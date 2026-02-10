@@ -21,6 +21,8 @@ import {
   Settings,
   User,
   ChevronDown,
+  Award,
+  Clipboard,
 } from 'lucide-react'
 
 interface NavItem {
@@ -63,6 +65,8 @@ export const Sidebar: React.FC = () => {
       items: [
         { label: 'My Activities', href: '/activities', icon: FileText, show: isFaculty() },
         { label: 'Submit Activity', href: '/activities/submit', icon: PlusCircle, show: isFaculty() },
+        { label: 'Submit Achievements', href: '/achievements/submit', icon: Award, show: isFaculty() },
+        { label: 'Submit Action Plan', href: '/action-plan/submit', icon: Clipboard, show: isFaculty() },
       ],
     },
     {

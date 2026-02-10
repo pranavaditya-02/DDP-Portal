@@ -43,6 +43,16 @@ export const Navigation: React.FC = () => {
       show: isFaculty(),
     },
     {
+      label: 'Submit Achievements',
+      href: '/achievements/submit',
+      show: isFaculty(),
+    },
+    {
+      label: 'Submit Action Plan',
+      href: '/action-plan/submit',
+      show: isFaculty(),
+    },
+    {
       label: 'Department',
       href: '/department',
       show: isHod(),
