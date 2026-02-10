@@ -27,10 +27,13 @@ client.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Unauthorized - clear auth and redirect to login
-      useAuthStore.getState().logout();
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
+      const token = useAuthStore.getState().token;
+      // Don't auto-logout for demo tokens — they don't hit a real backend
+      if (token && !token.startsWith('demo-')) {
+        useAuthStore.getState().logout();
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
       }
     }
     return Promise.reject(error);

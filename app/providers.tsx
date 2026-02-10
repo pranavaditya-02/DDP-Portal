@@ -12,17 +12,20 @@ export function Providers({ children }: { children: React.ReactNode }) {
     // Verify token on app load
     const verifyAuth = async () => {
       const token = useAuthStore.getState().token
-      if (token) {
-        try {
-          const response = await apiClient.getMe()
-          useAuthStore.setState({
-            user: response.user,
-            isAuthenticated: true,
-          })
-        } catch (error) {
-          console.error('Auth verification failed:', error)
-          useAuthStore.getState().logout()
-        }
+      if (!token) return
+
+      // Skip API verification for demo tokens — they are client-side only
+      if (token.startsWith('demo-')) return
+
+      try {
+        const response = await apiClient.getMe()
+        useAuthStore.setState({
+          user: response.user,
+          isAuthenticated: true,
+        })
+      } catch (error) {
+        console.error('Auth verification failed:', error)
+        useAuthStore.getState().logout()
       }
     }
 

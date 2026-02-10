@@ -76,6 +76,8 @@ export const Sidebar: React.FC = () => {
       title: 'College',
       items: [
         { label: 'College Overview', href: '/college', icon: GraduationCap, show: isDean() },
+        { label: 'Department', href: '/department', icon: Building2, show: isDean() },
+        { label: 'Leaderboard', href: '/leaderboard', icon: Trophy, show: isDean() },
       ],
     },
     {

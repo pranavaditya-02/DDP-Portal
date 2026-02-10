@@ -69,7 +69,7 @@ export const myActivities: Activity[] = [
 
 // ---- Pending verification queue ----
 export const pendingActivities: Activity[] = [
-  { id: 101, title: 'Published paper in Elsevier - Computer Networks', type: 'Journal Publication', category: 'Research', date: '2026-02-03', status: 'pending', points: 50, facultyName: 'Dr. Meena Kumari', facultyId: 5, department: 'CSE' },
+  { id: 101, title: 'Published paper in Elsevier - Computer Networks', type: 'Journal Publication', category: 'Research', date: '2026-02-03', status: 'pending', points: 50, facultyName: 'Dr. Ramesh', facultyId: 5, department: 'CSE' },
   { id: 102, title: 'AWS Solutions Architect Certification', type: 'Certification', category: 'Professional Development', date: '2026-01-28', status: 'pending', points: 20, facultyName: 'Prof. Karthik R', facultyId: 6, department: 'IT' },
   { id: 103, title: 'Keynote at International AI Summit', type: 'Guest Lecture', category: 'Teaching', date: '2026-01-30', status: 'pending', points: 25, facultyName: 'Dr. Lakshmi Priya', facultyId: 7, department: 'CSE' },
   { id: 104, title: 'Patent granted: Blockchain-based Voting System', type: 'Patent', category: 'Research', date: '2026-02-01', status: 'pending', points: 75, facultyName: 'Dr. Arun Kumar', facultyId: 8, department: 'ECE' },
@@ -84,7 +84,7 @@ export const facultyMembers: FacultyMember[] = [
   { id: 2, name: 'Dr. Rajesh Kumar', email: 'rajesh@bit.edu', department: 'CSE', designation: 'Professor & HOD', totalPoints: 420, activitiesCount: 24, joinedDate: '2015-08-01' },
   { id: 3, name: 'Prof. Anitha Devi', email: 'anitha@bit.edu', department: 'CSE', designation: 'Assistant Professor', totalPoints: 210, activitiesCount: 12, joinedDate: '2020-01-10' },
   { id: 4, name: 'Dr. Suresh Babu', email: 'suresh@bit.edu', department: 'ECE', designation: 'Associate Professor', totalPoints: 380, activitiesCount: 20, joinedDate: '2016-03-20' },
-  { id: 5, name: 'Dr. Meena Kumari', email: 'meena@bit.edu', department: 'CSE', designation: 'Professor', totalPoints: 510, activitiesCount: 28, joinedDate: '2012-07-01' },
+  { id: 5, name: 'Dr. Ramesh', email: 'ramesh@bit.edu', department: 'CSE', designation: 'Professor', totalPoints: 510, activitiesCount: 28, joinedDate: '2012-07-01' },
   { id: 6, name: 'Prof. Karthik R', email: 'karthik@bit.edu', department: 'IT', designation: 'Assistant Professor', totalPoints: 180, activitiesCount: 10, joinedDate: '2021-06-15' },
   { id: 7, name: 'Dr. Lakshmi Priya', email: 'lakshmi@bit.edu', department: 'CSE', designation: 'Associate Professor', totalPoints: 290, activitiesCount: 16, joinedDate: '2019-01-05' },
   { id: 8, name: 'Dr. Arun Kumar', email: 'arun@bit.edu', department: 'ECE', designation: 'Professor', totalPoints: 465, activitiesCount: 22, joinedDate: '2014-08-20' },
@@ -96,7 +96,7 @@ export const facultyMembers: FacultyMember[] = [
 
 // ---- Department stats (for Dean) ----
 export const departmentStats: DepartmentStat[] = [
-  { name: 'Computer Science & Engineering', shortName: 'CSE', facultyCount: 45, totalActivities: 312, avgPoints: 285, topPerformer: 'Dr. Meena Kumari', pendingApprovals: 8 },
+  { name: 'Computer Science & Engineering', shortName: 'CSE', facultyCount: 45, totalActivities: 312, avgPoints: 285, topPerformer: 'Dr. Ramesh', pendingApprovals: 8 },
   { name: 'Information Technology', shortName: 'IT', facultyCount: 30, totalActivities: 198, avgPoints: 245, topPerformer: 'Dr. Senthil Kumar', pendingApprovals: 5 },
   { name: 'Electronics & Communication', shortName: 'ECE', facultyCount: 38, totalActivities: 256, avgPoints: 260, topPerformer: 'Dr. Arun Kumar', pendingApprovals: 6 },
   { name: 'Electrical & Electronics', shortName: 'EEE', facultyCount: 28, totalActivities: 167, avgPoints: 220, topPerformer: 'Dr. Vani R', pendingApprovals: 3 },
@@ -144,7 +144,7 @@ export const hodStats = {
   totalActivities: 312,
   pendingApprovals: 8,
   avgPointsPerFaculty: 285,
-  topPerformer: 'Dr. Meena Kumari',
+  topPerformer: 'Dr. Ramesh',
   topPerformerPoints: 510,
   thisMonthActivities: 48,
   activitiesGrowth: +15,
@@ -187,13 +187,13 @@ export const recentNotifications = [
   { id: 1, message: 'Your paper submission was approved (+50 pts)', time: '2 hours ago', type: 'success' as const },
   { id: 2, message: 'New FDP opportunity: AI in Education', time: '5 hours ago', type: 'info' as const },
   { id: 3, message: 'Deadline reminder: Submit Q4 activities by Feb 28', time: '1 day ago', type: 'warning' as const },
-  { id: 4, message: 'Dr. Meena Kumari reached 500 points milestone!', time: '2 days ago', type: 'success' as const },
+  { id: 4, message: 'Dr. Ramesh reached 500 points milestone!', time: '2 days ago', type: 'success' as const },
   { id: 5, message: 'System maintenance scheduled for Feb 15', time: '3 days ago', type: 'info' as const },
 ]
 
 // ---- Leaderboard ----
 export const leaderboard = [
-  { rank: 1, name: 'Dr. Meena Kumari', department: 'CSE', points: 510, activities: 28, badge: 'gold' },
+  { rank: 1, name: 'Dr. Ramesh', department: 'CSE', points: 510, activities: 28, badge: 'gold' },
   { rank: 2, name: 'Dr. Arun Kumar', department: 'ECE', points: 465, activities: 22, badge: 'gold' },
   { rank: 3, name: 'Dr. Rajesh Kumar', department: 'CSE', points: 420, activities: 24, badge: 'silver' },
   { rank: 4, name: 'Dr. Venkat K', department: 'MECH', points: 400, activities: 21, badge: 'silver' },
@@ -249,7 +249,7 @@ export const facultyRadarData = [
 
 // ---- HOD: faculty performance scatter ----
 export const facultyPerformanceData = [
-  { name: 'Dr. Meena Kumari', activities: 28, points: 510 },
+  { name: 'Dr. Ramesh', activities: 28, points: 510 },
   { name: 'Dr. Rajesh Kumar', activities: 24, points: 420 },
   { name: 'Prof. Anitha Devi', activities: 12, points: 210 },
   { name: 'Dr. Lakshmi Priya', activities: 16, points: 290 },
@@ -411,3 +411,290 @@ export const loginStatsData = [
   { month: 'Jan', logins: 1550, unique: 178 },
   { month: 'Feb', logins: 820, unique: 160 },
 ]
+
+// ============================================================
+// PERSONALIZED DATA HELPERS
+// ============================================================
+
+// Map department ids to department short names
+const departmentIdMap: Record<number, string> = {
+  1: 'CSE',
+  2: 'IT',
+  3: 'ECE',
+  4: 'EEE',
+  5: 'MECH',
+  6: 'CIVIL',
+}
+
+// All activities across the system (faculty-specific)
+const allActivities: Activity[] = [
+  // Dr. Priya Sharma (id:1) - CSE
+  { id: 1, title: 'Published paper in IEEE Transactions on Neural Networks', type: 'Journal Publication', category: 'Research', date: '2026-01-15', status: 'approved', points: 50, facultyName: 'Dr. Priya Sharma', facultyId: 1, department: 'CSE' },
+  { id: 2, title: 'Attended FDP on Machine Learning at IIT Madras', type: 'FDP/Workshop', category: 'Professional Development', date: '2026-01-08', status: 'approved', points: 20, facultyName: 'Dr. Priya Sharma', facultyId: 1, department: 'CSE' },
+  { id: 3, title: 'Filed patent for IoT-based Smart Agriculture System', type: 'Patent', category: 'Research', date: '2025-12-20', status: 'approved', points: 75, facultyName: 'Dr. Priya Sharma', facultyId: 1, department: 'CSE' },
+  { id: 4, title: 'Guest lecture at Anna University on Cloud Computing', type: 'Guest Lecture', category: 'Teaching', date: '2026-01-22', status: 'pending', points: 15, facultyName: 'Dr. Priya Sharma', facultyId: 1, department: 'CSE' },
+  { id: 5, title: 'Organized National Workshop on Cybersecurity', type: 'Event Organized', category: 'Service', date: '2025-12-10', status: 'approved', points: 30, facultyName: 'Dr. Priya Sharma', facultyId: 1, department: 'CSE' },
+  { id: 6, title: 'Conference paper at ICACCI 2026', type: 'Conference Paper', category: 'Research', date: '2026-02-01', status: 'pending', points: 35, facultyName: 'Dr. Priya Sharma', facultyId: 1, department: 'CSE' },
+  { id: 7, title: 'Completed NPTEL certification on Deep Learning', type: 'Certification', category: 'Professional Development', date: '2025-11-28', status: 'approved', points: 15, facultyName: 'Dr. Priya Sharma', facultyId: 1, department: 'CSE' },
+  { id: 8, title: 'Mentored 3 students for Smart India Hackathon', type: 'Student Mentoring', category: 'Teaching', date: '2025-12-05', status: 'approved', points: 20, facultyName: 'Dr. Priya Sharma', facultyId: 1, department: 'CSE' },
+  { id: 9, title: 'Book chapter in Springer: AI in Healthcare', type: 'Book Chapter', category: 'Research', date: '2026-02-05', status: 'pending', points: 40, facultyName: 'Dr. Priya Sharma', facultyId: 1, department: 'CSE' },
+  { id: 10, title: 'Industry consultancy project with TCS', type: 'Consultancy', category: 'Industry', date: '2025-11-15', status: 'approved', points: 45, facultyName: 'Dr. Priya Sharma', facultyId: 1, department: 'CSE' },
+  { id: 11, title: 'Webinar on Edge Computing Trends', type: 'Guest Lecture', category: 'Teaching', date: '2025-10-20', status: 'approved', points: 10, facultyName: 'Dr. Priya Sharma', facultyId: 1, department: 'CSE' },
+  { id: 12, title: 'Review for ACM Computing Surveys', type: 'Journal Review', category: 'Service', date: '2025-10-05', status: 'approved', points: 10, facultyName: 'Dr. Priya Sharma', facultyId: 1, department: 'CSE' },
+  { id: 13, title: 'Python Workshop for First-Year Students', type: 'FDP/Workshop', category: 'Teaching', date: '2025-09-18', status: 'approved', points: 15, facultyName: 'Dr. Priya Sharma', facultyId: 1, department: 'CSE' },
+  { id: 14, title: 'Published survey on Federated Learning in Elsevier', type: 'Journal Publication', category: 'Research', date: '2025-09-10', status: 'approved', points: 50, facultyName: 'Dr. Priya Sharma', facultyId: 1, department: 'CSE' },
+  { id: 15, title: 'AWS Cloud Practitioner Certification', type: 'Certification', category: 'Professional Development', date: '2025-09-02', status: 'approved', points: 15, facultyName: 'Dr. Priya Sharma', facultyId: 1, department: 'CSE' },
+  { id: 16, title: 'Quiz committee member – University Fest', type: 'Event Organized', category: 'Service', date: '2025-08-28', status: 'approved', points: 10, facultyName: 'Dr. Priya Sharma', facultyId: 1, department: 'CSE' },
+  { id: 17, title: 'IoT Lab Development – Infosys Partnership', type: 'Consultancy', category: 'Industry', date: '2025-08-15', status: 'approved', points: 30, facultyName: 'Dr. Priya Sharma', facultyId: 1, department: 'CSE' },
+  { id: 18, title: 'FDP on Blockchain at NIT Trichy (5 days)', type: 'FDP/Workshop', category: 'Professional Development', date: '2025-08-01', status: 'rejected', points: 20, facultyName: 'Dr. Priya Sharma', facultyId: 1, department: 'CSE' },
+
+  // Dr. Rajesh Kumar (id:2) - CSE - HOD
+  { id: 201, title: 'Research paper on Quantum Algorithms in IEEE Access', type: 'Journal Publication', category: 'Research', date: '2026-01-25', status: 'approved', points: 50, facultyName: 'Dr. Rajesh Kumar', facultyId: 2, department: 'CSE' },
+  { id: 202, title: 'Keynote at National Conference on AI', type: 'Guest Lecture', category: 'Teaching', date: '2026-01-10', status: 'approved', points: 25, facultyName: 'Dr. Rajesh Kumar', facultyId: 2, department: 'CSE' },
+  { id: 203, title: 'FDP on Data Science – 5 days', type: 'FDP/Workshop', category: 'Professional Development', date: '2025-12-15', status: 'approved', points: 20, facultyName: 'Dr. Rajesh Kumar', facultyId: 2, department: 'CSE' },
+  { id: 204, title: 'Patent filed: AI-based Crop Disease Detection', type: 'Patent', category: 'Research', date: '2025-12-01', status: 'approved', points: 75, facultyName: 'Dr. Rajesh Kumar', facultyId: 2, department: 'CSE' },
+  { id: 205, title: 'Industry project with Wipro on Smart Grid', type: 'Consultancy', category: 'Industry', date: '2025-11-20', status: 'approved', points: 45, facultyName: 'Dr. Rajesh Kumar', facultyId: 2, department: 'CSE' },
+  { id: 206, title: 'Organized Symposium on Cloud Security', type: 'Event Organized', category: 'Service', date: '2025-11-10', status: 'approved', points: 30, facultyName: 'Dr. Rajesh Kumar', facultyId: 2, department: 'CSE' },
+  { id: 207, title: 'Conference paper at IEEE TENCON 2026', type: 'Conference Paper', category: 'Research', date: '2026-02-03', status: 'pending', points: 35, facultyName: 'Dr. Rajesh Kumar', facultyId: 2, department: 'CSE' },
+  { id: 208, title: 'Book: "Machine Learning Fundamentals" – Springer', type: 'Book Chapter', category: 'Research', date: '2026-01-30', status: 'pending', points: 60, facultyName: 'Dr. Rajesh Kumar', facultyId: 2, department: 'CSE' },
+  { id: 209, title: 'Google TensorFlow Developer Certificate', type: 'Certification', category: 'Professional Development', date: '2025-10-25', status: 'approved', points: 20, facultyName: 'Dr. Rajesh Kumar', facultyId: 2, department: 'CSE' },
+  { id: 210, title: 'Mentored students for ACM ICPC Regional', type: 'Student Mentoring', category: 'Teaching', date: '2025-10-12', status: 'approved', points: 20, facultyName: 'Dr. Rajesh Kumar', facultyId: 2, department: 'CSE' },
+  { id: 211, title: 'Guest lecture at PSG Tech on Cybersecurity', type: 'Guest Lecture', category: 'Teaching', date: '2025-09-28', status: 'approved', points: 15, facultyName: 'Dr. Rajesh Kumar', facultyId: 2, department: 'CSE' },
+  { id: 212, title: 'Published survey on Explainable AI in Springer', type: 'Journal Publication', category: 'Research', date: '2025-09-15', status: 'approved', points: 50, facultyName: 'Dr. Rajesh Kumar', facultyId: 2, department: 'CSE' },
+  { id: 213, title: 'Chaired session at ICSCC Conference', type: 'Conference Paper', category: 'Research', date: '2025-09-05', status: 'approved', points: 15, facultyName: 'Dr. Rajesh Kumar', facultyId: 2, department: 'CSE' },
+  { id: 214, title: 'Azure Solutions Architect Certification', type: 'Certification', category: 'Professional Development', date: '2025-08-20', status: 'approved', points: 20, facultyName: 'Dr. Rajesh Kumar', facultyId: 2, department: 'CSE' },
+  { id: 215, title: 'NBA Documentation Committee Lead', type: 'Event Organized', category: 'Service', date: '2025-08-10', status: 'approved', points: 10, facultyName: 'Dr. Rajesh Kumar', facultyId: 2, department: 'CSE' },
+  { id: 216, title: 'Summer Internship Coordinator – CSE Dept', type: 'Student Mentoring', category: 'Service', date: '2025-07-15', status: 'approved', points: 10, facultyName: 'Dr. Rajesh Kumar', facultyId: 2, department: 'CSE' },
+
+  // Other CSE faculty activities
+  { id: 301, title: 'Published paper in Elsevier - Computer Networks', type: 'Journal Publication', category: 'Research', date: '2026-02-03', status: 'pending', points: 50, facultyName: 'Dr. Ramesh', facultyId: 5, department: 'CSE' },
+  { id: 302, title: 'Keynote at International AI Summit', type: 'Guest Lecture', category: 'Teaching', date: '2026-01-30', status: 'pending', points: 25, facultyName: 'Dr. Lakshmi Priya', facultyId: 7, department: 'CSE' },
+  { id: 303, title: 'Organized Hackathon with 500+ participants', type: 'Event Organized', category: 'Service', date: '2026-02-07', status: 'pending', points: 30, facultyName: 'Dr. Ramesh B', facultyId: 10, department: 'CSE' },
+  { id: 304, title: 'FDP on Quantum Computing - 5 days', type: 'FDP/Workshop', category: 'Professional Development', date: '2026-01-25', status: 'approved', points: 20, facultyName: 'Prof. Anitha Devi', facultyId: 3, department: 'CSE' },
+  { id: 305, title: 'Paper on Deep Reinforcement Learning at NeurIPS', type: 'Conference Paper', category: 'Research', date: '2025-12-18', status: 'approved', points: 55, facultyName: 'Dr. Ramesh', facultyId: 5, department: 'CSE' },
+
+  // Other department activities
+  { id: 401, title: 'AWS Solutions Architect Certification', type: 'Certification', category: 'Professional Development', date: '2026-01-28', status: 'pending', points: 20, facultyName: 'Prof. Karthik R', facultyId: 6, department: 'IT' },
+  { id: 402, title: 'Patent granted: Blockchain-based Voting System', type: 'Patent', category: 'Research', date: '2026-02-01', status: 'pending', points: 75, facultyName: 'Dr. Arun Kumar', facultyId: 8, department: 'ECE' },
+  { id: 403, title: 'Industry project with Infosys on Edge AI', type: 'Consultancy', category: 'Industry', date: '2026-01-18', status: 'pending', points: 45, facultyName: 'Prof. Sathya N', facultyId: 11, department: 'IT' },
+  { id: 404, title: 'FDP on Quantum Computing - 5 days', type: 'FDP/Workshop', category: 'Professional Development', date: '2026-01-25', status: 'pending', points: 20, facultyName: 'Prof. Divya S', facultyId: 9, department: 'EEE' },
+]
+
+/** Get personalized faculty dashboard data based on the logged-in user */
+export function getPersonalizedFacultyData(userId: number, userName: string) {
+  const me = facultyMembers.find(f => f.id === userId)
+    || facultyMembers.find(f => f.name === userName)
+  const myDept = me?.department || 'CSE'
+
+  // Activities for this specific faculty
+  const myActs = allActivities
+    .filter(a => a.facultyId === userId || a.facultyName === userName)
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+
+  const approved = myActs.filter(a => a.status === 'approved').length
+  const pending = myActs.filter(a => a.status === 'pending').length
+  const rejected = myActs.filter(a => a.status === 'rejected').length
+  const totalPoints = myActs.filter(a => a.status === 'approved').reduce((s, a) => s + a.points, 0)
+
+  // Build rank from leaderboard or faculty list
+  const sorted = [...facultyMembers].sort((a, b) => b.totalPoints - a.totalPoints)
+  const rank = sorted.findIndex(f => f.id === userId || f.name === userName) + 1
+
+  // Category breakdown for this faculty
+  const catMap: Record<string, { count: number; points: number }> = {}
+  myActs.forEach(a => {
+    if (!catMap[a.category]) catMap[a.category] = { count: 0, points: 0 }
+    catMap[a.category].count++
+    catMap[a.category].points += a.points
+  })
+  const catColors: Record<string, string> = {
+    Research: '#3b82f6', Teaching: '#10b981', 'Professional Development': '#f59e0b',
+    Service: '#8b5cf6', Industry: '#ef4444',
+  }
+  const myCategoryBreakdown = Object.entries(catMap).map(([cat, v]) => ({
+    name: cat, value: v.count, color: catColors[cat] || '#94a3b8',
+  }))
+
+  // Activity status distribution
+  const myStatusData = [
+    { name: 'Approved', value: approved, color: '#10b981' },
+    ...(pending > 0 ? [{ name: 'Pending', value: pending, color: '#f59e0b' }] : []),
+    ...(rejected > 0 ? [{ name: 'Rejected', value: rejected, color: '#ef4444' }] : []),
+  ]
+
+  // Weekly points (seeded from total to give realistic per-week values)
+  const weeklyBase = Math.max(1, Math.round(totalPoints / 8))
+  const seed = userId * 7
+  const myWeeklyData = weeklyPointsData.map((w, i) => ({
+    week: w.week,
+    points: Math.round(weeklyBase * (0.5 + ((seed + i * 13) % 10) / 10)),
+    activities: Math.max(1, Math.round(myActs.length / 8 * (0.5 + ((seed + i * 7) % 10) / 10))),
+  }))
+
+  // Target vs actual
+  const monthlyBase = Math.round(totalPoints / 6)
+  const myGoalData = pointsGoalData.map((m, i) => ({
+    month: m.month,
+    actual: Math.round(monthlyBase * (0.6 + ((seed + i * 11) % 10) / 12)),
+    target: Math.round(monthlyBase * (0.8 + i * 0.05)),
+  }))
+
+  // Radar data from categories
+  const maxCat = Math.max(...Object.values(catMap).map(v => v.count), 1)
+  const myRadarData = [
+    { subject: 'Research', value: Math.round(((catMap['Research']?.count || 0) / maxCat) * 100), fullMark: 100 },
+    { subject: 'Teaching', value: Math.round(((catMap['Teaching']?.count || 0) / maxCat) * 100), fullMark: 100 },
+    { subject: 'Service', value: Math.round(((catMap['Service']?.count || 0) / maxCat) * 100), fullMark: 100 },
+    { subject: 'Industry', value: Math.round(((catMap['Industry']?.count || 0) / maxCat) * 100), fullMark: 100 },
+    { subject: 'Development', value: Math.round(((catMap['Professional Development']?.count || 0) / maxCat) * 100), fullMark: 100 },
+  ]
+
+  return {
+    stats: {
+      totalActivities: myActs.length,
+      approved, pending, rejected,
+      totalPoints,
+      rank: rank || 1,
+      totalFaculty: sorted.length,
+      pointsTrend: +12,
+    },
+    activities: myActs,
+    statusData: myStatusData,
+    weeklyData: myWeeklyData,
+    goalData: myGoalData,
+    radarData: myRadarData,
+    categoryBreakdown: myCategoryBreakdown,
+    department: myDept,
+    designation: me?.designation || 'Faculty',
+  }
+}
+
+/** Get personalized HOD dashboard data based on the HOD's department */
+export function getPersonalizedHodData(userId: number, userName: string, departmentId?: number) {
+  const deptShort = departmentId ? departmentIdMap[departmentId] || 'CSE' : 'CSE'
+  const dept = departmentStats.find(d => d.shortName === deptShort) || departmentStats[0]
+
+  // Faculty in this department
+  const deptFaculty = facultyMembers.filter(f => f.department === deptShort)
+  const deptActivities = allActivities.filter(a => a.department === deptShort)
+
+  // Pending approvals for this department
+  const deptPending = deptActivities.filter(a => a.status === 'pending')
+
+  // Top performers in this department
+  const deptLeaderboard = [...deptFaculty]
+    .sort((a, b) => b.totalPoints - a.totalPoints)
+    .map((f, i) => ({
+      rank: i + 1,
+      name: f.name,
+      department: f.department,
+      points: f.totalPoints,
+      activities: f.activitiesCount,
+      badge: i === 0 ? 'gold' : i < 3 ? 'silver' : i < 5 ? 'bronze' : 'none',
+    }))
+
+  // Category breakdown for this department
+  const catMap: Record<string, number> = {}
+  deptActivities.forEach(a => {
+    catMap[a.category] = (catMap[a.category] || 0) + 1
+  })
+  const catColors: Record<string, string> = {
+    Research: '#3b82f6', Teaching: '#10b981', 'Professional Development': '#f59e0b',
+    Service: '#8b5cf6', Industry: '#ef4444',
+  }
+  const deptCategoryBreakdown = Object.entries(catMap).map(([cat, count]) => ({
+    name: cat, value: count, color: catColors[cat] || '#94a3b8',
+  }))
+
+  return {
+    stats: {
+      departmentName: dept.name,
+      departmentShort: deptShort,
+      totalFaculty: deptFaculty.length || dept.facultyCount,
+      activeFaculty: Math.round((deptFaculty.length || dept.facultyCount) * 0.93),
+      totalActivities: deptActivities.length || dept.totalActivities,
+      pendingApprovals: deptPending.length || dept.pendingApprovals,
+      avgPointsPerFaculty: dept.avgPoints,
+      topPerformer: deptLeaderboard[0]?.name || dept.topPerformer,
+      topPerformerPoints: deptLeaderboard[0]?.points || 0,
+      activitiesGrowth: +15,
+    },
+    faculty: deptFaculty,
+    activities: deptActivities,
+    pendingActivities: deptPending,
+    leaderboard: deptLeaderboard,
+    categoryBreakdown: deptCategoryBreakdown,
+  }
+}
+
+// ============================================================
+// DEPARTMENT PAGE – KPI HEATMAP & TARGETS
+// ============================================================
+
+export interface FacultyKPI {
+  name: string
+  research: number
+  publications: number
+  teaching: number
+  events: number
+  innovation: number
+  engagement: number
+}
+
+export const facultyKpiData: FacultyKPI[] = [
+  { name: 'Dr. Rajesh Kumar', research: 95, publications: 92, teaching: 88, events: 85, innovation: 90, engagement: 92 },
+  { name: 'Dr. Priya Sharma', research: 88, publications: 85, teaching: 92, events: 82, innovation: 80, engagement: 88 },
+  { name: 'Dr. Amit Patel', research: 82, publications: 78, teaching: 85, events: 88, innovation: 75, engagement: 82 },
+  { name: 'Prof. Neha Gupta', research: 72, publications: 68, teaching: 82, events: 75, innovation: 62, engagement: 70 },
+  { name: 'Dr. Vikram Singh', research: 68, publications: 62, teaching: 75, events: 58, innovation: 52, engagement: 60 },
+  { name: 'Dr. Anjali Desai', research: 58, publications: 52, teaching: 68, events: 48, innovation: 45, engagement: 55 },
+  { name: 'Prof. Sanjay Rao', research: 45, publications: 38, teaching: 55, events: 42, innovation: 35, engagement: 48 },
+  { name: 'Dr. Meera Iyer', research: 38, publications: 32, teaching: 48, events: 35, innovation: 28, engagement: 40 },
+]
+
+export interface DepartmentTarget {
+  label: string
+  current: number
+  target: number
+  unit: string
+  dueDate: string
+}
+
+export const departmentTargets: DepartmentTarget[] = [
+  { label: 'Research Publications', current: 165, target: 200, unit: 'papers', dueDate: '10/7/2026' },
+  { label: 'Research Funding', current: 3800000, target: 5000000, unit: 'Rs', dueDate: '10/6/2026' },
+  { label: 'Events Organized', current: 132, target: 180, unit: 'events', dueDate: '11/5/2026' },
+  { label: 'Innovation Projects', current: 68, target: 100, unit: 'projects', dueDate: '9/8/2026' },
+]
+
+export interface DeptPerformanceIndex {
+  score: number
+  maxScore: number
+  rank: number
+  totalDepts: number
+  trend: number
+  facultyCount: number
+  activeFaculty: number
+  newThisYear: number
+  achievements: number
+  achievementsGrowth: number
+  pendingApprovals: number
+  urgentPending: number
+  targetRate: number
+}
+
+export const deptPerformanceIndex: DeptPerformanceIndex = {
+  score: 82,
+  maxScore: 100,
+  rank: 2,
+  totalDepts: 6,
+  trend: 12.5,
+  facultyCount: 26,
+  activeFaculty: 26,
+  newThisYear: 3,
+  achievements: 387,
+  achievementsGrowth: 28.5,
+  pendingApprovals: 12,
+  urgentPending: 3,
+  targetRate: 76,
+}

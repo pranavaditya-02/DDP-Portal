@@ -140,19 +140,37 @@ export function MultiLineChart({ data, xKey, lines, height = 240 }: {
 // ============================================================
 // DONUT / PIE CHART
 // ============================================================
-export function DonutChart({ data, height = 220, innerRadius = 55, outerRadius = 80, showLabel = true }: {
+export function DonutChart({ data, height = 260, innerRadius = 50, outerRadius = 70, showLabel = true }: {
   data: { name: string; value: number; color: string }[]
   height?: number; innerRadius?: number; outerRadius?: number; showLabel?: boolean
 }) {
   const total = data.reduce((s, d) => s + d.value, 0)
+  const RADIAN = Math.PI / 180
+  const renderLabel = showLabel
+    ? ({ cx, cy, midAngle, outerRadius: or, name, percent, fill }: {
+        cx: number; cy: number; midAngle: number; outerRadius: number
+        name: string; percent: number; fill: string
+      }) => {
+        const radius = or + 18
+        const x = cx + radius * Math.cos(-midAngle * RADIAN)
+        const y = cy + radius * Math.sin(-midAngle * RADIAN)
+        const pct = (percent * 100).toFixed(0)
+        return (
+          <text x={x} y={y} fill={fill} fontSize={12} fontWeight={600}
+            textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central">
+            {`${name} ${pct}%`}
+          </text>
+        )
+      }
+    : false
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <PieChart>
+      <PieChart margin={{ top: 20, right: 40, bottom: 20, left: 40 }}>
         <Pie data={data} cx="50%" cy="50%"
           innerRadius={innerRadius} outerRadius={outerRadius}
           paddingAngle={3} dataKey="value"
-          label={showLabel ? ({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%` : false}
-          labelLine={showLabel}>
+          label={renderLabel}
+          labelLine={showLabel ? { stroke: '#94a3b8', strokeWidth: 1 } : false}>
           {data.map((d, i) => <Cell key={i} fill={d.color} stroke="none" />)}
         </Pie>
         <Tooltip {...tooltipStyle} formatter={(value: number) => [`${value} (${((value / total) * 100).toFixed(1)}%)`, '']} />

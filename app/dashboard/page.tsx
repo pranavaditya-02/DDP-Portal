@@ -17,6 +17,7 @@ import {
   approvalFunnelData, dailyReviewData, reviewTimeData, categoryPendingData,
   yearlyComparisonData, collegeActivityTypeData, facultyGrowthData,
   userGrowthData, roleDistributionData, deptActivityVolumeData, loginStatsData,
+  getPersonalizedFacultyData, getPersonalizedHodData,
 } from '@/lib/mock-data'
 import {
   TrendingUp, TrendingDown, Award, FileText, Clock, CheckCircle2,
@@ -62,38 +63,56 @@ function StatCard({ label, value, icon: Icon, description, trend, color }: {
 /* FACULTY DASHBOARD                                                   */
 /* ------------------------------------------------------------------ */
 function FacultyDashboard() {
-  const recentActs = myActivities.slice(0, 5)
+  const { user } = useAuthStore()
+  const data = getPersonalizedFacultyData(user?.id || 1, user?.name || 'Dr. Priya Sharma')
+  const { stats, activities, statusData, weeklyData, goalData, radarData, department, designation } = data
+  const recentActs = activities.slice(0, 5)
+
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Personal info bar */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-xl p-4 flex items-center gap-4">
+        <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white text-lg font-bold">
+          {(user?.name || 'U').charAt(0)}
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-slate-800">{user?.name || 'Faculty'}</p>
+          <p className="text-xs text-slate-500">{designation} &middot; {department} Department</p>
+        </div>
+        <div className="ml-auto flex items-center gap-2">
+          <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-100 text-blue-700">Rank #{stats.rank}</span>
+        </div>
+      </div>
+
       {/* KPI row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Total Activities" value={facultyStats.totalActivities} icon={FileText} description="All time" trend={facultyStats.pointsTrend} color="bg-blue-50 text-blue-600" />
-        <StatCard label="Total Points" value={facultyStats.totalPoints} icon={Award} description={`Rank #${facultyStats.rank} of ${facultyStats.totalFaculty}`} trend={facultyStats.pointsTrend} color="bg-emerald-50 text-emerald-600" />
-        <StatCard label="Pending" value={facultyStats.pending} icon={Clock} description="Awaiting verification" color="bg-amber-50 text-amber-600" />
-        <StatCard label="Approved" value={facultyStats.approved} icon={CheckCircle2} description={`${((facultyStats.approved / facultyStats.totalActivities) * 100).toFixed(0)}% approval rate`} color="bg-green-50 text-green-600" />
+        <StatCard label="Total Activities" value={stats.totalActivities} icon={FileText} description="All time" trend={stats.pointsTrend} color="bg-blue-50 text-blue-600" />
+        <StatCard label="Total Points" value={stats.totalPoints} icon={Award} description={`Rank #${stats.rank} of ${stats.totalFaculty}`} trend={stats.pointsTrend} color="bg-emerald-50 text-emerald-600" />
+        <StatCard label="Pending" value={stats.pending} icon={Clock} description="Awaiting verification" color="bg-amber-50 text-amber-600" />
+        <StatCard label="Approved" value={stats.approved} icon={CheckCircle2} description={`${stats.totalActivities > 0 ? ((stats.approved / stats.totalActivities) * 100).toFixed(0) : 0}% approval rate`} color="bg-green-50 text-green-600" />
       </div>
 
       {/* Chart row 1 */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <ChartCard title="Weekly Points" subtitle="Last 8 weeks" className="lg:col-span-2">
-          <TrendAreaChart data={weeklyPointsData} xKey="week" areas={[{ key: 'points', color: '#3b82f6', name: 'Points' }]} />
+          <TrendAreaChart data={weeklyData} xKey="week" areas={[{ key: 'points', color: '#3b82f6', name: 'Points' }]} />
         </ChartCard>
         <ChartCard title="Status Breakdown" subtitle="Activity outcomes">
-          <DonutChart data={activityStatusData} />
+          <DonutChart data={statusData} />
         </ChartCard>
       </div>
 
       {/* Chart row 2 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <ChartCard title="Target vs Actual" subtitle="Monthly points goal">
-          <MultiLineChart data={pointsGoalData} xKey="month"
+          <MultiLineChart data={goalData} xKey="month"
             lines={[
               { key: 'actual', color: '#3b82f6', name: 'Actual' },
               { key: 'target', color: '#94a3b8', name: 'Target', dashed: true },
             ]} />
         </ChartCard>
         <ChartCard title="Skill Dimensions" subtitle="Activity distribution by area">
-          <RadarChartComponent data={facultyRadarData} dataKey="value" nameKey="subject" color="#6366f1" />
+          <RadarChartComponent data={radarData} dataKey="value" nameKey="subject" color="#6366f1" />
         </ChartCard>
       </div>
 
@@ -139,17 +158,32 @@ function FacultyDashboard() {
 /* HOD DASHBOARD                                                       */
 /* ------------------------------------------------------------------ */
 function HodDashboard() {
+  const { user } = useAuthStore()
+  const hodData = getPersonalizedHodData(user?.id || 2, user?.name || 'Dr. Rajesh Kumar', user?.departmentId)
+  const { stats, leaderboard: deptLeaderboard, categoryBreakdown: deptCategories, pendingActivities: deptPending } = hodData
+
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Department info bar */}
+      <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100 rounded-xl p-4 flex items-center gap-4">
+        <div className="w-12 h-12 rounded-lg bg-emerald-600 flex items-center justify-center text-white text-sm font-bold">
+          {stats.departmentShort}
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-slate-800">{stats.departmentName}</p>
+          <p className="text-xs text-slate-500">Head of Department &middot; {user?.name || 'HOD'}</p>
+        </div>
+      </div>
+
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Total Faculty" value={hodStats.totalFaculty} icon={Users} description={`${hodStats.activeFaculty} active`} color="bg-blue-50 text-blue-600" />
-        <StatCard label="Activities" value={hodStats.totalActivities} icon={FileText} description={hodStats.departmentName} trend={hodStats.activitiesGrowth} color="bg-emerald-50 text-emerald-600" />
-        <StatCard label="Pending Approvals" value={hodStats.pendingApprovals} icon={Clock} description="Need review" color="bg-amber-50 text-amber-600" />
-        <StatCard label="Avg Points" value={hodStats.avgPointsPerFaculty} icon={BarChart3} description={`Top: ${hodStats.topPerformer}`} color="bg-purple-50 text-purple-600" />
+        <StatCard label="Total Faculty" value={stats.totalFaculty} icon={Users} description={`${stats.activeFaculty} active`} color="bg-blue-50 text-blue-600" />
+        <StatCard label="Activities" value={stats.totalActivities} icon={FileText} description={stats.departmentName} trend={stats.activitiesGrowth} color="bg-emerald-50 text-emerald-600" />
+        <StatCard label="Pending Approvals" value={stats.pendingApprovals} icon={Clock} description="Need review" color="bg-amber-50 text-amber-600" />
+        <StatCard label="Avg Points" value={stats.avgPointsPerFaculty} icon={BarChart3} description={`Top: ${stats.topPerformer}`} color="bg-purple-50 text-purple-600" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <ChartCard title="Approval Funnel" subtitle="Monthly submission pipeline" className="lg:col-span-2">
+        <ChartCard title="Approval Funnel" subtitle={`${stats.departmentShort} – Monthly submission pipeline`} className="lg:col-span-2">
           <ComposedBarLineChart data={approvalFunnelData} xKey="month"
             bars={[
               { key: 'submitted', color: '#94a3b8', name: 'Submitted' },
@@ -157,13 +191,13 @@ function HodDashboard() {
             ]}
             lines={[{ key: 'rejected', color: '#ef4444', name: 'Rejected' }]} />
         </ChartCard>
-        <ChartCard title="Category Breakdown" subtitle="Faculty activity categories">
-          <DonutChart data={categoryBreakdown.map(c => ({ name: c.category, value: c.count, color: c.color }))} />
+        <ChartCard title="Category Breakdown" subtitle={`${stats.departmentShort} activity categories`}>
+          <DonutChart data={deptCategories.length > 0 ? deptCategories : categoryBreakdown.map(c => ({ name: c.category, value: c.count, color: c.color }))} />
         </ChartCard>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <ChartCard title="Monthly Trends" subtitle="Activities & points over time">
+        <ChartCard title="Monthly Trends" subtitle={`${stats.departmentShort} – Activities & approvals over time`}>
           <TrendAreaChart data={monthlyTrends} xKey="month"
             areas={[
               { key: 'activities', color: '#3b82f6', name: 'Activities' },
@@ -174,12 +208,12 @@ function HodDashboard() {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="font-semibold text-slate-900 text-sm">Top Performers</h3>
-              <p className="text-xs text-slate-500">{hodStats.departmentName}</p>
+              <p className="text-xs text-slate-500">{stats.departmentName}</p>
             </div>
             <Link href="/leaderboard" className="text-xs font-medium text-blue-600 hover:text-blue-700">View All &rarr;</Link>
           </div>
           <div className="space-y-3">
-            {leaderboard.slice(0, 5).map((f) => (
+            {(deptLeaderboard.length > 0 ? deptLeaderboard : leaderboard).slice(0, 5).map((f) => (
               <div key={f.rank} className="flex items-center gap-3">
                 <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
                   f.rank === 1 ? 'bg-yellow-100 text-yellow-700' :
@@ -197,6 +231,32 @@ function HodDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Pending queue for this department */}
+      {deptPending.length > 0 && (
+        <div className="bg-white rounded-xl border border-slate-200 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="font-semibold text-slate-900 text-sm">Pending Approvals</h3>
+              <p className="text-xs text-slate-500">{deptPending.length} submissions from {stats.departmentShort} faculty</p>
+            </div>
+            <Link href="/verification" className="text-xs font-medium text-blue-600 hover:text-blue-700">Review All &rarr;</Link>
+          </div>
+          <div className="divide-y divide-slate-100">
+            {deptPending.slice(0, 5).map((act) => (
+              <div key={act.id} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-slate-800 truncate">{act.title}</p>
+                  <p className="text-xs text-slate-400 mt-0.5">{act.facultyName} &middot; {act.type} &middot; {act.date}</p>
+                </div>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-600 ml-4">
+                  +{act.points} pts
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -385,10 +445,10 @@ export default function DashboardPage() {
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
 
   // Pick primary role for the dashboard view
+  // HOD sees their personal faculty dashboard here; department data is on /department
   const primaryRole = isMaintenance() ? 'admin'
     : isDean() ? 'dean'
     : isVerification() ? 'verification'
-    : isHod() ? 'hod'
     : 'faculty'
 
   return (
@@ -399,7 +459,7 @@ export default function DashboardPage() {
           {greeting}, {user?.name?.split(' ')[0] || 'User'}
         </h1>
         <p className="text-sm text-slate-500 mt-1">
-          Here&apos;s what&apos;s happening with your {primaryRole === 'admin' ? 'system' : primaryRole === 'dean' ? 'college' : primaryRole === 'hod' ? 'department' : primaryRole === 'verification' ? 'review queue' : 'achievements'} today.
+          Here&apos;s what&apos;s happening with your {primaryRole === 'admin' ? 'system' : primaryRole === 'dean' ? 'college' : primaryRole === 'verification' ? 'review queue' : 'achievements'} today.
         </p>
       </div>
 
@@ -414,9 +474,8 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Role-specific dashboards */}
+      {/* Role-specific dashboards — HOD & Faculty both see the personal faculty view */}
       {primaryRole === 'faculty' && <FacultyDashboard />}
-      {primaryRole === 'hod' && <HodDashboard />}
       {primaryRole === 'dean' && <DeanDashboard />}
       {primaryRole === 'verification' && <VerificationDashboard />}
       {primaryRole === 'admin' && <AdminDashboard />}
