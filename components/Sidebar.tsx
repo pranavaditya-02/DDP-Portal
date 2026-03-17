@@ -186,11 +186,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: "examiner", label: "External Examiner", icon: ClipboardCheck },
     { id: "guestLecture", label: "Guest Lecture Delivered", icon: Mic },
     { id: "internationalVisit", label: "International Visit", icon: Plane },
+    { id: "reviewer", label: "Journal Reviewer", icon: PenTool },
     { id: "newsletter", label: "Newsletter", icon: Newspaper },
     { id: "onlineCourse", label: "Online Courses", icon: Video },
     { id: "papers", label: "Paper Presentation", icon: FileText },
     { id: "resourcePerson", label: "Resource Person", icon: UserCheck },
-    { id: "reviewer", label: "Journal Reviewer", icon: PenTool },
   ];
 
   const owiItems = [
@@ -357,7 +357,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             ? "/achievements/events-organized"
                             : item.id === "examiner"
                               ? "/achievements/external-examiner"
-                              : null;
+                              : item.id === "guestLecture"
+                                ? "/achievements/guest-lecture-delivered"
+                                : item.id === "internationalVisit"
+                                  ? "/achievements/international-visit"
+                                  : item.id === "newsletter"
+                                    ? "/achievements/newsletter"
+                                    : item.id === "reviewer"
+                                      ? "/achievements/journal-reviewer"
+                                      : item.id === "onlineCourse"
+                                        ? "/achievements/online-course"
+                                        : item.id === "papers"
+                                          ? "/achievements/paper-presentation"
+                                          : item.id === "resourcePerson"
+                                            ? "/achievements/resource-person"
+                                            : null;
 
                   if (href) {
                     return (

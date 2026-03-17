@@ -224,7 +224,7 @@ export default function NotableAchievementsPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-[2400px] w-full border-collapse mx-auto">
+              <table className="w-max border-collapse mx-auto">
                 <thead>
                   <tr className="border-b border-slate-200 bg-slate-50">
                     <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
