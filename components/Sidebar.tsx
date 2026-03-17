@@ -1,10 +1,10 @@
-'use client'
+"use client";
 
-import React, { useState } from 'react'
-import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
-import { useAuthStore } from '@/lib/store'
-import { useRoles } from '@/hooks/useRoles'
+import React, { useState } from "react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuthStore } from "@/lib/store";
+import { useRoles } from "@/hooks/useRoles";
 import {
   LayoutDashboard,
   FileText,
@@ -24,112 +24,227 @@ import {
   Award,
   Clipboard,
   X,
-} from 'lucide-react'
+  Newspaper,
+  Monitor,
+  Calendar,
+  ClipboardCheck,
+  PenTool,
+  Mic,
+  Plane,
+  Video,
+  UserCheck,
+} from "lucide-react";
 
 interface SidebarProps {
-  collapsed: boolean
-  setCollapsed: (v: boolean) => void
-  mobileOpen: boolean
-  setMobileOpen: (v: boolean) => void
+  collapsed: boolean;
+  setCollapsed: (v: boolean) => void;
+  mobileOpen: boolean;
+  setMobileOpen: (v: boolean) => void;
 }
 
 interface NavItem {
-  label: string
-  href: string
-  icon: React.ElementType
-  show: boolean
-  badge?: number
+  label: string;
+  href: string;
+  icon: React.ElementType;
+  show: boolean;
+  badge?: number;
 }
 
 interface NavGroup {
-  title: string
-  items: NavItem[]
+  title: string;
+  items: NavItem[];
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) => {
-  const router = useRouter()
-  const pathname = usePathname()
-  const { user, logout } = useAuthStore()
-  const { isFaculty, isHod, isDean, isVerification, isMaintenance } = useRoles()
-  const [profileOpen, setProfileOpen] = useState(false)
+export const Sidebar: React.FC<SidebarProps> = ({
+  collapsed,
+  setCollapsed,
+  mobileOpen,
+  setMobileOpen,
+}) => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const { user, logout } = useAuthStore();
+  const { isFaculty, isHod, isDean, isVerification, isMaintenance } =
+    useRoles();
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [achievementsExpanded, setAchievementsExpanded] = useState(false);
+  const [owiExpanded, setOwiExpanded] = useState(false);
 
   const handleLogout = () => {
-    logout()
-    router.push('/login')
-  }
+    logout();
+    router.push("/login");
+  };
 
-  if (!user) return null
+  if (!user) return null;
 
   const navGroups: NavGroup[] = [
     {
-      title: 'Overview',
+      title: "Overview",
       items: [
-        { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, show: !isDean() },
+        {
+          label: "Dashboard",
+          href: "/dashboard",
+          icon: LayoutDashboard,
+          show: !isDean(),
+        },
       ],
     },
     {
-      title: 'Faculty',
+      title: "Faculty",
       items: [
-        { label: 'My Activities', href: '/activities', icon: FileText, show: isFaculty() && !isDean() },
-        // { label: 'Submit Activity', href: '/activities/submit', icon: PlusCircle, show: isFaculty() },
-        { label: 'Submit Achievements', href: '/achievements/submit', icon: Award, show: isFaculty() && !isDean() },
-        { label: 'Submit Action Plan', href: '/action-plan/submit', icon: Clipboard, show: isFaculty() && !isDean() },
+        {
+          label: "My Activities",
+          href: "/activities",
+          icon: FileText,
+          show: isFaculty() && !isDean(),
+        },
+        {
+          label: "Submit Achievements",
+          href: "/achievements/submit",
+          icon: Award,
+          show: isFaculty() && !isDean(),
+        },
+        {
+          label: "Submit Action Plan",
+          href: "/action-plan/submit",
+          icon: Clipboard,
+          show: isFaculty() && !isDean(),
+        },
       ],
     },
     {
-      title: 'Department',
+      title: "Department",
       items: [
-        { label: 'Department', href: '/department', icon: Building2, show: isHod() },
-        { label: 'Leaderboard', href: '/leaderboard', icon: Trophy, show: isHod() },
+        {
+          label: "Department",
+          href: "/department",
+          icon: Building2,
+          show: isHod(),
+        },
+        {
+          label: "Leaderboard",
+          href: "/leaderboard",
+          icon: Trophy,
+          show: isHod(),
+        },
       ],
     },
     {
-      title: 'College',
+      title: "College",
       items: [
-        { label: 'College Overview', href: '/college', icon: GraduationCap, show: isDean() },
-        { label: 'Department', href: '/department', icon: Building2, show: isDean() },
-        { label: 'Leaderboard', href: '/leaderboard', icon: Trophy, show: isDean() },
+        {
+          label: "College Overview",
+          href: "/college",
+          icon: GraduationCap,
+          show: isDean(),
+        },
+        {
+          label: "Department",
+          href: "/department",
+          icon: Building2,
+          show: isDean(),
+        },
+        {
+          label: "Leaderboard",
+          href: "/leaderboard",
+          icon: Trophy,
+          show: isDean(),
+        },
       ],
     },
     {
-      title: 'Management',
+      title: "Management",
       items: [
-        { label: 'Verification Queue', href: '/verification', icon: ShieldCheck, show: isVerification(), badge: 7 },
-        { label: 'User Management', href: '/users', icon: Users, show: isMaintenance() },
-        { label: 'Role Management', href: '/roles', icon: Shield, show: isMaintenance() },
+        {
+          label: "Verification Queue",
+          href: "/verification",
+          icon: ShieldCheck,
+          show: isVerification(),
+          badge: 7,
+        },
+        {
+          label: "User Management",
+          href: "/users",
+          icon: Users,
+          show: isMaintenance(),
+        },
+        {
+          label: "Role Management",
+          href: "/roles",
+          icon: Shield,
+          show: isMaintenance(),
+        },
       ],
     },
-  ]
+  ];
+
+  const achievementItems = [
+    { id: "awards", label: "Notable Achievements and Awards", icon: Trophy },
+    { id: "econtent", label: "E-Content Developed", icon: Monitor },
+    { id: "eventAttended", label: "Events Attended", icon: Users },
+    { id: "eventOrganized", label: "Events Organized", icon: Calendar },
+    { id: "examiner", label: "External Examiner", icon: ClipboardCheck },
+    { id: "guestLecture", label: "Guest Lecture Delivered", icon: Mic },
+    { id: "internationalVisit", label: "International Visit", icon: Plane },
+    { id: "newsletter", label: "Newsletter", icon: Newspaper },
+    { id: "onlineCourse", label: "Online Courses", icon: Video },
+    { id: "papers", label: "Paper Presentation", icon: FileText },
+    { id: "resourcePerson", label: "Resource Person", icon: UserCheck },
+    { id: "reviewer", label: "Journal Reviewer", icon: PenTool },
+  ];
+
+  const owiItems = [
+    { label: "COE", slug: "coe" },
+    { label: "External VIP Visit", slug: "external-vip-visit" },
+    { label: "Faculty Industry Projects", slug: "faculty-industry-projects" },
+    {
+      label: "Faculty Trained by Industry",
+      slug: "faculty-trained-by-industry",
+    },
+    { label: "Industry Advisors", slug: "industry-advisors" },
+    { label: "IRP Visit", slug: "irp-visit" },
+    { label: "Laboratory by Industry", slug: "laboratory-by-industry" },
+    { label: "MoU", slug: "mou" },
+    { label: "Professional Membership", slug: "professional-membership" },
+    { label: "Students Industrial Visit", slug: "students-industrial-visit" },
+    { label: "Technical Societies", slug: "technical-societies" },
+    { label: "Training to Industry", slug: "training-to-industry" },
+  ];
 
   // Filter groups: only show groups that have at least one visible item
   const visibleGroups = navGroups
-    .map(g => ({ ...g, items: g.items.filter(i => i.show) }))
-    .filter(g => g.items.length > 0)
+    .map((g) => ({ ...g, items: g.items.filter((i) => i.show) }))
+    .filter((g) => g.items.length > 0);
 
-  const isActive = (href: string) => pathname === href
+  const isActive = (href: string) => pathname === href;
 
   const getRoleBadgeColor = (role: string) => {
     const colors: Record<string, string> = {
-      faculty: 'bg-blue-500/20 text-blue-300',
-      hod: 'bg-emerald-500/20 text-emerald-300',
-      dean: 'bg-purple-500/20 text-purple-300',
-      verification: 'bg-amber-500/20 text-amber-300',
-      maintenance: 'bg-red-500/20 text-red-300',
-    }
-    return colors[role] || 'bg-slate-500/20 text-slate-300'
-  }
+      faculty: "bg-blue-500/20 text-blue-300",
+      hod: "bg-emerald-500/20 text-emerald-300",
+      dean: "bg-purple-500/20 text-purple-300",
+      verification: "bg-amber-500/20 text-amber-300",
+      maintenance: "bg-red-500/20 text-red-300",
+    };
+    return colors[role] || "bg-slate-500/20 text-slate-300";
+  };
 
   return (
     <aside
       className={`fixed left-0 top-0 h-screen bg-slate-900 text-white flex flex-col z-50 border-r border-slate-800
         transition-all duration-300 ease-in-out w-[260px]
-        ${collapsed ? 'md:w-[72px]' : 'md:w-[260px]'}
-        ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
+        ${collapsed ? "md:w-[72px]" : "md:w-[260px]"}
+        ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
         md:translate-x-0`}
     >
       {/* Header / Logo */}
-      <div className={`flex items-center h-16 border-b border-slate-800 ${collapsed ? 'justify-center px-2' : 'justify-between px-4'}`}>
-        <Link href="/dashboard" className="flex items-center gap-3 overflow-hidden">
+      <div
+        className={`flex items-center h-16 border-b border-slate-800 ${collapsed ? "justify-center px-2" : "justify-between px-4"}`}
+      >
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-3 overflow-hidden"
+        >
           <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
             <span className="text-white font-bold text-lg">F</span>
           </div>
@@ -144,7 +259,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed, mobil
           onClick={() => setCollapsed(!collapsed)}
           className="hidden md:flex p-1.5 rounded-md hover:bg-slate-800 transition-colors text-slate-400 hover:text-white"
         >
-          {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          {collapsed ? (
+            <ChevronRight className="w-4 h-4" />
+          ) : (
+            <ChevronLeft className="w-4 h-4" />
+          )}
         </button>
         {/* Mobile close button */}
         <button
@@ -166,28 +285,28 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed, mobil
             )}
             <div className="space-y-1">
               {group.items.map((item) => {
-                const Icon = item.icon
-                const active = isActive(item.href)
+                const Icon = item.icon;
+                const active = isActive(item.href);
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
                     onClick={() => setMobileOpen(false)}
                     className={`group flex items-center gap-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 relative ${
-                      collapsed ? 'justify-center px-2' : 'px-3'
+                      collapsed ? "justify-center px-2" : "px-3"
                     } ${
                       active
-                        ? 'bg-blue-600/20 text-blue-400'
-                        : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                        ? "bg-blue-600/20 text-blue-400"
+                        : "text-slate-400 hover:bg-slate-800 hover:text-white"
                     }`}
                     title={collapsed ? item.label : undefined}
                   >
                     {active && (
-                      <div
-                        className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-blue-500 rounded-r-full"
-                      />
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-blue-500 rounded-r-full" />
                     )}
-                    <Icon className={`w-5 h-5 flex-shrink-0 ${active ? 'text-blue-400' : ''}`} />
+                    <Icon
+                      className={`w-5 h-5 flex-shrink-0 ${active ? "text-blue-400" : ""}`}
+                    />
                     {!collapsed && (
                       <span className="flex-1 truncate">{item.label}</span>
                     )}
@@ -202,11 +321,124 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed, mobil
                       </span>
                     )}
                   </Link>
-                )
+                );
               })}
             </div>
           </div>
         ))}
+
+        {/* Faculty Achievements Section */}
+        {isFaculty() && !isDean() && !collapsed && (
+          <div>
+            <button
+              onClick={() => setAchievementsExpanded(!achievementsExpanded)}
+              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-150"
+            >
+              <div className="flex items-center gap-3">
+                <Trophy className="w-5 h-5 flex-shrink-0" />
+                <span>Faculty Achievements</span>
+              </div>
+              <ChevronDown
+                className={`w-4 h-4 transition-transform ${achievementsExpanded ? "rotate-180" : ""}`}
+              />
+            </button>
+            {achievementsExpanded && (
+              <div className="space-y-1 mt-2 ml-2">
+                {achievementItems.map((item) => {
+                  const Icon = item.icon;
+                  const href =
+                    item.id === "awards"
+                      ? "/achievements/notable-achievements-and-awards"
+                      : item.id === "econtent"
+                        ? "/achievements/e-content-developed"
+                        : item.id === "eventAttended"
+                          ? "/achievements/events-attended"
+                          : item.id === "eventOrganized"
+                            ? "/achievements/events-organized"
+                            : item.id === "examiner"
+                              ? "/achievements/external-examiner"
+                              : null;
+
+                  if (href) {
+                    return (
+                      <Link
+                        key={item.id}
+                        href={href}
+                        onClick={() => setMobileOpen(false)}
+                        className={`w-full flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 ${
+                          pathname === href
+                            ? "bg-blue-600/20 text-blue-400"
+                            : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                        }`}
+                      >
+                        <Icon className="w-4 h-4 flex-shrink-0" />
+                        <span className="flex-1 text-left truncate">
+                          {item.label}
+                        </span>
+                      </Link>
+                    );
+                  }
+
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setMobileOpen(false)}
+                      className="w-full flex items-center gap-3 py-2 px-3 rounded-lg text-xs text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+                    >
+                      <Icon className="w-4 h-4 flex-shrink-0" />
+                      <span className="flex-1 text-left truncate">
+                        {item.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* OWI (Outside World Interaction) Section */}
+        {isFaculty() && !isDean() && !collapsed && (
+          <div>
+            <button
+              onClick={() => setOwiExpanded(!owiExpanded)}
+              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-150"
+            >
+              <div className="flex items-center gap-3">
+                <Users className="w-5 h-5 flex-shrink-0" />
+                <span>OWI</span>
+              </div>
+              <ChevronDown
+                className={`w-4 h-4 transition-transform ${owiExpanded ? "rotate-180" : ""}`}
+              />
+            </button>
+            {owiExpanded && (
+              <div className="space-y-1 mt-2 ml-2">
+                {owiItems.map((item) => {
+                  const href = `/faculty/outside-world/${item.slug}`;
+                  const active = isActive(href);
+                  return (
+                    <Link
+                      key={item.slug}
+                      href={href}
+                      onClick={() => setMobileOpen(false)}
+                      className={`flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 relative ${
+                        active
+                          ? "bg-blue-600/20 text-blue-400"
+                          : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                      }`}
+                    >
+                      {active && (
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-blue-500 rounded-r-full" />
+                      )}
+                      <span className="flex-1 truncate">{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </nav>
 
       {/* User Profile Section */}
@@ -227,47 +459,55 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed, mobil
 
         {/* User Info */}
         <div
-          className={`flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer ${collapsed ? 'justify-center' : ''}`}
+          className={`flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer ${collapsed ? "justify-center" : ""}`}
           onClick={() => setProfileOpen(!profileOpen)}
         >
           <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center flex-shrink-0 text-sm font-bold">
-            {user.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+            {user.name
+              .split(" ")
+              .map((n) => n[0])
+              .join("")
+              .slice(0, 2)}
           </div>
           {!collapsed && (
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-slate-200 truncate">{user.name}</p>
-              <p className="text-[11px] text-slate-500 truncate">{user.email}</p>
+              <p className="text-sm font-medium text-slate-200 truncate">
+                {user.name}
+              </p>
+              <p className="text-[11px] text-slate-500 truncate">
+                {user.email}
+              </p>
             </div>
           )}
           {!collapsed && (
-            <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown
+              className={`w-4 h-4 text-slate-500 transition-transform ${profileOpen ? "rotate-180" : ""}`}
+            />
           )}
         </div>
 
         {/* Profile dropdown */}
         {profileOpen && !collapsed && (
-            <div
-              className="overflow-hidden animate-fade-in"
-            >
-              <div className="pt-2 space-y-1">
-                <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-                  <User className="w-4 h-4" />
-                  Profile
-                </button>
-                <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-                  <Bell className="w-4 h-4" />
-                  Notifications
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Sign Out
-                </button>
-              </div>
+          <div className="overflow-hidden animate-fade-in">
+            <div className="pt-2 space-y-1">
+              <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
+                <User className="w-4 h-4" />
+                Profile
+              </button>
+              <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
+                <Bell className="w-4 h-4" />
+                Notifications
+              </button>
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+                Sign Out
+              </button>
             </div>
-          )}
+          </div>
+        )}
 
         {/* Collapsed logout */}
         {collapsed && (
@@ -281,5 +521,5 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed, mobil
         )}
       </div>
     </aside>
-  )
-}
+  );
+};
