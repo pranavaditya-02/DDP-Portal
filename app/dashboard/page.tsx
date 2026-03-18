@@ -40,7 +40,7 @@ function getFacultyAttainedCount(activityName: string, activities: Array<{ type:
     if (name.includes('BOOK / BOOK CHAPTER')) return type.includes('book')
     if (name.includes('RESEARCH PROPOSALS SUBMITTED')) return type.includes('research proposal')
     if (name.includes('RESEARCH FUNDING')) return type.includes('research funding')
-    if (name.includes('PATENTS PUBLISHED') || name.includes('PATENTS GRANTED')) return type.includes('patent')
+    if (name.includes('PATENTS PUBLISHED') || name.includes('PATENTS GRANTED') || name.includes('PATENT PUBLICATIONS')) return type.includes('patent')
     if (name.includes('CONSULTANCY PROJECTS COMPLETED') || name.includes('INDUSTRIAL CONSULTANCY')) return type.includes('consultancy')
     if (name.includes('SEED MONEY PROJECTS')) return title.includes('seed money')
     if (name.includes('GUEST LECTURE')) return type.includes('guest lecture')

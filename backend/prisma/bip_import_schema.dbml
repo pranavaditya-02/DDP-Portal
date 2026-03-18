@@ -1,305 +1,1461 @@
-Project bip_import_schema {
-  database_type: "PostgreSQL"
-  Note: "ER diagram model for the BIP CSV import schema"
+// PS-FAA Database Schema
+// Paste this at https://dbdiagram.io/d
+
+// ─────────────────────────────────────────
+// LOOKUP / REFERENCE TABLES
+// ─────────────────────────────────────────
+
+Table ref_iqac_status {
+  id    int         [pk, increment]
+  label varchar(20) [not null, unique, note: 'Initiated | Approved | Rejected']
 }
+
+Table ref_event_level {
+  id    int         [pk, increment]
+  label varchar(60) [not null, unique, note: 'State | National | International | Institute (BIT)']
+}
+
+Table ref_event_mode {
+  id    int         [pk, increment]
+  label varchar(20) [not null, unique, note: 'Online | Offline | Hybrid']
+}
+
+Table ref_organizer_type {
+  id    int         [pk, increment]
+  label varchar(40) [not null, unique, note: 'BIT | Industry | Foreign Institute | Institute in India | Others']
+}
+
+Table ref_sponsorship_type {
+  id    int         [pk, increment]
+  label varchar(30) [not null, unique, note: 'Self | BIT | Funding Agency | Others']
+}
+
+Table ref_fund_type {
+  id    int         [pk, increment]
+  label varchar(30) [not null, unique, note: 'Self | Management | Funding Agency']
+}
+
+Table ref_event_type_attended {
+  id    int         [pk, increment]
+  label varchar(120) [not null, unique, note: 'Certificate course | Conference attended-without presentation | Educational fair | Faculty exchange programme | FDP | Guest Lecture | Non-technical events | One credit course | Orientation programme | Seminar | Session chair | STTP | Summer School | Training | Value-Added course | Webinar | Winter School | Workshop | Hands-On Training | PS-Certification (BIT) | NPTEL-FDP | AICTE-UHV-FDP | Innovation Ambassador- IIC Certificate | CEE-ACO & BEI panelist workshop certificate | Other']
+}
+
+Table ref_event_type_organized {
+  id    int         [pk, increment]
+  label varchar(120) [not null, unique, note: 'HRD Programs | Certificate course | Partial Delivery of Course | Competitions for BIT students | Conference | Faculty training Program | FDP/STTP | Guest Lecture | Hands on training | Leader of the Week | Non Technical Event | One credit course | Orientation program | Refresher Program | Seminar | Technical Events | Webinar | Workshop | Non-Teaching training programme | Others | Symposium | Interaction']
+}
+
+Table ref_course_type {
+  id    int         [pk, increment]
+  label varchar(80) [not null, unique, note: 'AICTE | CEC | CISCO | COURSERA | edX | GOOGLE | IBM | IGNOU | IIMB | INI | NITTTR | MICROSOFT | NMEICT | NPTEL | SWAYAM | ICMR | UDEMY | UGC | AICTE QIP PG certificate Programme | AI Infinity | Oracle | Other']
+}
+
+Table ref_journal_indexing {
+  id    int         [pk, increment]
+  label varchar(20) [not null, unique, note: 'Scopus | Web of Science | SCI | Others']
+}
+
+Table ref_recognition_type {
+  id    int         [pk, increment]
+  label varchar(40) [not null, unique, note: 'Reviewer | Editorial Board Member | Editor in Chief | Advisory board Member | Others']
+}
+
+Table ref_external_examiner_purpose {
+  id    int         [pk, increment]
+  label varchar(80) [not null, unique, note: 'Central Valuation | Flying Squad | Hall invigilator | Practical/Project viva External Examiner | Question Paper Scrutiny | QP Setter | University Representative']
+}
+
+Table ref_technical_society {
+  id    int          [pk, increment]
+  label varchar(100) [not null, unique, note: 'IEEE | CSI | IAENG | SAE | etc.']
+}
+
+Table ref_resource_person_category {
+  id    int         [pk, increment]
+  label varchar(80) [not null, unique, note: 'BoS Member | Chief Guest | Conference Session Chair | DC member | Energy Audit | Examiner - Ph.D Viva voce | External Academic Audit | Internal Academic Audit | Jury member | Quality Expert | Technical Expert | Thesis Evaluator | Interaction | Panel-Member']
+}
+
+Table ref_e_content_type {
+  id    int         [pk, increment]
+  label varchar(80) [not null, unique, note: 'PERSONALIZED_SKILL (PS) | TUTORIAL | E-BOOK | VIDEO LECTURES | ACADEMIC BOOK | ASSESSMENT | ARTICLE | BLOG WRITING | COURSE BOARD GRAPHICS | DATABASE CREATION | E-LEARNING GAME | NPTEL TRANSLATION | PODCAST | SKILL-SCOURCE-BOOK | YOUTUBE-VIDEO | MAGAZINE | NEW METHODOLOGY IN TLP/ASSESSMENT | NEW COURSE IN CURICULLAM | Other']
+}
+
+Table ref_newsletter_category {
+  id    int         [pk, increment]
+  label varchar(40) [not null, unique, note: 'Department Newsletter | Institution Newsletter']
+}
+
+// ─────────────────────────────────────────
+// CORE ENTITY
+// ─────────────────────────────────────────
 
 Table departments {
-  id bigint [pk, increment]
-  code varchar(20) [not null, unique]
-  name varchar(120) [not null]
-  created_at timestamptz [not null]
-}
-
-Table special_labs {
-  id bigint [pk, increment]
-  lab_code varchar(50) [unique]
-  lab_name varchar(200) [not null]
-  created_at timestamptz [not null]
-  updated_at timestamptz [not null]
-}
-
-Table roles {
-  id bigint [pk, increment]
-  role_code varchar(50) [not null, unique]
-  role_name varchar(100) [not null]
-  description text
-  created_at timestamptz [not null]
+  id         int          [pk, increment]
+  dept_code  varchar(20)  [not null, unique]
+  dept_name  varchar(120) [not null, unique]
+  status     boolean      [not null, default: true, note: 'true=active, false=inactive']
+  created_at timestamp    [default: `CURRENT_TIMESTAMP`]
+  updated_at timestamp    [default: `CURRENT_TIMESTAMP`]
 }
 
 Table faculty {
-  id bigint [pk, increment]
-  faculty_code varchar(50) [not null, unique]
-  full_name varchar(150) [not null]
-  department_id bigint
-  source_department_text varchar(150)
-  created_at timestamptz [not null]
-  updated_at timestamptz [not null]
+  id         varchar(50)  [pk]
+  salutation varchar(10)  [not null, note: 'Mr | Mrs | Ms | Dr']
+  name       varchar(200) [not null]
+  designation varchar(60) [not null, note: 'Assistant Professor Level I | Assistant Professor Level II | Assistant Professor Level III | Associate Professor | Professor']
+  department_id int       [ref: > departments.id]
+  email      varchar(200)
+  created_at timestamp    [default: `CURRENT_TIMESTAMP`]
 }
 
-Table faculty_roles {
-  id bigint [pk, increment]
-  faculty_id bigint [not null]
-  role_id bigint [not null]
-  department_id bigint
-  is_primary boolean [not null]
-  assigned_at timestamptz [not null]
+Table users {
+  id            int          [pk, increment]
+  username      varchar(100) [not null, unique]
+  email         varchar(200) [not null, unique]
+  password_hash varchar(255) [not null]
+  faculty_id    varchar(50)  [unique, ref: > faculty.id, note: 'Optional link for faculty user accounts']
+  department_id int          [ref: > departments.id, note: 'Primary department mapping']
+  role_id       int          [not null, ref: > roles.id, note: 'Assigned role for page/resource access']
+  is_active     boolean      [default: true]
+  created_at    timestamp    [default: `CURRENT_TIMESTAMP`]
+  updated_at    timestamp    [default: `CURRENT_TIMESTAMP`]
+}
+
+Table roles {
+  id          int          [pk, increment]
+  name        varchar(100) [not null, unique]
+  is_active   boolean      [default: true]
+  created_at  timestamp    [default: `CURRENT_TIMESTAMP`]
+}
+
+Table app_pages {
+  id          int          [pk, increment]
+  page_key    varchar(120) [not null, unique, note: 'dashboard | activities | achievements.submit | department | roles | etc.']
+  page_name   varchar(150) [not null]
+  route_path  varchar(255) [not null, unique, note: '/dashboard | /activities | /achievements/submit | etc.']
+  created_at  timestamp    [default: `CURRENT_TIMESTAMP`]
+}
+
+Table role_page_access {
+  id          int       [pk, increment]
+  role_id     int       [not null, ref: > roles.id]
+  page_id     int       [not null, ref: > app_pages.id]
+  created_at  timestamp [default: `CURRENT_TIMESTAMP`]
 
   indexes {
-    (faculty_id, role_id, department_id) [unique]
+    (role_id, page_id) [unique]
   }
 }
 
-Table import_batches {
-  id bigint [pk, increment]
-  source_name varchar(120) [not null]
-  source_file varchar(255) [not null]
-  row_count int
-  imported_at timestamptz [not null]
-  notes text
+// ─────────────────────────────────────────
+// SUPPORT TABLES
+// ─────────────────────────────────────────
+
+Table ref_doc_type {
+  id    int         [pk, increment]
+  label varchar(60) [not null, unique, note: 'document_proof | apex_proof | certificate_proof | geotag_photos | syllabus | course_feedback | proceedings_proof | relevant_proof | marksheet_proof | fdp_proof | photo_proof | award_proof | sample_photographs']
+}
+
+Table documents {
+  id          int          [pk, increment]
+  doc_type_id int          [not null, ref: > ref_doc_type.id]
+  file_path   varchar(500) [not null]
+  uploaded_at timestamp    [default: `CURRENT_TIMESTAMP`]
+}
+
+Table special_lab {
+  id         int          [pk, increment]
+  code       varchar(20)  [not null, unique, note: 'e.g. SL-001, AI-LAB, IOT-LAB']
+  name       varchar(200) [not null]
+  is_active  boolean      [default: true]
+  created_at timestamp    [default: `CURRENT_TIMESTAMP`]
+  updated_at timestamp    [default: `CURRENT_TIMESTAMP`]
 }
 
 Table submissions {
-  id bigint [pk, increment]
-  bip_id bigint [not null]
-  source_sheet varchar(80) [not null]
-  activity_type varchar(40) [not null]
-  faculty_id bigint [not null]
-  department_id bigint
-  source_department_text varchar(150)
-  claimed_department_id bigint
-  claimed_department_text varchar(150)
-  apply_from varchar(40)
-  task_id varchar(80)
-  iqac_status varchar(40)
-  special_lab_involved boolean
-  special_lab_id bigint
-  special_lab_code varchar(50)
-  special_lab_name varchar(200)
-  start_date date
-  end_date date
-  duration_days int
-  duration_text varchar(80)
-  level varchar(80)
-  mode varchar(40)
-  location varchar(200)
-  event_organizer varchar(200)
-  organizer_type varchar(120)
-  industry varchar(200)
-  claimed_for varchar(120)
-  amount_rs numeric(12,2)
-  sponsorship_type varchar(80)
-  funding_agency varchar(200)
-  management_funding_received boolean
-  management_amount_received numeric(12,2)
-  raw_payload jsonb
-  created_at timestamptz [not null]
-  updated_at timestamptz [not null]
-  import_batch_id bigint
+  id                   int          [pk, increment]
+  task_id              varchar(100) [unique, note: 'Task ID from activity forms (if applicable)']
+  remarks              text         [note: 'General remarks/comments for the submission']
+  activity_type        varchar(60)  [not null, note: 'newsletter_archive | e_content_developed | events_attended | events_organized | external_examiner | faculty_journal_reviewer | guest_lecture_delivered | international_visit | notable_achievements | online_course | paper_presentation | resource_person | mou | irp_visit | consultancy | external_vip_visit | faculty_industry_project | centre_of_excellence | faculty_trained_by_industry | industry_advisor | lab_developed_by_industry | students_industrial_visit | training_to_industry | professional_body_membership']
+  faculty_id           varchar(50)  [ref: > faculty.id, note: 'Nullable for department-level activities like newsletter_archive']
+  iqac_verification_id int          [ref: > ref_iqac_status.id]
+  created_at           timestamp    [default: `CURRENT_TIMESTAMP`]
+  updated_at           timestamp    [default: `CURRENT_TIMESTAMP`]
+}
+
+
+// ─────────────────────────────────────────
+// ACTIVITY TABLE 1 — NEWSLETTER ARCHIVE
+// ─────────────────────────────────────────
+
+Table newsletter_archive {
+  id                       int          [pk, increment]
+  submission_id            int          [not null, unique, ref: > submissions.id]
+  newsletter_category_id   int          [ref: > ref_newsletter_category.id]
+  department_id            int          [ref: > departments.id]
+  academic_year            varchar(20)
+  date_of_publication      date
+  volume_number            int
+  issue_number             int
+  issue_month              varchar(20)
+  num_faculty_editors      int
+  num_student_editors      int
+  proof_document_id        int          [ref: > documents.id, note: 'Upload the Document']
+}
+
+// ─────────────────────────────────────────
+// ACTIVITY TABLE 2 — E-CONTENT DEVELOPED
+// ─────────────────────────────────────────
+
+Table e_content_developed {
+  id                   int          [pk, increment]
+  submission_id        int          [not null, unique, ref: > submissions.id]
+  special_labs_involved boolean     [default: false, note: 'Yes | No']
+  special_lab_id       int          [ref: > special_lab.id, note: 'Required if special_labs_involved = true']
+  e_content_type_id    int          [ref: > ref_e_content_type.id]
+  if_others_specify    varchar(200)
+  topic_name           varchar(300)
+  publisher_name       varchar(200)
+  publisher_address    text
+  contact_no           varchar(20)
+  url_of_content       varchar(500)
+  date_of_publication  date
+  document_proof_id    int          [ref: > documents.id, note: 'Document Proof']
+}
+
+// ─────────────────────────────────────────
+// ACTIVITY TABLE 3 — EVENTS ATTENDED
+// ─────────────────────────────────────────
+
+Table events_attended {
+  id                    int           [pk, increment]
+  submission_id         int           [not null, unique, ref: > submissions.id]
+  special_labs_involved boolean       [default: false, note: 'Yes | No']
+  special_lab_id        int           [ref: > special_lab.id, note: 'Required if special_labs_involved = true']
+  event_type_id         int           [ref: > ref_event_type_attended.id]
+  if_event_type_others  varchar(200)
+  ps_domain             text
+  ps_domain_level       text
+  topic_name            varchar(300)
+  organizer_type_id     int           [ref: > ref_organizer_type.id]
+  industry_name         varchar(300)
+  industry_name_select  varchar(300)
+  industry_address      text
+  institute_name        varchar(300)
+  event_level_id        int           [ref: > ref_event_level.id]
+  event_title           varchar(300)
+  organization_sector   varchar(20)   [note: 'Private | Government']
+  event_organizer       varchar(300)
+  event_mode_id         int           [ref: > ref_event_mode.id]
+  event_location        varchar(300)
+  event_duration_unit   varchar(10)   [note: 'Months | Weeks | Hours | Days']
+  event_date_from       date
+  event_date_to         date
+  duration_days         int
+  other_organizer_name  varchar(300)
+  sponsorship_type_id   int           [ref: > ref_sponsorship_type.id]
+  funding_agency_name   varchar(300)
+  amount_inrs           decimal(12,2)
+  outcome               varchar(100)  [note: 'Programs organized | Development of working Models and prototypes | Funded projects received | Others']
+  if_outcome_others     varchar(300)
+  apex_proof_id         int           [ref: > documents.id, note: 'Apex Proof']
+  certificate_proof_id  int           [ref: > documents.id, note: 'Certificate Proof']
+  geotag_photos_id      int           [ref: > documents.id, note: 'Upload Geotag Photos']
+}
+
+// ─────────────────────────────────────────
+// ACTIVITY TABLE 4 — EVENTS ORGANIZED
+// ─────────────────────────────────────────
+
+Table events_organized {
+  id                         int           [pk, increment]
+  submission_id              int           [not null, unique, ref: > submissions.id]
+  special_labs_involved      boolean       [default: false, note: 'Yes | No']
+  special_lab_id             int           [ref: > special_lab.id, note: 'Required if special_labs_involved = true']
+  role                       varchar(60)   [note: 'Convener | Co-Convener | Co-ordinator | Organizing Secretary']
+  department_id              int           [ref: > departments.id]
+  is_iic_event               boolean
+  is_iic_uploaded            boolean
+  iic_bip_id                 varchar(100)
+  is_dept_association        boolean
+  is_rnd_organized           boolean
+  is_technical_society       boolean
+  technical_society_id       int           [ref: > ref_technical_society.id]
+  is_mou_outcome             boolean
+  mou_bip_id                 varchar(100)
+  is_irp_outcome             boolean
+  irp_bip_id                 varchar(100)
+  is_centre_of_excellence    boolean
+  coe_bip_id                 varchar(100)
+  is_industry_supported_lab  boolean
+  isl_bip_id                 varchar(100)
+  event_name                 varchar(300)
+  type_of_program            varchar(20)   [note: 'Academic | Non Academic']
+  club_society_name          varchar(200)
+  event_type_id              int           [ref: > ref_event_type_organized.id]
+  if_event_type_others       varchar(200)
+  topics_covered             text
+  has_conference_proceedings boolean
+  publisher_detail           text
+  publisher_year             int
+  volume_number              int
+  issue_number               int
+  page_number                varchar(40)
+  isbn_number                varchar(30)
+  indexing_detail            varchar(200)
+  event_category             varchar(100)
+  event_organizer            varchar(300)
+  event_description          text
+  event_mode_id              int           [ref: > ref_event_mode.id]
+  event_location             varchar(300)
+  start_date                 date
+  end_date                   date
+  event_duration_days        int
+  event_level_id             int           [ref: > ref_event_level.id]
+  jointly_organized_with     varchar(60)
+  joint_org_name             varchar(300)
+  joint_org_address          text
+  internal_students_count    int
+  internal_faculty_count     int
+  external_students_count    int
+  external_faculty_count     int
+  amount_from_management     boolean
+  amount_received_inrs       decimal(12,2)
+  has_funding_agency         boolean
+  funding_agency_name        varchar(300)
+  registration_amount_inrs   decimal(12,2)
+  total_sponsored_amount     decimal(12,2)
+  total_revenue              decimal(12,2)
+  syllabus_id                int           [ref: > documents.id, note: 'Upload the Syllabus']
+  course_feedback_id         int           [ref: > documents.id, note: 'Upload the Course Feedback']
+  proceedings_proof_id       int           [ref: > documents.id, note: 'Submit the Proceedings proof']
+  apex_proof_id              int           [ref: > documents.id, note: 'Apex Proof']
+  relevant_proof_id          int           [ref: > documents.id, note: 'Approval letter, Brochure, Attendance sheet, Photos, Feedback']
+}
+
+Table event_organized_faculty {
+  id                 int         [pk, increment]
+  event_organized_id int         [not null, ref: > events_organized.id]
+  faculty_id         varchar(50) [not null, ref: > faculty.id]
+  role               varchar(60) [note: 'Convener | Co-Convener | Co-ordinator | Organizing Secretary']
+}
+
+Table event_organized_student {
+  id                 int          [pk, increment]
+  event_organized_id int          [not null, ref: > events_organized.id]
+  student_name       varchar(200)
+  student_ref_id     int
+}
+
+Table event_organized_guest {
+  id                 int          [pk, increment]
+  event_organized_id int          [not null, ref: > events_organized.id]
+  guest_number       smallint     [not null, note: '1 to 5']
+  institution_type   varchar(60)  [note: 'International | National (Within TamilNadu) | National (Outside TamilNadu)']
+  guest_name         varchar(200)
+  designation        varchar(200)
+  email              varchar(200)
+  contact_no         varchar(20)
+  organization_detail text
+  is_alumni          boolean
+  guest_type         varchar(20)  [note: 'Academic | Industry']
+}
+
+// ─────────────────────────────────────────
+// ACTIVITY TABLE 5 — EXTERNAL EXAMINER
+// ─────────────────────────────────────────
+
+Table external_examiner {
+  id                   int          [pk, increment]
+  submission_id        int          [not null, unique, ref: > submissions.id]
+  special_labs_involved boolean     [default: false, note: 'Yes | No']
+  special_lab_id       int          [ref: > special_lab.id, note: 'Required if special_labs_involved = true']
+  college_name         varchar(300)
+  institute_address    text
+  purpose_id           int          [ref: > ref_external_examiner_purpose.id]
+  examination_name     varchar(300)
+  department_of_qp_id  int          [ref: > departments.id]
+  subject_of_qp        varchar(300)
+  num_days             int
+  from_date            date
+  to_date              date
+  document_proof_id    int          [ref: > documents.id, note: 'Document Proof']
+}
+
+// ─────────────────────────────────────────
+// ACTIVITY TABLE 6 — FACULTY JOURNAL REVIEWER
+// ─────────────────────────────────────────
+
+Table faculty_journal_reviewer {
+  id                    int           [pk, increment]
+  submission_id         int           [not null, unique, ref: > submissions.id]
+  special_labs_involved boolean       [default: false, note: 'Yes | No']
+  special_lab_id        int           [ref: > special_lab.id, note: 'Required if special_labs_involved = true']
+  journal_name          varchar(300)
+  indexing_id           int           [ref: > ref_journal_indexing.id]
+  if_indexing_others    varchar(200)
+  issn_no               varchar(30)
+  publisher_name        varchar(200)
+  impact_factor         decimal(8,3)
+  journal_homepage_url  varchar(500)
+  recognition_type_id   int           [ref: > ref_recognition_type.id]
+  if_recognition_others varchar(200)
+  num_papers_reviewed   int
+  review_date           date
+  document_proof_id     int           [ref: > documents.id, note: 'Mail/Letter/Certificate as single PDF']
+}
+
+// ─────────────────────────────────────────
+// ACTIVITY TABLE 7 — GUEST LECTURE DELIVERED
+// ─────────────────────────────────────────
+
+Table guest_lecture_delivered {
+  id                   int          [pk, increment]
+  submission_id        int          [not null, unique, ref: > submissions.id]
+  special_labs_involved boolean     [default: false, note: 'Yes | No']
+  special_lab_id       int          [ref: > special_lab.id, note: 'Required if special_labs_involved = true']
+  event_type           varchar(100)
+  topic                varchar(300)
+  event_mode_id        int          [ref: > ref_event_mode.id]
+  event_level_id       int          [ref: > ref_event_level.id]
+  event_name           varchar(300)
+  from_date            date
+  to_date              date
+  num_days             int
+  organization_type_id int          [ref: > ref_organizer_type.id]
+  org_name             varchar(300)
+  org_address          text
+  num_participants     int
+  audience_type        varchar(200) [note: 'Students | Teaching Faculty | Non Teaching Faculty | Engineering Trainee | Industry persons | Others']
+  document_proof_id    int          [ref: > documents.id, note: 'Request Letter, Confirmation Letter, Brochure']
+  apex_proof_id        int          [ref: > documents.id, note: 'Apex Proof']
+  sample_photographs_id int         [ref: > documents.id, note: 'Screenshot if online, Photograph if offline']
+}
+
+// ─────────────────────────────────────────
+// ACTIVITY TABLE 8 — INTERNATIONAL VISIT
+// ─────────────────────────────────────────
+
+Table international_visit {
+  id                   int          [pk, increment]
+  submission_id        int          [not null, unique, ref: > submissions.id]
+  country_visited      varchar(100)
+  purpose_of_visit     text
+  from_date            date
+  to_date              date
+  fund_type_id         int          [ref: > ref_fund_type.id]
+  funding_agency_name  varchar(300)
+  apex_proof_id        int          [ref: > documents.id, note: 'Apex Proof']
+  relevant_proof_id    int          [ref: > documents.id, note: 'Approval letter, Brochure, Attendance sheet, Photos']
+}
+
+// ─────────────────────────────────────────
+// ACTIVITY TABLE 9 — NOTABLE ACHIEVEMENTS & AWARDS
+// ─────────────────────────────────────────
+
+Table notable_achievements {
+  id                     int           [pk, increment]
+  submission_id          int           [not null, unique, ref: > submissions.id]
+  special_labs_involved  boolean       [default: false, note: 'Yes | No']
+  special_lab_id         int           [ref: > special_lab.id, note: 'Required if special_labs_involved = true']
+  is_technical_society   boolean
+  technical_society_id   int           [ref: > ref_technical_society.id]
+  type_of_recognition    varchar(20)   [note: 'Award | Achievement']
+  award_type             varchar(100)
+  achievement_type       varchar(100)
+  award_achievement_name varchar(300)
+  organization_type      varchar(20)   [note: 'Government | Private | Others']
+  others_organization_name varchar(300)
+  org_name               varchar(300)
+  awarding_body          varchar(100)
+  level_id               int           [ref: > ref_event_level.id]
+  received_date          date
+  nature_of_recognition  varchar(60)   [note: 'Cash Prize | Certificate | Momento']
+  prize_amount_inrs      decimal(12,2)
+  photo_proof_id         int           [ref: > documents.id, note: 'Photo Proofs']
+  document_proof_id      int           [ref: > documents.id, note: 'Document Proof']
+}
+
+// ─────────────────────────────────────────
+// ACTIVITY TABLE 10 — ONLINE COURSE
+// ─────────────────────────────────────────
+
+Table online_course {
+  id                   int          [pk, increment]
+  submission_id        int          [not null, unique, ref: > submissions.id]
+  special_labs_involved boolean     [default: false, note: 'Yes | No']
+  special_lab_id       int          [ref: > special_lab.id, note: 'Required if special_labs_involved = true']
+  mode_of_course       varchar(20)  [note: 'Online | Offline | Hybrid']
+  course_type_id       int          [ref: > ref_course_type.id]
+  type_of_organizer    varchar(20)  [note: 'Private | Government']
+  course_name          varchar(300)
+  organization_name    varchar(300)
+  organization_address text
+  level_of_event_id    int          [ref: > ref_event_level.id]
+  duration_unit        varchar(10)  [note: 'Hours | Weeks | Days']
+  num_hours            int
+  num_weeks            int
+  num_days             int
+  start_date           date
+  end_date             date
+  course_category      varchar(60)  [note: 'Proctored-Exam | Self-paced with final assessment | Self-paced without final assessment']
+  exam_date            date
+  grade_obtained       varchar(20)
+  is_approved_fdp      boolean
+  sponsorship_type_id  int          [ref: > ref_sponsorship_type.id]
+  funding_agency_name  varchar(300)
+  claimed_for          varchar(30)  [note: 'FAP | Competency | Not-Applicable']
+  marksheet_proof_id   int          [ref: > documents.id, note: 'Upload Mark Sheet Proof']
+  fdp_proof_id         int          [ref: > documents.id, note: 'Upload FDP Proof']
+  apex_proof_id        int          [ref: > documents.id, note: 'Apex Proof']
+  certificate_proof_id int          [ref: > documents.id, note: 'Upload Certificate Proof']
+}
+
+// ─────────────────────────────────────────
+// ACTIVITY TABLE 11 — PAPER PRESENTATION
+// ─────────────────────────────────────────
+
+Table paper_presentation {
+  id                        int           [pk, increment]
+  submission_id             int           [not null, unique, ref: > submissions.id]
+  special_labs_involved     boolean       [default: false, note: 'Yes | No']
+  special_lab_id            int           [ref: > special_lab.id, note: 'Required if special_labs_involved = true']
+  has_intl_institute_collab boolean
+  institute_name            varchar(300)
+  conference_name           varchar(300)
+  event_mode_id             int           [ref: > ref_event_mode.id]
+  event_location            varchar(300)
+  organizer_type_id         int           [ref: > ref_organizer_type.id]
+  organizer_name            varchar(300)
+  event_level_id            int           [ref: > ref_event_level.id]
+  paper_title               varchar(500)
+  event_start_date          date
+  event_end_date            date
+  event_duration_days       int
+  published_in_proceedings  boolean
+  page_from                 int
+  page_to                   int
+  sponsorship_type_id       int           [ref: > ref_sponsorship_type.id]
+  funding_agency_name       varchar(300)
+  amount_inrs               decimal(12,2)
+  registration_amount_inrs  decimal(12,2)
+  award_received            boolean
+  apex_proof_id             int           [ref: > documents.id, note: 'Apex Proof']
+  document_proof_id         int           [ref: > documents.id, note: 'Certificate & Proceeding page']
+  award_proof_id            int           [ref: > documents.id, note: 'Award Proof']
+}
+
+Table paper_presentation_faculty {
+  id                    int      [pk, increment]
+  paper_presentation_id int      [not null, ref: > paper_presentation.id]
+  faculty_id            varchar(50) [not null, ref: > faculty.id]
+  author_order          smallint
+}
+
+Table paper_presentation_ext_faculty {
+  id                    int          [pk, increment]
+  paper_presentation_id int          [not null, ref: > paper_presentation.id]
+  faculty_name          varchar(300)
+  institution           varchar(300)
+}
+
+Table paper_presentation_industry {
+  id                    int          [pk, increment]
+  paper_presentation_id int          [not null, ref: > paper_presentation.id]
+  person_name           varchar(300)
+  industry_name         varchar(300)
+}
+
+Table paper_presentation_student {
+  id                    int         [pk, increment]
+  paper_presentation_id int         [not null, ref: > paper_presentation.id]
+  student_name          varchar(200)
+  year_of_study         varchar(10) [note: 'First | Second | Third | Fourth']
+}
+
+// ─────────────────────────────────────────
+// ACTIVITY TABLE 12 — RESOURCE PERSON
+// ─────────────────────────────────────────
+
+Table resource_person {
+  id                      int          [pk, increment]
+  submission_id           int          [not null, unique, ref: > submissions.id]
+  special_labs_involved   boolean      [default: false, note: 'Yes | No']
+  special_lab_id          int          [ref: > special_lab.id, note: 'Required if special_labs_involved = true']
+  category_id             int          [ref: > ref_resource_person_category.id]
+  purpose_of_interaction  text
+  panel_name              varchar(200)
+  organization_type       varchar(20)  [note: 'Industry | Institute']
+  org_name_address        text
+  visiting_dept_industry  varchar(200)
+  visiting_dept_institute varchar(200)
+  num_days                int
+  from_date               date
+  to_date                 date
+  document_proof_id       int          [ref: > documents.id, note: 'Document Proof (PDF - max 2KB)']
+}
+
+// ─────────────────────────────────────────
+// TABLE GROUPS (for visual grouping in dbdiagram)
+// ─────────────────────────────────────────
+
+TableGroup lookup_tables {
+  ref_iqac_status
+  ref_event_level
+  ref_event_mode
+  ref_organizer_type
+  ref_sponsorship_type
+  ref_fund_type
+  ref_event_type_attended
+  ref_event_type_organized
+  ref_course_type
+  ref_journal_indexing
+  ref_recognition_type
+  ref_external_examiner_purpose
+  ref_technical_society
+  ref_resource_person_category
+  ref_e_content_type
+  ref_newsletter_category
+  ref_doc_type
+  roles
+}
+
+TableGroup core_and_support {
+  departments
+  users
+  faculty
+  app_pages
+  special_lab
+  documents
+  submissions
+}
+
+TableGroup activity_tables {
+  newsletter_archive
+  e_content_developed
+  events_attended
+  events_organized
+  external_examiner
+  faculty_journal_reviewer
+  guest_lecture_delivered
+  international_visit
+  notable_achievements
+  online_course
+  paper_presentation
+  resource_person
+}
+
+TableGroup junction_tables {
+  role_page_access
+  event_organized_faculty
+  event_organized_student
+  event_organized_guest
+  paper_presentation_faculty
+  paper_presentation_ext_faculty
+  paper_presentation_industry
+  paper_presentation_student
+}
+
+// ─────────────────────────────────────────
+// NEW LOOKUP / REFERENCE TABLES
+// ─────────────────────────────────────────
+
+Table ref_mou_type {
+  id    int         [pk, increment]
+  label varchar(30) [not null, unique, note: 'National | International']
+}
+
+Table ref_industry_org_type {
+  id    int         [pk, increment]
+  label varchar(40) [not null, unique, note: 'MNC | Large Scale | MSME | Small Scale | Others']
+}
+
+Table ref_mou_based_on {
+  id    int         [pk, increment]
+  label varchar(20) [not null, unique, note: 'Industry | Institute']
+}
+
+Table ref_mou_duration_unit {
+  id    int         [pk, increment]
+  label varchar(10) [not null, unique, note: 'Years | Months']
+}
+
+Table ref_mou_purpose {
+  id    int          [pk, increment]
+  label varchar(100) [not null, unique, note: 'Internship | Centre of Excellence | Faculty Training | World Skills Training | Certification Course | Placement Training | Collaborative Projects | Laboratory Enhancement | Consultancy | Sharing Facilities | Product Development | Publications | Funding | Patents | Organizing Events | Student Projects | One-Credit Course | Placement Offers | Syllabus Framing for Curriculum | Syllabus Framing for One Credit | Student Training | Others']
+}
+
+Table ref_irp_interaction_mode {
+  id    int         [pk, increment]
+  label varchar(60) [not null, unique, note: 'Email | Visit to Company Premises | Within BIT | Phone Call | Others']
+}
+
+Table ref_irp_purpose {
+  id    int         [pk, increment]
+  label varchar(60) [not null, unique, note: 'Industry Interaction | Field Visit | Exhibition | IECC Planned Activity | Pskill']
+}
+
+Table ref_irp_points_discussed {
+  id    int         [pk, increment]
+  label varchar(80) [not null, unique, note: 'Placement | Internship | One Credit Course | Student Project | Curriculum Feedback | Guest Lecture | Board of Studies | Workshop/Seminar | Faculty Training | Student Industrial Visit | Laboratory Enhancement | Skill Training | Industry Defined Problem | Joint Funding Proposals | Joint IPR Activity | Product Development | Teaching Materials | Sponsorship | Funding | Others']
+}
+
+Table ref_approval_type {
+  id    int         [pk, increment]
+  label varchar(20) [not null, unique, note: 'Apex | Non-Apex | Dean | Principal']
+}
+
+Table ref_approval_type_short {
+  id    int         [pk, increment]
+  label varchar(20) [not null, unique, note: 'Apex | Principal | Dean']
+}
+
+Table ref_consultancy_type {
+  id    int         [pk, increment]
+  label varchar(20) [not null, unique, note: 'Industry | Institute']
+}
+
+Table ref_sector_type {
+  id    int         [pk, increment]
+  label varchar(20) [not null, unique, note: 'Private | Government']
+}
+
+Table ref_core_sector {
+  id    int         [pk, increment]
+  label varchar(60) [not null, unique, note: 'Manufacturing | Consulting | Supply Chain Management | Healthcare | Technology | Non-Profit (Public Service) | Research | Start Ups | UG Student Project | PG Student Project']
+}
+
+Table ref_consultancy_category {
+  id    int         [pk, increment]
+  label varchar(20) [not null, unique, note: 'Service Based | Product Based']
+}
+
+Table ref_scope_of_work {
+  id    int         [pk, increment]
+  label varchar(80) [not null, unique, note: 'Testing Service using Instrument Facility | Product Development | Hardware Module Prototype Design | Software Testing | Software Design | Software Application Development | Self-Knowledge Transfer']
+}
+
+Table ref_duration_unit {
+  id    int         [pk, increment]
+  label varchar(10) [not null, unique, note: 'Year | Month | Day']
+}
+
+Table ref_vip_event_type {
+  id    int         [pk, increment]
+  label varchar(60) [not null, unique, note: 'Workshop | Seminar | Conference | Symposium | Value Added Course | One Credit Course | Non-Technical Events | Technical Events | Special Programs | Leader of the Week | Guest Lecture | Placement Visit | FDP/SDP | Certificate Course | Other']
+}
+
+Table ref_vip_category {
+  id    int         [pk, increment]
+  label varchar(10) [not null, unique, note: 'FAA | Events | R&D']
+}
+
+Table ref_industry_project_type {
+  id    int         [pk, increment]
+  label varchar(20) [not null, unique, note: 'Product | Process']
+}
+
+Table ref_coe_type {
+  id    int         [pk, increment]
+  label varchar(40) [not null, unique, note: 'Industry Sponsored Lab | Industry Supported Lab']
+}
+
+Table ref_financial_assistance {
+  id    int         [pk, increment]
+  label varchar(20) [not null, unique, note: 'Self | Management | NA']
+}
+
+Table ref_training_mode {
+  id    int         [pk, increment]
+  label varchar(10) [not null, unique, note: 'Online | Offline']
+}
+
+Table ref_lab_layout_type {
+  id    int         [pk, increment]
+  label varchar(20) [not null, unique, note: 'New Layout | Modified Layout']
+}
+
+Table ref_programme_level {
+  id    int         [pk, increment]
+  label varchar(5)  [not null, unique, note: 'UG | PG']
+}
+
+Table ref_year_of_study {
+  id    int         [pk, increment]
+  label varchar(10) [not null, unique, note: 'First | Second | Third | Fourth']
+}
+
+Table ref_visit_source {
+  id    int         [pk, increment]
+  label varchar(20) [not null, unique, note: 'Self | Department | Special Lab | Institute']
+}
+
+Table ref_training_event_type {
+  id    int         [pk, increment]
+  label varchar(30) [not null, unique, note: 'Conference | Workshop | Industry Training | Seminar | Others']
+}
+
+Table ref_category_sharing {
+  id    int         [pk, increment]
+  label varchar(10) [not null, unique, note: '60:40 | 70:30']
+}
+
+Table ref_membership_category {
+  id    int         [pk, increment]
+  label varchar(30) [not null, unique, note: 'Institute Membership | Faculty Membership']
+}
+
+Table ref_membership_type {
+  id    int         [pk, increment]
+  label varchar(20) [not null, unique, note: 'Annual | Lifetime']
+}
+
+Table ref_membership_level {
+  id    int         [pk, increment]
+  label varchar(20) [not null, unique, note: 'National | International']
+}
+
+Table ref_membership_validity_type {
+  id    int         [pk, increment]
+  label varchar(20) [not null, unique, note: 'Self | BIT | Others']
+}
+
+Table ref_technical_society_status {
+  id    int         [pk, increment]
+  label varchar(15) [not null, unique, note: 'Active | Non-Active']
+}
+
+// ─────────────────────────────────────────
+// ACTIVITY TABLE 13 — MoU
+// ─────────────────────────────────────────
+
+Table mou {
+  id                          int           [pk, increment]
+  submission_id               int           [not null, unique, ref: > submissions.id]
+  sig_number                  varchar(50)
+  special_labs_involved       boolean       [default: false]
+  special_lab_id              int           [ref: > special_lab.id]
+  claiming_department_id      int           [ref: > departments.id]
+  mou_type_id                 int           [ref: > ref_mou_type.id]
+  industry_org_type_id        int           [ref: > ref_industry_org_type.id]
+  if_org_type_others          varchar(200)
+  mou_based_on_id             int           [ref: > ref_mou_based_on.id]
+  domain_area                 varchar(300)
+  date_of_agreement           date
+  legal_name_collaborator     varchar(300)
+  industry_location           varchar(300)
+  industry_address            text
+  industry_website            varchar(500)
+  industry_contact_mobile     varchar(20)
+  industry_email              varchar(200)
+  duration_unit_id            int           [ref: > ref_mou_duration_unit.id]
+  num_years                   int
+  num_months                  int
+  mou_effect_from             date
+  mou_effect_till             date
+  scope_of_agreement          text
+  objectives_and_goals        text
+  boundaries_and_limitations  text
+  bit_roles_responsibilities  text
+  collaborator_roles          text
+  spoc_name                   varchar(200)
+  spoc_designation            varchar(200)
+  spoc_email                  varchar(200)
+  spoc_phone                  varchar(20)
+  mou_signing_initiated_by    varchar(200)
+  num_faculty                 smallint      [note: '1 | 2 | 3']
+  apex_proof_id               int           [ref: > documents.id, note: 'Upload the Apex Proof']
+  email_comm_letter_proof_id  int           [ref: > documents.id, note: 'Upload Email Communication / Letter Proof']
+  signed_mou_doc_id           int           [ref: > documents.id, note: 'Upload Signed MoU Document']
+  parties_rights_doc_id       int           [ref: > documents.id, note: 'Upload Papers showing Party Rights']
+  notarized_affidavit_id      int           [ref: > documents.id, note: 'Upload Notarized Affidavit(s) of Nondisclosure']
+  geotag_photos_id            int           [ref: > documents.id, note: 'Upload Geotag Photos']
+  consolidated_doc_id         int           [ref: > documents.id, note: 'Upload All Documents as Single File']
+}
+
+// MoU purpose is multi-select -> junction table
+Table mou_purpose {
+  id         int [pk, increment]
+  mou_id     int [not null, ref: > mou.id]
+  purpose_id int [not null, ref: > ref_mou_purpose.id]
 
   indexes {
-    (activity_type, bip_id) [unique]
+    (mou_id, purpose_id) [unique]
   }
 }
 
-Table submission_proofs {
-  id bigint [pk, increment]
-  submission_id bigint [not null]
-  proof_type varchar(40) [not null]
-  source_column varchar(120) [not null]
-  proof_name text
-  proof_url text
-  created_at timestamptz [not null]
+// MoU faculty (1-3 faculty)
+Table mou_faculty {
+  id         int         [pk, increment]
+  mou_id     int         [not null, ref: > mou.id]
+  faculty_id varchar(50) [not null, ref: > faculty.id]
+  order_no   smallint    [not null, note: '1 | 2 | 3']
+
+  indexes {
+    (mou_id, faculty_id) [unique]
+  }
 }
 
-Table submission_participants {
-  id bigint [pk, increment]
-  submission_id bigint [not null]
-  participant_type varchar(40) [not null]
-  seq_no smallint
-  participant_code varchar(80)
-  participant_name varchar(200)
-  role_name varchar(80)
-  organization varchar(200)
-  organization_address text
-  designation varchar(120)
-  email varchar(150)
-  contact_no varchar(30)
-  year_of_study varchar(30)
-  is_internal boolean
-  additional_data jsonb
+// ─────────────────────────────────────────
+// ACTIVITY TABLE 14 — IRP VISIT
+// ─────────────────────────────────────────
+
+Table irp_visit {
+  id                        int           [pk, increment]
+  submission_id             int           [not null, unique, ref: > submissions.id]
+  sig_number                varchar(50)
+  special_labs_involved     boolean       [default: false]
+  special_lab_id            int           [ref: > special_lab.id]
+  num_faculty               smallint      [note: '1 to 6']
+  claimed_for_faculty_id    varchar(50)   [ref: > faculty.id]
+  claimed_for_department_id int           [ref: > departments.id]
+  approval_type_id          int           [ref: > ref_approval_type.id]
+  apex_no                   varchar(100)
+  is_mou_related            boolean
+  mou_id                    int           [ref: > mou.id, note: 'Required if is_mou_related = true']
+  mou_relation_points       text
+  from_date                 date
+  to_date                   date
+  interaction_mode_id       int           [ref: > ref_irp_interaction_mode.id]
+  if_mode_others            varchar(200)
+  purpose_id                int           [ref: > ref_irp_purpose.id]
+  amount_incurred_inrs      decimal(12,2)
+  num_industry              smallint      [note: '1 to 6']
+  apex_proof_id             int           [ref: > documents.id, note: 'Upload Apex Proof']
+  geotag_photos_id          int           [ref: > documents.id, note: 'Upload Geotag Photos']
+  irp_form_signed_id        int           [ref: > documents.id, note: 'Upload IRP form duly signed by Industry person']
+  consolidated_doc_id       int           [ref: > documents.id, note: 'Upload Consolidated Document']
 }
 
-Table event_attended_details {
-  id bigint [pk, increment]
-  submission_id bigint [not null, unique]
-  event_type varchar(80)
-  event_type_other varchar(200)
-  event_title text
-  event_organizer varchar(200)
-  organizer_type varchar(120)
-  other_organizer_name varchar(200)
-  industry varchar(200)
-  claimed_for varchar(120)
+// IRP visit faculty (up to 6)
+Table irp_visit_faculty {
+  id           int      [pk, increment]
+  irp_visit_id int      [not null, ref: > irp_visit.id]
+  faculty_id   varchar(50) [not null, ref: > faculty.id]
+  order_no     smallint [not null, note: '1 to 6']
+
+  indexes {
+    (irp_visit_id, faculty_id) [unique]
+  }
 }
 
-Table event_organized_details {
-  id bigint [pk, increment]
-  submission_id bigint [not null, unique]
-  iic_flag boolean
-  iic_upload_flag boolean
-  iic_bip_id bigint
-  rnd_flag boolean
-  technical_society_flag boolean
-  technical_society_chapter varchar(200)
-  event_name text
-  program_type varchar(80)
-  club_or_society_name varchar(200)
-  event_type varchar(120)
-  event_category varchar(120)
-  event_description text
-  jointly_organized_with varchar(200)
-  joint_organization_name varchar(200)
-  joint_organization_address text
-  internal_participants_student_count int
-  internal_participants_faculty_count int
-  external_participants_student_count int
-  external_participants_faculty_count int
-  invited_guest_details text
-  resource_person_is_bit_alumni boolean
-  registration_amount_collected_rs numeric(12,2)
-  sponsored_amount_rs numeric(12,2)
-  revenue_generated_rs numeric(12,2)
-  conference_proceedings_available boolean
-  proceedings_publisher_detail varchar(200)
-  proceedings_published_year int
-  proceedings_volume_number varchar(40)
-  proceedings_issue_number varchar(40)
-  proceedings_page_number varchar(80)
-  proceedings_isbn_number varchar(40)
-  proceedings_indexing_detail varchar(200)
+// IRP visit industries visited (up to 6)
+Table irp_visit_industry {
+  id                   int          [pk, increment]
+  irp_visit_id         int          [not null, ref: > irp_visit.id]
+  industry_order       smallint     [not null, note: '1 to 6']
+  industry_name        varchar(300)
+  industry_type        varchar(100)
+  industry_location    varchar(300)
+  industry_website     varchar(500)
+  contact_person_name  varchar(200)
+  contact_designation  varchar(200)
+  contact_no           varchar(20)
+  contact_email        varchar(200)
 }
 
-Table guest_lecture_details {
-  id bigint [pk, increment]
-  submission_id bigint [not null, unique]
-  event_type varchar(80)
-  topic text
-  event_name text
-  organization_type varchar(120)
-  organization_name varchar(200)
-  organization_address text
-  audience_type varchar(120)
-  audience_other varchar(200)
-  participant_count int
+// Points discussed per industry visit - multi-select
+Table irp_industry_points_discussed {
+  id                    int [pk, increment]
+  irp_visit_industry_id int [not null, ref: > irp_visit_industry.id]
+  point_id              int [not null, ref: > ref_irp_points_discussed.id]
 }
 
-Table online_course_details {
-  id bigint [pk, increment]
-  submission_id bigint [not null, unique]
-  course_name text
-  course_type varchar(120)
-  other_course_type varchar(120)
-  course_category varchar(120)
-  hours_count int
-  weeks_count int
-  days_count int
-  exam_date date
-  grade_obtained varchar(50)
-  approved_fdp boolean
+// Expected outcomes per industry visit - multi-select
+Table irp_industry_expected_outcomes {
+  id                    int [pk, increment]
+  irp_visit_industry_id int [not null, ref: > irp_visit_industry.id]
+  outcome_id            int [not null, ref: > ref_irp_points_discussed.id]
 }
 
-Table paper_presentation_details {
-  id bigint [pk, increment]
-  submission_id bigint [not null, unique]
-  conference_name text
-  paper_title text
-  organizer_name varchar(200)
-  industry_or_organizer_name varchar(200)
-  institute_and_location varchar(200)
-  paper_in_proceedings boolean
-  page_from varchar(30)
-  page_to varchar(30)
-  collaboration_international boolean
-  international_institute_name varchar(200)
-  industrial_person_involved boolean
-  students_involved boolean
-  registration_amount_rs numeric(12,2)
-  award_received boolean
+// ─────────────────────────────────────────
+// ACTIVITY TABLE 15 — CONSULTANCY
+// ─────────────────────────────────────────
+
+Table consultancy {
+  id                            int           [pk, increment]
+  submission_id                 int           [not null, unique, ref: > submissions.id]
+  special_labs_involved         boolean       [default: false]
+  special_lab_id                int           [ref: > special_lab.id]
+  claiming_department_id        int           [ref: > departments.id]
+  consultant_type_id            int           [ref: > ref_consultancy_type.id]
+  sector_id                     int           [ref: > ref_sector_type.id]
+  org_name                      varchar(300)
+  org_address                   text
+  core_sector_id                int           [ref: > ref_core_sector.id]
+  project_title                 varchar(300)
+  project_category_id           int           [ref: > ref_consultancy_category.id]
+  scope_of_work_id              int           [ref: > ref_scope_of_work.id]
+  duration_unit_id              int           [ref: > ref_duration_unit.id]
+  from_date                     date
+  to_date                       date
+  is_mou_related                boolean
+  mou_id                        int           [ref: > mou.id]
+  is_irp_related                boolean
+  irp_visit_id                  int           [ref: > irp_visit.id]
+  is_fesem_related              boolean
+  is_roi_related                boolean
+  date_of_payment_1             date
+  consultancy_amount_1_inrs     decimal(14,2)
+  is_gst_included_1             boolean
+  amount_after_gst_1            decimal(14,2)
+  ownership_rights_desc         text
+  consultant_agreement_desc     text
+  date_of_payment_2             date
+  college_resources_utilized    boolean
+  faculty_share_pct_resources   decimal(5,2)
+  institute_share_pct_resources decimal(5,2)
+  resources_list                text
+  college_transport_utilized    boolean
+  transport_area_visited        varchar(300)
+  distance_km                   decimal(10,2)
+  petrol_cost_per_km            decimal(8,2)
+  transport_cost                decimal(12,2)
+  consumables_utilized          boolean
+  consumables_list              text
+  consumables_charge            decimal(12,2)
+  faculty_share_pct_no_resources    decimal(5,2)
+  institute_share_pct_no_resources  decimal(5,2)
+  faculty_share_before_deduction    decimal(14,2)
+  institute_share_before_addition   decimal(14,2)
+  net_faculty_share_amount      decimal(14,2)
+  net_institute_share_amount    decimal(14,2)
+  num_faculty_members           int
+  consolidated_doc_id           int           [ref: > documents.id, note: 'Upload Consolidated Document']
+  rent_agreement_id             int           [ref: > documents.id, note: 'Rent Agreement']
+  consultancy_agreement_id      int           [ref: > documents.id, note: 'Upload Consultancy Agreement']
+  communication_proof_id        int           [ref: > documents.id, note: 'Upload Communication Proof']
+  audit_doc_id                  int           [ref: > documents.id, note: 'Upload Audit Documents Proof (Annexures 1/2)']
+  work_logs_id                  int           [ref: > documents.id, note: 'Upload Work Logs Proof']
+  invoice_receipt_id            int           [ref: > documents.id, note: 'Upload Invoice Receipt']
+  transaction_proof_id          int           [ref: > documents.id, note: 'Upload Transaction Proof']
+  geotag_photos_id              int           [ref: > documents.id, note: 'Upload Geotag Photos']
+  consultancy_report_id         int           [ref: > documents.id, note: 'Upload Consultancy Report Proof']
+  all_consolidated_doc_id       int           [ref: > documents.id, note: 'Consolidated: Comm+Audit+WorkLogs+Invoice+Transaction+Geotag+Report']
+  visiting_card_id              int           [ref: > documents.id, note: 'Upload Visiting Card of the Organisation']
+  partnership_deed_id           int           [ref: > documents.id, note: 'Upload Partnership Deed Documents Proof']
+  noc_premises_id               int           [ref: > documents.id, note: 'Upload NOC of the Business Premises Proof']
+  nda_proof_id                  int           [ref: > documents.id, note: 'Upload Non-Disclosure Agreement (Mutual) Proof']
 }
 
-Table patent_filed_details {
-  id bigint [pk, increment]
-  submission_id bigint [not null, unique]
-  patent_title text
-  patent_type varchar(120)
-  registration_date date
-  application_no varchar(120)
-  collaboration_type varchar(120)
-  institution_name_included boolean
-  patent_level varchar(80)
-  form9_filed boolean
-  form18_filed boolean
-  other_faculties_text text
-  inventors_text text
-  inventor_details_text text
-  patent_license_details text
-  funding_from_agency boolean
+// Consultancy faculty (1 primary via submission + up to 4 additional)
+Table consultancy_faculty {
+  id             int         [pk, increment]
+  consultancy_id int         [not null, ref: > consultancy.id]
+  faculty_id     varchar(50) [not null, ref: > faculty.id]
+  sig_number     varchar(50)
+  order_no       smallint    [not null, note: '2 to 5']
+
+  indexes {
+    (consultancy_id, faculty_id) [unique]
+  }
 }
 
-Table patent_published_details {
-  id bigint [pk, increment]
-  submission_id bigint [not null, unique]
-  patent_title text
-  patent_type varchar(120)
-  publication_date date
-  application_no varchar(120)
-  collaboration_type varchar(120)
-  institution_name_included boolean
-  patent_level varchar(80)
-  form9_filed boolean
-  form18_filed boolean
-  other_faculties_text text
-  inventors_text text
-  inventor_details_text text
-  patent_license_details text
-  funding_from_agency boolean
+// ─────────────────────────────────────────
+// ACTIVITY TABLE 16 — EXTERNAL VIP VISIT
+// ─────────────────────────────────────────
+
+Table external_vip_visit {
+  id                       int          [pk, increment]
+  submission_id            int          [not null, unique, ref: > submissions.id]
+  special_labs_involved    boolean      [default: false]
+  special_lab_id           int          [ref: > special_lab.id]
+  guest_from_industry      boolean
+  event_name               varchar(300)
+  event_type_id            int          [ref: > ref_vip_event_type.id]
+  category_id              int          [ref: > ref_vip_category.id]
+  if_event_type_others     varchar(200)
+  guest_name               varchar(200)
+  guest_designation        varchar(200)
+  org_name                 varchar(300)
+  org_address              text
+  start_date               date
+  end_date                 date
+  purpose_of_visit         text
+  mobile_number            varchar(20)
+  guest_email              varchar(200)
+  department_visited_id    int          [ref: > departments.id]
+  topic_presented          varchar(300)
+  is_bit_alumni            boolean
+  guided_faculty_id        varchar(50)  [ref: > faculty.id]
+  formal_photo_id          int          [ref: > documents.id, note: 'Formal Photo of Guest (good clarity)']
+  photo_proof_id           int          [ref: > documents.id, note: 'Photo Proof']
+  approval_letter_id       int          [ref: > documents.id, note: 'Approval Letter']
 }
 
-Table patent_granted_details {
-  id bigint [pk, increment]
-  submission_id bigint [not null, unique]
-  patent_title text
-  patent_type varchar(120)
-  grant_date date
-  application_no varchar(120)
-  collaboration_type varchar(120)
-  institution_name_included boolean
-  patent_level varchar(80)
-  form9_filed boolean
-  form18_filed boolean
-  other_faculties_text text
-  inventors_text text
-  inventor_details_text text
-  patent_license_details text
-  funding_from_agency boolean
+// ─────────────────────────────────────────
+// ACTIVITY TABLE 17 — FACULTY MEMBERS INDUSTRY PROJECT
+// ─────────────────────────────────────────
+
+Table faculty_industry_project {
+  id                       int           [pk, increment]
+  submission_id            int           [not null, unique, ref: > submissions.id]
+  sig_number               varchar(50)
+  special_labs_involved    boolean       [default: false]
+  special_lab_id           int           [ref: > special_lab.id]
+  students_involved        boolean       [note: 'Yes | NA']
+  industry_name            varchar(300)
+  industry_type_id         int           [ref: > ref_industry_org_type.id]
+  if_type_others           varchar(200)
+  project_type_id          int           [ref: > ref_industry_project_type.id]
+  project_title            varchar(300)
+  duration_months          int
+  start_date               date
+  end_date                 date
+  outcome                  text
+  project_proof_id         int           [ref: > documents.id, note: 'Approval Letter, BIT Approval, Certificate, Project Report, Photos, Joint IPR']
 }
 
-Ref: faculty.department_id > departments.id
-Ref: faculty_roles.faculty_id > faculty.id
-Ref: faculty_roles.role_id > roles.id
-Ref: faculty_roles.department_id > departments.id
-Ref: submissions.faculty_id > faculty.id
-Ref: submissions.department_id > departments.id
-Ref: submissions.claimed_department_id > departments.id
-Ref: submissions.special_lab_id > special_labs.id
-Ref: submissions.import_batch_id > import_batches.id
-Ref: submission_proofs.submission_id > submissions.id [delete: cascade]
-Ref: submission_participants.submission_id > submissions.id [delete: cascade]
-Ref: event_attended_details.submission_id - submissions.id [delete: cascade]
-Ref: event_organized_details.submission_id - submissions.id [delete: cascade]
-Ref: guest_lecture_details.submission_id - submissions.id [delete: cascade]
-Ref: online_course_details.submission_id - submissions.id [delete: cascade]
-Ref: paper_presentation_details.submission_id - submissions.id [delete: cascade]
-Ref: patent_filed_details.submission_id - submissions.id [delete: cascade]
-Ref: patent_published_details.submission_id - submissions.id [delete: cascade]
-Ref: patent_granted_details.submission_id - submissions.id [delete: cascade]
+// Faculty involved in industry project (1-5)
+Table faculty_industry_project_faculty {
+  id         int         [pk, increment]
+  project_id int         [not null, ref: > faculty_industry_project.id]
+  faculty_id varchar(50) [not null, ref: > faculty.id]
+  sig_number varchar(50)
+  order_no   smallint    [not null, note: '2 to 5']
+
+  indexes {
+    (project_id, faculty_id) [unique]
+  }
+}
+
+// Students involved in industry project (1-5)
+Table faculty_industry_project_student {
+  id           int          [pk, increment]
+  project_id   int          [not null, ref: > faculty_industry_project.id]
+  student_name varchar(200)
+  order_no     smallint     [not null, note: '1 to 5']
+}
+
+// ─────────────────────────────────────────
+// ACTIVITY TABLE 18 — CENTRE OF EXCELLENCE (COE)
+// ─────────────────────────────────────────
+
+Table centre_of_excellence {
+  id                              int           [pk, increment]
+  submission_id                   int           [not null, unique, ref: > submissions.id]
+  sig_number                      varchar(50)
+  coe_name                        varchar(300)
+  claiming_department_id          int           [ref: > departments.id]
+  faculty_incharge_id             varchar(50)   [ref: > faculty.id]
+  coe_type_id                     int           [ref: > ref_coe_type.id]
+  collaborative_industry_name     varchar(300)
+  date_of_establishment           date
+  area_sq_m                       decimal(10,2)
+  domain_of_centre                varchar(300)
+  is_mou_related                  boolean
+  mou_id                          int           [ref: > mou.id]
+  is_irp_related                  boolean
+  irp_visit_id                    int           [ref: > irp_visit.id]
+  stock_register_maintained       boolean
+  total_amount_inrs               decimal(14,2)
+  bit_contribution_inrs           decimal(14,2)
+  industry_contribution_with_gst  decimal(14,2)
+  industry_contribution_no_gst    decimal(14,2)
+  students_per_batch              int
+  academic_course                 varchar(300)
+  syllabus_id                     int           [ref: > documents.id, note: 'Upload Syllabus']
+  lab_photo_id                    int           [ref: > documents.id, note: 'Upload Lab Photo']
+  communication_proof_id          int           [ref: > documents.id, note: 'Upload Communication Proof']
+  apex_document_id                int           [ref: > documents.id, note: 'Upload Apex Document']
+  facilities_report_id            int           [ref: > documents.id, note: 'Report of Facilities Available (Word Document)']
+  utilization_report_id           int           [ref: > documents.id, note: 'Lab Utilization Report']
+}
+
+// ─────────────────────────────────────────
+// ACTIVITY TABLE 19 — FACULTY TRAINED BY INDUSTRY
+// ─────────────────────────────────────────
+
+Table faculty_trained_by_industry {
+  id                        int           [pk, increment]
+  submission_id             int           [not null, unique, ref: > submissions.id]
+  special_labs_involved     boolean       [default: false]
+  special_lab_id            int           [ref: > special_lab.id]
+  training_program_name     varchar(300)
+  financial_assistance_id   int           [ref: > ref_financial_assistance.id]
+  amount_incurred_inrs      decimal(12,2)
+  approval_type_id          int           [ref: > ref_approval_type_short.id]
+  apex_approval_no          varchar(100)
+  industry_name             varchar(300)
+  domain_area               varchar(300)
+  industry_type_id          int           [ref: > ref_industry_org_type.id]
+  if_type_others            varchar(200)
+  training_mode_id          int           [ref: > ref_training_mode.id]
+  training_venue            varchar(300)
+  duration_days             int
+  start_date                date
+  end_date                  date
+  industry_website          varchar(500)
+  trainer1_name             varchar(200)
+  trainer1_designation      varchar(200)
+  trainer1_email            varchar(200)
+  trainer1_phone            varchar(20)
+  has_trainer2              boolean
+  trainer2_name             varchar(200)
+  trainer2_designation      varchar(200)
+  trainer2_email            varchar(200)
+  trainer2_phone            varchar(20)
+  outcome                   text
+  proof_id                  int           [ref: > documents.id, note: 'Apex Approval Copy, Sample Photographs, Training Certificate, Bills/Invoices']
+}
+
+// ─────────────────────────────────────────
+// ACTIVITY TABLE 20 — INDUSTRY ADVISORS
+// ─────────────────────────────────────────
+
+Table industry_advisor {
+  id                           int           [pk, increment]
+  submission_id                int           [not null, unique, ref: > submissions.id]
+  sig_number                   varchar(50)
+  special_labs_involved        boolean       [default: false]
+  special_lab_id               int           [ref: > special_lab.id]
+  industry_name                varchar(300)
+  domain_area                  varchar(300)
+  industry_type_id             int           [ref: > ref_industry_org_type.id]
+  if_type_others               varchar(200)
+  expert_name                  varchar(200)
+  expert_designation           varchar(200)
+  expert_email                 varchar(200)
+  expert_phone                 varchar(20)
+  experience_years             int
+  area_of_expertise            varchar(300)
+  industry_address             text
+  industry_website             varchar(500)
+  interaction_frequency_months int
+  date_of_meeting              date
+  expense_incurred_inrs        decimal(12,2)
+  suggestions_for_improvement  text
+  collaborative_activities     text
+  proof_id                     int           [ref: > documents.id, note: 'Approval Letter, Minutes of Meeting, Sample Photographs, Collaborative Activities']
+}
+
+// ─────────────────────────────────────────
+// ACTIVITY TABLE 21 — LABORATORY DEVELOPED BY INDUSTRY
+// ─────────────────────────────────────────
+
+Table lab_developed_by_industry {
+  id                               int           [pk, increment]
+  submission_id                    int           [not null, unique, ref: > submissions.id]
+  sig_number                        varchar(50)
+  lab_name                         varchar(300)
+  collaborative_industry           varchar(300)
+  domain_area                      varchar(300)
+  lab_area_sq_m                    decimal(10,2)
+  total_amount_inrs                decimal(14,2)
+  bit_contribution_inrs            decimal(14,2)
+  industry_financial_support_inrs  decimal(14,2)
+  any_equipment_sponsored          boolean
+  sponsored_equipment_names        text
+  any_equipment_enhancement        boolean
+  enhanced_equipment_names         text
+  layout_design_type_id            int           [ref: > ref_lab_layout_type.id]
+  curriculum_mapping               text          [note: 'Course code and name for newly set laboratories']
+  expected_outcomes                text
+  proof_id                         int           [ref: > documents.id, note: 'Bills & Invoices, Sample Training/Equipment Sponsored, Photographs, Approval Letter']
+}
+
+// ─────────────────────────────────────────
+// ACTIVITY TABLE 22 — STUDENTS INDUSTRIAL VISIT
+// ─────────────────────────────────────────
+
+Table students_industrial_visit {
+  id                          int           [pk, increment]
+  submission_id               int           [not null, unique, ref: > submissions.id]
+  sig_number                  varchar(50)
+  programme_level_id          int           [ref: > ref_programme_level.id]
+  industry_name               varchar(300)
+  domain_area                 varchar(300)
+  industry_type_id            int           [ref: > ref_industry_org_type.id]
+  if_type_others              varchar(200)
+  industry_location           varchar(300)
+  industry_website            varchar(500)
+  contact_person_name         varchar(200)
+  contact_designation         varchar(200)
+  contact_email               varchar(200)
+  contact_phone               varchar(20)
+  start_date                  date
+  end_date                    date
+  purpose_of_visit            text
+  num_students_visited        int
+  num_male_students           int
+  num_female_students         int
+  year_of_study_id            int           [ref: > ref_year_of_study.id, note: 'First | Second | Third | Fourth']
+  source_of_arrangement_id    int           [ref: > ref_visit_source.id]
+  curriculum_mapping          text
+  outcome                     text
+  proof_id                    int           [ref: > documents.id, note: 'IV Approval Letter, Institute Approval, IV Report with Photos, Student Feedback Samples, Payment Proofs']
+}
+
+// Faculty accompanying industrial visit (up to 3)
+Table students_iv_faculty {
+  id         int      [pk, increment]
+  iv_id      int      [not null, ref: > students_industrial_visit.id]
+  faculty_id varchar(50) [not null, ref: > faculty.id]
+  order_no   smallint [not null, note: '1 to 3']
+
+  indexes {
+    (iv_id, faculty_id) [unique]
+  }
+}
+
+// ─────────────────────────────────────────
+// ACTIVITY TABLE 23 — TECHNICAL SOCIETIES & CHAPTERS
+// ─────────────────────────────────────────
+
+Table technical_society_dept_mapping {
+  id                   int       [pk, increment]
+  technical_society_id int       [not null, ref: > ref_technical_society.id]
+  department_id        int       [not null, ref: > departments.id]
+  status_id            int       [not null, ref: > ref_technical_society_status.id, note: 'Active | Non-Active']
+  created_at           timestamp [default: `CURRENT_TIMESTAMP`]
+  updated_at           timestamp [default: `CURRENT_TIMESTAMP`]
+
+  indexes {
+    (technical_society_id, department_id) [unique]
+  }
+}
+
+// ─────────────────────────────────────────
+// ACTIVITY TABLE 24 — TRAINING TO INDUSTRY PERSONNEL
+// ─────────────────────────────────────────
+
+Table training_to_industry {
+  id                           int           [pk, increment]
+  submission_id                int           [not null, unique, ref: > submissions.id]
+  sig_number                   varchar(50)
+  special_labs_involved        boolean       [default: false]
+  special_lab_id               int           [ref: > special_lab.id]
+  event_type_id                int           [ref: > ref_training_event_type.id]
+  if_event_type_others         varchar(200)
+  industry_name                varchar(300)
+  industry_address             text
+  domain_area                  varchar(300)
+  industry_type_id             int           [ref: > ref_industry_org_type.id]
+  if_type_others               varchar(200)
+  training_mode_id             int           [ref: > ref_training_mode.id]
+  training_venue               varchar(300)
+  industry_website             varchar(500)
+  num_persons_trained          int
+  duration_days                int
+  start_date                   date
+  end_date                     date
+  outcome                      text
+  honorarium_received          boolean
+  honorarium_amount_inrs       decimal(12,2)
+  honorarium_includes_gst      boolean
+  amount_after_gst             decimal(12,2)
+  college_resources_utilized   boolean
+  resources_list               text
+  consumable_charges           decimal(12,2)
+  college_transport_utilized   boolean
+  transport_area               varchar(300)
+  distance_km                  decimal(10,2)
+  petrol_cost_per_km           decimal(8,2)
+  transport_cost               decimal(12,2)
+  is_claimed_as_consultancy    boolean
+  category_sharing_id          int           [ref: > ref_category_sharing.id]
+  faculty_share_before         decimal(14,2)
+  institute_share_before       decimal(14,2)
+  net_faculty_share            decimal(14,2)
+  net_institute_share          decimal(14,2)
+  num_faculty_members          int
+  share_per_faculty            decimal(14,2) [note: 'Net faculty share / num faculty members']
+  communication_proof_id       int           [ref: > documents.id, note: 'Upload Communication Proof']
+  approval_letter_id           int           [ref: > documents.id, note: 'Approval Letter from BIT']
+  geotag_photos_id             int           [ref: > documents.id, note: 'Upload Geotag Photos']
+  participant_attendance_id    int           [ref: > documents.id, note: "Upload Participant's Attendance"]
+  payment_proof_id             int           [ref: > documents.id, note: 'Upload Payment Proofs']
+  consolidated_doc_id          int           [ref: > documents.id, note: 'Upload Consolidated Document']
+}
+
+// ─────────────────────────────────────────
+// ACTIVITY TABLE 25 — PROFESSIONAL BODY MEMBERSHIP
+// ─────────────────────────────────────────
+
+Table professional_body_membership {
+  id                       int           [pk, increment]
+  submission_id            int           [not null, unique, ref: > submissions.id]
+  membership_category_id   int           [not null, ref: > ref_membership_category.id]
+  special_labs_involved    boolean       [default: false]
+  special_lab_id           int           [ref: > special_lab.id]
+  professional_body_name   varchar(300)
+  membership_type_id       int           [ref: > ref_membership_type.id]
+  membership_id            varchar(100)
+  grade_level_position     varchar(200)
+  level_id                 int           [ref: > ref_membership_level.id]
+  validity_type_id         int           [ref: > ref_membership_validity_type.id]
+  apex_document_id         int           [ref: > documents.id, note: 'Apex Document Proof (if applicable)']
+  amount_self_bit_inrs     decimal(12,2) [note: 'Amount for Self or BIT validity type']
+  if_validity_others       varchar(200)
+  amount_others_inrs       decimal(12,2) [note: 'Amount when Validity Type = Others']
+  document_proof_id        int           [ref: > documents.id, note: 'Certificate Proof & Apex Proof']
+}
+
+// ─────────────────────────────────────────
+// TABLE GROUPS (for visual grouping in dbdiagram)
+// ─────────────────────────────────────────
+
+TableGroup new_lookup_tables {
+  ref_mou_type
+  ref_industry_org_type
+  ref_mou_based_on
+  ref_mou_duration_unit
+  ref_mou_purpose
+  ref_irp_interaction_mode
+  ref_irp_purpose
+  ref_irp_points_discussed
+  ref_approval_type
+  ref_approval_type_short
+  ref_consultancy_type
+  ref_sector_type
+  ref_core_sector
+  ref_consultancy_category
+  ref_scope_of_work
+  ref_duration_unit
+  ref_vip_event_type
+  ref_vip_category
+  ref_industry_project_type
+  ref_coe_type
+  ref_financial_assistance
+  ref_training_mode
+  ref_lab_layout_type
+  ref_programme_level
+  ref_year_of_study
+  ref_visit_source
+  ref_training_event_type
+  ref_category_sharing
+  ref_membership_category
+  ref_membership_type
+  ref_membership_level
+  ref_membership_validity_type
+  ref_technical_society_status
+}
+
+TableGroup new_activity_tables {
+  mou
+  irp_visit
+  consultancy
+  external_vip_visit
+  faculty_industry_project
+  centre_of_excellence
+  faculty_trained_by_industry
+  industry_advisor
+  lab_developed_by_industry
+  students_industrial_visit
+  technical_society_dept_mapping
+  training_to_industry
+  professional_body_membership
+}
+
+TableGroup new_junction_tables {
+  mou_purpose
+  mou_faculty
+  irp_visit_faculty
+  irp_visit_industry
+  irp_industry_points_discussed
+  irp_industry_expected_outcomes
+  consultancy_faculty
+  faculty_industry_project_faculty
+  faculty_industry_project_student
+  students_iv_faculty
+}
