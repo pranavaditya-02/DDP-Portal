@@ -470,13 +470,13 @@ export default function EventsAttendedForm() {
       (formData.sponsorshipType === "Funding Agency" ||
         formData.sponsorshipType === "Others") &&
       !formData.fundingAgencyName
-    ) {
+    ){
       newErrors.fundingAgencyName = "Funding Agency / Other name is required";
     }
     if (!formData.outcome || formData.outcome === "Select Outcome") {
       newErrors.outcome = "Outcome is required";
     }
-    if (formData.outcome === "Others" && !formData.otherOutcome) {
+    if (formData.outcome === "Others" && !formData.otherOutcome) {``
       newErrors.otherOutcome = "Please specify outcome";
     }
     if (!formData.certificateProof) {
