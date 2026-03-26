@@ -220,18 +220,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const getRoleBadgeColor = (role: string) => {
     const colors: Record<string, string> = {
-      faculty: "bg-blue-500/20 text-blue-300",
+      faculty: "bg-purple-100 text-purple-700",
       hod: "bg-emerald-500/20 text-emerald-300",
-      dean: "bg-purple-500/20 text-purple-300",
+      dean: "bg-violet-100 text-violet-700",
       verification: "bg-amber-500/20 text-amber-300",
       maintenance: "bg-red-500/20 text-red-300",
     };
-    return colors[role] || "bg-slate-500/20 text-slate-300";
+    return colors[role] || "bg-slate-100 text-slate-600";
   };
 
   return (
     <aside
-      className={`fixed left-0 top-0 h-screen bg-slate-900 text-white flex flex-col z-50 border-r border-slate-800
+      className={`fixed left-0 top-0 h-screen bg-white text-slate-800 flex flex-col z-50 border-r border-slate-200 shadow-sm
         transition-all duration-300 ease-in-out w-[260px]
         ${collapsed ? "md:w-[72px]" : "md:w-[260px]"}
         ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
@@ -239,13 +239,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
     >
       {/* Header / Logo */}
       <div
-        className={`flex items-center h-16 border-b border-slate-800 ${collapsed ? "justify-center px-2" : "justify-between px-4"}`}
+        className={`flex items-center h-16 border-b border-slate-200 ${collapsed ? "justify-center px-2" : "justify-between px-4"}`}
       >
         <Link
           href="/dashboard"
           className="flex items-center gap-3 overflow-hidden"
         >
-          <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
+          <div className="w-9 h-9 bg-[#7D53F6] rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
             <span className="text-white font-bold text-lg">F</span>
           </div>
           {!collapsed && (
@@ -257,7 +257,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Desktop collapse toggle */}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="hidden md:flex p-1.5 rounded-md hover:bg-slate-800 transition-colors text-slate-400 hover:text-white"
+          className="hidden md:flex p-1.5 rounded-md hover:bg-purple-50 transition-colors text-slate-400 hover:text-[#7D53F6]"
         >
           {collapsed ? (
             <ChevronRight className="w-4 h-4" />
@@ -268,7 +268,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Mobile close button */}
         <button
           onClick={() => setMobileOpen(false)}
-          className="md:hidden p-1.5 rounded-md hover:bg-slate-800 transition-colors text-slate-400 hover:text-white"
+          className="md:hidden p-1.5 rounded-md hover:bg-purple-50 transition-colors text-slate-400 hover:text-[#7D53F6]"
         >
           <X className="w-4 h-4" />
         </button>
@@ -296,16 +296,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       collapsed ? "justify-center px-2" : "px-3"
                     } ${
                       active
-                        ? "bg-blue-600/20 text-blue-400"
-                        : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                        ? "bg-[#7D53F6] text-white shadow-sm"
+                        : "text-slate-500 hover:bg-purple-50 hover:text-[#7D53F6]"
                     }`}
                     title={collapsed ? item.label : undefined}
                   >
                     {active && (
-                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-blue-500 rounded-r-full" />
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-[#7D53F6] rounded-r-full" />
                     )}
                     <Icon
-                      className={`w-5 h-5 flex-shrink-0 ${active ? "text-blue-400" : ""}`}
+                      className={`w-5 h-5 flex-shrink-0 ${active ? "text-white" : ""}`}
                     />
                     {!collapsed && (
                       <span className="flex-1 truncate">{item.label}</span>
@@ -332,7 +332,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div>
             <button
               onClick={() => setAchievementsExpanded(!achievementsExpanded)}
-              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-150"
+              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-purple-50 hover:text-[#7D53F6] transition-all duration-150"
             >
               <div className="flex items-center gap-3">
                 <Trophy className="w-5 h-5 flex-shrink-0" />
@@ -367,8 +367,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         onClick={() => setMobileOpen(false)}
                         className={`w-full flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 ${
                           pathname === href
-                            ? "bg-blue-600/20 text-blue-400"
-                            : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                            ? "bg-purple-100 text-purple-700"
+                            : "text-slate-500 hover:bg-purple-50 hover:text-[#7D53F6]"
                         }`}
                       >
                         <Icon className="w-4 h-4 flex-shrink-0" />
@@ -383,7 +383,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <button
                       key={item.id}
                       onClick={() => setMobileOpen(false)}
-                      className="w-full flex items-center gap-3 py-2 px-3 rounded-lg text-xs text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+                      className="w-full flex items-center gap-3 py-2 px-3 rounded-lg text-xs text-slate-500 hover:bg-purple-50 hover:text-[#7D53F6] transition-colors"
                     >
                       <Icon className="w-4 h-4 flex-shrink-0" />
                       <span className="flex-1 text-left truncate">
@@ -402,7 +402,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div>
             <button
               onClick={() => setOwiExpanded(!owiExpanded)}
-              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-150"
+              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-purple-50 hover:text-[#7D53F6] transition-all duration-150"
             >
               <div className="flex items-center gap-3">
                 <Users className="w-5 h-5 flex-shrink-0" />
@@ -424,12 +424,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       onClick={() => setMobileOpen(false)}
                       className={`flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 relative ${
                         active
-                          ? "bg-blue-600/20 text-blue-400"
-                          : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                          ? "bg-purple-100 text-purple-700"
+                          : "text-slate-500 hover:bg-purple-50 hover:text-[#7D53F6]"
                       }`}
                     >
                       {active && (
-                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-blue-500 rounded-r-full" />
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-[#7D53F6] rounded-r-full" />
                       )}
                       <span className="flex-1 truncate">{item.label}</span>
                     </Link>
@@ -442,7 +442,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </nav>
 
       {/* User Profile Section */}
-      <div className="border-t border-slate-800 p-3">
+      <div className="border-t border-slate-200 p-3">
         {/* Roles */}
         {!collapsed && (
           <div className="flex flex-wrap gap-1 mb-3 px-1">
@@ -459,10 +459,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* User Info */}
         <div
-          className={`flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer ${collapsed ? "justify-center" : ""}`}
+          className={`flex items-center gap-3 p-2 rounded-lg hover:bg-purple-50 transition-colors cursor-pointer ${collapsed ? "justify-center" : ""}`}
           onClick={() => setProfileOpen(!profileOpen)}
         >
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center flex-shrink-0 text-sm font-bold">
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#8D68FA] to-[#6A45D6] flex items-center justify-center flex-shrink-0 text-sm font-bold text-white">
             {user.name
               .split(" ")
               .map((n) => n[0])
@@ -471,7 +471,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
           {!collapsed && (
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-slate-200 truncate">
+              <p className="text-sm font-medium text-slate-800 truncate">
                 {user.name}
               </p>
               <p className="text-[11px] text-slate-500 truncate">
@@ -490,11 +490,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {profileOpen && !collapsed && (
           <div className="overflow-hidden animate-fade-in">
             <div className="pt-2 space-y-1">
-              <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
+              <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-purple-50 hover:text-[#7D53F6] transition-colors">
                 <User className="w-4 h-4" />
                 Profile
               </button>
-              <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
+              <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-500 hover:bg-purple-50 hover:text-[#7D53F6] transition-colors">
                 <Bell className="w-4 h-4" />
                 Notifications
               </button>

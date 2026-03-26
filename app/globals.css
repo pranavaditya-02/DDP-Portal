@@ -37,19 +37,19 @@
     --foreground: #0f172a;
     --card: #ffffff;
     --card-foreground: #0f172a;
-    --primary: #0b1b5e;
-    --primary-foreground: #f1f5f9;
-    --secondary: #1e3a8a;
-    --secondary-foreground: #f1f5f9;
+    --primary: 257 90% 64%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 257 64% 55%;
+    --secondary-foreground: 0 0% 100%;
     --muted: #f1f5f9;
     --muted-foreground: #64748b;
-    --accent: #3b82f6;
-    --accent-foreground: #ffffff;
+    --accent: 257 90% 64%;
+    --accent-foreground: 0 0% 100%;
     --destructive: #ef4444;
     --destructive-foreground: #ffffff;
     --border: #e2e8f0;
     --input: #e2e8f0;
-    --ring: #3b82f6;
+    --ring: 257 90% 64%;
     --radius: 0.5rem;
   }
 
@@ -58,19 +58,19 @@
     --foreground: #f1f5f9;
     --card: #1e3a8a;
     --card-foreground: #f1f5f9;
-    --primary: #3b82f6;
-    --primary-foreground: #0f172a;
+    --primary: 257 90% 70%;
+    --primary-foreground: 0 0% 100%;
     --secondary: #1e293b;
     --secondary-foreground: #f1f5f9;
     --muted: #1e293b;
     --muted-foreground: #cbd5e1;
-    --accent: #60a5fa;
-    --accent-foreground: #0f172a;
+    --accent: 257 90% 70%;
+    --accent-foreground: 0 0% 100%;
     --destructive: #f87171;
     --destructive-foreground: #0f172a;
     --border: #1e293b;
     --input: #1e293b;
-    --ring: #60a5fa;
+    --ring: 257 90% 70%;
   }
 
   * {
@@ -204,6 +204,37 @@
 
   .glass {
     @apply backdrop-blur-md bg-white/10 border border-white/20 rounded-lg;
+  }
+
+  /* Keep legacy blue button utility classes aligned with the purple brand theme. */
+  button[class~="bg-blue-600"],
+  button[class*="bg-[#2572ed]"] {
+    background-color: #7d53f6 !important;
+  }
+
+  button[class~="hover:bg-blue-700"]:hover {
+    background-color: #6943d4 !important;
+  }
+
+  button[class~="text-blue-600"],
+  button[class~="text-blue-700"] {
+    color: #7d53f6 !important;
+  }
+
+  button[class~="hover:text-blue-600"]:hover,
+  button[class~="hover:text-blue-700"]:hover,
+  button[class~="hover:text-blue-800"]:hover {
+    color: #6943d4 !important;
+  }
+
+  button[class~="border-blue-200"],
+  button[class~="border-blue-300"] {
+    border-color: #c4b5fd !important;
+  }
+
+  button[class~="hover:bg-blue-50"]:hover,
+  button[class~="hover:bg-blue-100"]:hover {
+    background-color: #f3efff !important;
   }
 }
 

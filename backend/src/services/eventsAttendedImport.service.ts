@@ -23,7 +23,10 @@ interface LookupMaps {
   organizerType: Map<string, number>;
   sponsorshipType: Map<string, number>;
   docType: Map<string, number>;
+  specialLabByCode: Map<string, number>;
+  specialLabIds: Set<number>;
   industries: Map<string, number>;
+  facultyIds: Set<string>;
 }
 
 const EXPECTED_HEADERS = [
@@ -54,6 +57,20 @@ const EXPECTED_HEADERS = [
 ] as const;
 
 const normalizeKey = (value: string): string => value.trim().toLowerCase();
+
+const normalizeLookupToken = (value: string): string =>
+  normalizeKey(value).replace(/[\s-]+/g, '_');
+
+const normalizeSpecialLabCode = (value: string): string => value.trim().toUpperCase();
+
+const getLookupId = (map: Map<string, number>, label: string): number | null => {
+  const direct = map.get(normalizeKey(label));
+  if (direct) {
+    return direct;
+  }
+
+  return map.get(normalizeLookupToken(label)) ?? null;
+};
 
 const parseCsvText = (content: string): CsvRow[] => {
   const source = content.replace(/^\uFEFF/, '');
@@ -196,9 +213,33 @@ const loadLookupMap = async (
 
   const map = new Map<string, number>();
   for (const row of rows) {
-    map.set(normalizeKey(String(row.label)), Number(row.id));
+    const label = String(row.label);
+    const id = Number(row.id);
+    map.set(normalizeKey(label), id);
+    map.set(normalizeLookupToken(label), id);
   }
   return map;
+};
+
+const ensureDocType = async (
+  connection: PoolConnection,
+  lookups: LookupMaps,
+  label: string,
+): Promise<{ id: number; inserted: boolean }> => {
+  const existing = getLookupId(lookups.docType, label);
+  if (existing) {
+    return { id: existing, inserted: false };
+  }
+
+  const [insertResult] = await connection.execute<ResultSetHeader>(
+    'INSERT INTO ref_doc_type (label) VALUES (?)',
+    [label],
+  );
+
+  const id = Number(insertResult.insertId);
+  lookups.docType.set(normalizeKey(label), id);
+  lookups.docType.set(normalizeLookupToken(label), id);
+  return { id, inserted: true };
 };
 
 const loadIndustryMap = async (connection: PoolConnection): Promise<Map<string, number>> => {
@@ -211,6 +252,37 @@ const loadIndustryMap = async (connection: PoolConnection): Promise<Map<string, 
     map.set(normalizeKey(String(row.industry_name)), Number(row.id));
   }
   return map;
+};
+
+const loadSpecialLabCodeMap = async (
+  connection: PoolConnection,
+): Promise<{ byCode: Map<string, number>; ids: Set<number> }> => {
+  const [rows] = await connection.query<RowDataPacket[]>(
+    'SELECT id, code FROM special_lab',
+  );
+
+  const byCode = new Map<string, number>();
+  const ids = new Set<number>();
+  for (const row of rows) {
+    const id = Number(row.id);
+    ids.add(id);
+
+    const code = String(row.code ?? '').trim();
+    if (code) {
+      byCode.set(normalizeSpecialLabCode(code), id);
+    }
+  }
+
+  return { byCode, ids };
+};
+
+const loadFacultyIds = async (connection: PoolConnection): Promise<Set<string>> => {
+  const [rows] = await connection.query<RowDataPacket[]>('SELECT id FROM faculty');
+  const ids = new Set<string>();
+  for (const row of rows) {
+    ids.add(String(row.id).trim().toUpperCase());
+  }
+  return ids;
 };
 
 const getOrCreateIndustry = async (
@@ -237,35 +309,59 @@ const getOrCreateIndustry = async (
 const getOrCreateSubmission = async (
   connection: PoolConnection,
   taskId: string | null,
-  facultyId: string,
+  facultyId: string | null,
   iqacId: number | null,
   bipId: string | null,
-): Promise<{ id: number; inserted: boolean }> => {
-  if (taskId) {
-    const [existing] = await connection.execute<RowDataPacket[]>(
-      'SELECT id FROM submissions WHERE task_id = ? LIMIT 1',
-      [taskId],
+): Promise<{ id: number; inserted: boolean; warning?: string }> => {
+  try {
+    const [insertResult] = await connection.execute<ResultSetHeader>(
+      `INSERT INTO submissions (
+        task_id,
+        remarks,
+        activity_type,
+        faculty_id,
+        iqac_verification_id,
+        created_at,
+        updated_at
+      ) VALUES (?, ?, 'events_attended', ?, ?, NOW(), NOW())`,
+      [
+        taskId,
+        bipId ? `Migrated from BIP ID ${bipId}` : 'Migrated from CSV import',
+        facultyId,
+        iqacId,
+      ],
     );
 
-    if (existing.length > 0) {
-      return { id: Number(existing[0].id), inserted: false };
+    return { id: Number(insertResult.insertId), inserted: true };
+  } catch (error) {
+    const sqlError = error as { code?: string };
+    if (sqlError.code === 'ER_DUP_ENTRY' && taskId) {
+      const [fallbackResult] = await connection.execute<ResultSetHeader>(
+        `INSERT INTO submissions (
+          task_id,
+          remarks,
+          activity_type,
+          faculty_id,
+          iqac_verification_id,
+          created_at,
+          updated_at
+        ) VALUES (NULL, ?, 'events_attended', ?, ?, NOW(), NOW())`,
+        [
+          bipId ? `Migrated from BIP ID ${bipId}` : 'Migrated from CSV import',
+          facultyId,
+          iqacId,
+        ],
+      );
+
+      return {
+        id: Number(fallbackResult.insertId),
+        inserted: true,
+        warning: `Task ID '${taskId}' already exists; inserted submission with NULL task_id to keep one submission per event row.`,
+      };
     }
+
+    throw error;
   }
-
-  const [insertResult] = await connection.execute<ResultSetHeader>(
-    `INSERT INTO submissions (
-      task_id,
-      remarks,
-      activity_type,
-      faculty_id,
-      iqac_verification_id,
-      created_at,
-      updated_at
-    ) VALUES (?, ?, 'events_attended', ?, ?, NOW(), NOW())`,
-    [taskId, bipId ? `Migrated from BIP ID ${bipId}` : 'Migrated from CSV import', facultyId, iqacId],
-  );
-
-  return { id: Number(insertResult.insertId), inserted: true };
 };
 
 const getOrCreateDocument = async (
@@ -311,6 +407,13 @@ export class EventsAttendedImportService {
       await connection.beginTransaction();
 
       const lookups: LookupMaps = {
+        ...(await (async () => {
+          const specialLabData = await loadSpecialLabCodeMap(connection);
+          return {
+            specialLabByCode: specialLabData.byCode,
+            specialLabIds: specialLabData.ids,
+          };
+        })()),
         iqacStatus: await loadLookupMap(connection, 'ref_iqac_status'),
         eventType: await loadLookupMap(connection, 'ref_event_type_attended'),
         eventLevel: await loadLookupMap(connection, 'ref_event_level'),
@@ -319,24 +422,38 @@ export class EventsAttendedImportService {
         sponsorshipType: await loadLookupMap(connection, 'ref_sponsorship_type'),
         docType: await loadLookupMap(connection, 'ref_doc_type'),
         industries: await loadIndustryMap(connection),
+        facultyIds: await loadFacultyIds(connection),
       };
 
-      const apexDocTypeId = lookups.docType.get('apex_proof');
-      const certificateDocTypeId = lookups.docType.get('certificate_proof');
+      const apexDocType = await ensureDocType(connection, lookups, 'apex_proof');
+      const certificateDocType = await ensureDocType(connection, lookups, 'certificate_proof');
 
-      if (!apexDocTypeId || !certificateDocTypeId) {
-        throw new Error('ref_doc_type must contain apex_proof and certificate_proof values.');
+      if (apexDocType.inserted) {
+        summary.warnings.push('ref_doc_type missing apex_proof; created automatically.');
+      }
+      if (certificateDocType.inserted) {
+        summary.warnings.push('ref_doc_type missing certificate_proof; created automatically.');
       }
 
       for (const row of rows) {
         summary.processedRows += 1;
 
         const taskId = cleanText(row['Task ID'] ?? '') ?? null;
-        const facultyId = cleanText(row['Faculty ID'] ?? '');
-        if (!facultyId) {
-          summary.skippedRows += 1;
-          summary.warnings.push(`Row ${summary.processedRows}: skipped due to missing Faculty ID.`);
-          continue;
+        const facultyIdRaw = cleanText(row['Faculty ID'] ?? '');
+        let facultyId: string | null = null;
+        if (facultyIdRaw) {
+          const normalizedFacultyId = facultyIdRaw.trim().toUpperCase();
+          if (lookups.facultyIds.has(normalizedFacultyId)) {
+            facultyId = normalizedFacultyId;
+          } else {
+            summary.warnings.push(
+              `Row ${summary.processedRows}: Faculty ID '${facultyIdRaw}' not found in faculty table; storing NULL faculty_id.`,
+            );
+          }
+        } else {
+          summary.warnings.push(
+            `Row ${summary.processedRows}: Faculty ID is empty; storing NULL faculty_id.`,
+          );
         }
 
         const iqacLabel = normalizeKey(row['IQAC Verification'] ?? '');
@@ -352,16 +469,8 @@ export class EventsAttendedImportService {
         if (submission.inserted) {
           summary.insertedSubmissions += 1;
         }
-
-        const [existingEvent] = await connection.execute<RowDataPacket[]>(
-          'SELECT id FROM events_attended WHERE submission_id = ? LIMIT 1',
-          [submission.id],
-        );
-
-        if (existingEvent.length > 0) {
-          summary.skippedRows += 1;
-          summary.warnings.push(`Row ${summary.processedRows}: submission already has events_attended entry (task ${taskId}).`);
-          continue;
+        if (submission.warning) {
+          summary.warnings.push(`Row ${summary.processedRows}: ${submission.warning}`);
         }
 
         const industryName = cleanText(row['Industry'] ?? '');
@@ -377,7 +486,7 @@ export class EventsAttendedImportService {
         let apexProofId: number | null = null;
         const apexProofUrl = cleanText(row['Apex Proof'] ?? '');
         if (apexProofUrl) {
-          const doc = await getOrCreateDocument(connection, apexDocTypeId, apexProofUrl);
+          const doc = await getOrCreateDocument(connection, apexDocType.id, apexProofUrl);
           apexProofId = doc.id;
           if (doc.inserted) {
             summary.insertedDocuments += 1;
@@ -387,7 +496,7 @@ export class EventsAttendedImportService {
         let certificateProofId: number | null = null;
         const certificateProofUrl = cleanText(row['certificate_proof'] ?? '');
         if (certificateProofUrl) {
-          const doc = await getOrCreateDocument(connection, certificateDocTypeId, certificateProofUrl);
+          const doc = await getOrCreateDocument(connection, certificateDocType.id, certificateProofUrl);
           certificateProofId = doc.id;
           if (doc.inserted) {
             summary.insertedDocuments += 1;
@@ -395,14 +504,42 @@ export class EventsAttendedImportService {
         }
 
         const specialLabInvolved = normalizeKey(row['Special Lab Involved'] ?? '') === 'yes' ? 1 : 0;
-        const specialLabIdRaw = toNumber(row['Special Lab Id'] ?? '');
-        const specialLabId = specialLabIdRaw !== null ? Math.trunc(specialLabIdRaw) : null;
+        const specialLabCodeOrId = cleanText(row['Special Lab Id'] ?? '');
+        let specialLabId: number | null = null;
+        if (specialLabInvolved === 1 && specialLabCodeOrId) {
+          const specialLabNumericId = toNumber(specialLabCodeOrId);
+          if (specialLabNumericId !== null) {
+            const numericId = Math.trunc(specialLabNumericId);
+            if (lookups.specialLabIds.has(numericId)) {
+              specialLabId = numericId;
+            }
+          } else {
+            specialLabId =
+              lookups.specialLabByCode.get(normalizeSpecialLabCode(specialLabCodeOrId)) ?? null;
+          }
 
-        const eventTypeId = lookups.eventType.get(normalizeKey(row['Event Type'] ?? '')) ?? null;
-        const eventLevelId = lookups.eventLevel.get(normalizeKey(row['Event Level'] ?? '')) ?? null;
-        const eventModeId = lookups.eventMode.get(normalizeKey(row['event Mode'] ?? '')) ?? null;
-        const organizerTypeId = lookups.organizerType.get(normalizeKey(row['Organizer Type'] ?? '')) ?? null;
-        const sponsorshipTypeId = lookups.sponsorshipType.get(normalizeKey(row['Type of Sponsorship'] ?? '')) ?? null;
+          if (specialLabId === null) {
+            summary.warnings.push(
+              `Row ${summary.processedRows}: Special Lab Id '${specialLabCodeOrId}' not found; storing NULL special_lab_id.`,
+            );
+          }
+        }
+
+        if (specialLabInvolved === 1 && !specialLabCodeOrId) {
+          summary.warnings.push(
+            `Row ${summary.processedRows}: Special Lab Involved is Yes but Special Lab Id is empty; storing NULL special_lab_id.`,
+          );
+        }
+
+        const eventTypeId = getLookupId(lookups.eventType, row['Event Type'] ?? '');
+        const eventLevelId = getLookupId(lookups.eventLevel, row['Event Level'] ?? '');
+        const eventModeId = getLookupId(lookups.eventMode, row['event Mode'] ?? '');
+        const organizerTypeId = getLookupId(lookups.organizerType, row['Organizer Type'] ?? '');
+        const sponsorshipTypeId = getLookupId(lookups.sponsorshipType, row['Type of Sponsorship'] ?? '');
+        const outcome = cleanText(row['Outcome'] ?? row['Claimed For'] ?? '');
+        const ifOutcomeOthers = cleanText(
+          row['If Outcome Others'] ?? row['If outcome others'] ?? row['If Outcome Others Please Specify'] ?? '',
+        );
 
         if (!eventTypeId) {
           summary.warnings.push(`Row ${summary.processedRows}: Event Type not found -> ${row['Event Type']}`);
@@ -436,9 +573,35 @@ export class EventsAttendedImportService {
             sponsorship_type_id,
             funding_agency_name,
             amount_inrs,
+            outcome,
+            if_outcome_others,
             apex_proof_id,
             certificate_proof_id
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)` ,
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ON DUPLICATE KEY UPDATE
+            special_labs_involved = VALUES(special_labs_involved),
+            special_lab_id = VALUES(special_lab_id),
+            event_type_id = VALUES(event_type_id),
+            if_event_type_others = VALUES(if_event_type_others),
+            topic_name = VALUES(topic_name),
+            organizer_type_id = VALUES(organizer_type_id),
+            industry_id = VALUES(industry_id),
+            event_level_id = VALUES(event_level_id),
+            event_title = VALUES(event_title),
+            event_organizer = VALUES(event_organizer),
+            event_mode_id = VALUES(event_mode_id),
+            event_location = VALUES(event_location),
+            event_date_from = VALUES(event_date_from),
+            event_date_to = VALUES(event_date_to),
+            duration_days = VALUES(duration_days),
+            other_organizer_name = VALUES(other_organizer_name),
+            sponsorship_type_id = VALUES(sponsorship_type_id),
+            funding_agency_name = VALUES(funding_agency_name),
+            amount_inrs = VALUES(amount_inrs),
+            outcome = VALUES(outcome),
+            if_outcome_others = VALUES(if_outcome_others),
+            apex_proof_id = VALUES(apex_proof_id),
+            certificate_proof_id = VALUES(certificate_proof_id)`,
           [
             submission.id,
             specialLabInvolved,
@@ -460,6 +623,8 @@ export class EventsAttendedImportService {
             sponsorshipTypeId,
             cleanText(row['Name of the Funding Agency If Others'] ?? ''),
             toNumber(row['Amount in Rs.'] ?? ''),
+            outcome,
+            ifOutcomeOthers,
             apexProofId,
             certificateProofId,
           ],
