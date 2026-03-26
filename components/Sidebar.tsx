@@ -69,6 +69,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [profileOpen, setProfileOpen] = useState(false);
   const [achievementsExpanded, setAchievementsExpanded] = useState(false);
   const [owiExpanded, setOwiExpanded] = useState(false);
+  const [rndExpanded, setRndExpanded] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -209,6 +210,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { label: "Students Industrial Visit", slug: "students-industrial-visit" },
     { label: "Technical Societies", slug: "technical-societies" },
     { label: "Training to Industry", slug: "training-to-industry" },
+  ];
+
+  const rndItems = [
+    {
+      label: "Journal Publications - Applied",
+      slug: "journal-publications-applied",
+    },
+    {
+      label: "Journal Publications - Published",
+      slug: "journal-publications-published",
+    },
+    {
+      label: "Book Publications Proposal Applied Proposal Sanctionaed",
+      slug: "book-publications-proposal-applied-proposal-sanctionaed",
+    },
   ];
 
   // Filter groups: only show groups that have at least one visible item
@@ -430,6 +446,49 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div className="space-y-1 mt-2 ml-2">
                 {owiItems.map((item) => {
                   const href = `/faculty/outside-world/${item.slug}`;
+                  const active = isActive(href);
+                  return (
+                    <Link
+                      key={item.slug}
+                      href={href}
+                      onClick={() => setMobileOpen(false)}
+                      className={`flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 relative ${
+                        active
+                          ? "bg-blue-600/20 text-blue-400"
+                          : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                      }`}
+                    >
+                      {active && (
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-blue-500 rounded-r-full" />
+                      )}
+                      <span className="flex-1 truncate">{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* R&D Section */}
+        {isFaculty() && !isDean() && !collapsed && (
+          <div>
+            <button
+              onClick={() => setRndExpanded(!rndExpanded)}
+              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-150"
+            >
+              <div className="flex items-center gap-3">
+                <FileText className="w-5 h-5 flex-shrink-0" />
+                <span>R&amp;D</span>
+              </div>
+              <ChevronDown
+                className={`w-4 h-4 transition-transform ${rndExpanded ? "rotate-180" : ""}`}
+              />
+            </button>
+            {rndExpanded && (
+              <div className="space-y-1 mt-2 ml-2">
+                {rndItems.map((item) => {
+                  const href = `/faculty/r-and-d/${item.slug}`;
                   const active = isActive(href);
                   return (
                     <Link

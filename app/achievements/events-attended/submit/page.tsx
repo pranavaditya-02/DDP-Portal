@@ -470,7 +470,7 @@ export default function EventsAttendedForm() {
       (formData.sponsorshipType === "Funding Agency" ||
         formData.sponsorshipType === "Others") &&
       !formData.fundingAgencyName
-    ) {
+    ){
       newErrors.fundingAgencyName = "Funding Agency / Other name is required";
     }
     if (!formData.outcome || formData.outcome === "Select Outcome") {
