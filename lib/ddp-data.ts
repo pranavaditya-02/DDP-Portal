@@ -3,6 +3,9 @@
 // Modeled after the real DDP dashboard at dashboard.bitsathy.ac.in
 // ============================================================
 
+import ddpIndexingSheet from '@/assets/ddp-indexing.generated.json'
+import type { DeptActivityStats } from '@/lib/real-data'
+
 // ---- Types ----
 export interface DDPActivity {
   sNo: number
@@ -59,6 +62,132 @@ export interface DDPActivityOverall {
   pending: number
 }
 
+function normalizeActivityKey(name: string) {
+  return name.toUpperCase().replace(/[^A-Z0-9]+/g, ' ').trim()
+}
+
+function attainedFromRealDept(activityName: string, dept: DeptActivityStats): number {
+  const key = normalizeActivityKey(activityName)
+
+  if (key === 'PATENT PUBLICATIONS') return dept.patentPublished
+  if (key === 'GUEST LECTURE DELIVERED') return dept.guestLectures
+  if (key === 'ONLINE COURSES NPTEL') return dept.onlineCourses
+  if (key === 'MOOC NPTEL E CONTENT DEVELOPMENT') return dept.onlineCourses
+  if (key === 'PUBLICATION IN CONFERENCES') return dept.paperPresentations
+  if (key === 'NATIONAL CONFERENCE') return Math.round(dept.paperPresentations * 0.7)
+  if (key === 'INTERNATIONAL CONFERENCE') return Math.round(dept.paperPresentations * 0.3)
+  if (key === 'WORKSHOP SEMINAR OBT IN HOUSE TRAINING') return Math.round(dept.eventsOrganized * 0.6)
+  if (key === 'FDP STTP ORGANISED') return Math.round(dept.eventsOrganized * 0.4)
+  if (key === 'FDP STTP ATTENDING FACULTY INTERNSHIP INDUSTRIAL TRAINING') return Math.round(dept.eventsAttended * 0.6)
+  if (key === 'TECHNICAL EVENT HACKATHON PARTICIPATION STUDENT S PARTICIPATION') return Math.round(dept.eventsAttended * 0.4)
+
+  return 0
+}
+
+function computeActivityIndexRow(template: DDPActivity, attained: number): DDPActivity {
+  const actualIndex = template.totalTarget > 0 ? attained / template.totalTarget : 0
+  const permittedIndex = Math.min(1, Math.max(0, actualIndex))
+
+  return {
+    sNo: template.sNo,
+    activityName: template.activityName,
+    weightage: template.weightage,
+    totalTarget: template.totalTarget,
+    attained,
+    actualIndex,
+    permittedIndex,
+  }
+}
+
+export function buildDDPRealtimeActivityIndexing(dept: DeptActivityStats): DDPActivity[] {
+  return cseActivityIndexing.map(template => {
+    const attained = attainedFromRealDept(template.activityName, dept)
+    return computeActivityIndexRow(template, attained)
+  })
+}
+
+export function buildDDPRealtimeOverallIndexing(deptStats: DeptActivityStats[]): DDPDepartmentOverall[] {
+  const raw = deptStats.map(dept => {
+    const rows = buildDDPRealtimeActivityIndexing(dept)
+    const totalWeightage = Math.max(rows.reduce((sum, r) => sum + r.weightage, 0), 1)
+    const totalTarget = rows.reduce((sum, r) => sum + r.totalTarget, 0)
+    const achieved = rows.reduce((sum, r) => sum + r.attained, 0)
+
+    const baseIndex = rows.reduce((sum, r) => sum + (r.permittedIndex * r.weightage), 0) / totalWeightage
+    const additionalIndex = rows.reduce((sum, r) => {
+      const additionalPermitted = Math.min(1, Math.max(0, r.actualIndex - 1))
+      return sum + (additionalPermitted * r.weightage)
+    }, 0) / totalWeightage
+
+    return {
+      department: dept.dept,
+      shortName: dept.shortCode,
+      totalTarget,
+      achieved,
+      baseIndex,
+      additionalIndex,
+    }
+  })
+
+  const maxAdditional = Math.max(...raw.map(r => r.additionalIndex), 0)
+
+  const ranked = raw
+    .map(r => ({
+      ...r,
+      normalizedBonus: r.baseIndex + (maxAdditional > 0 ? (r.additionalIndex * 0.05) / maxAdditional : 0),
+    }))
+    .sort((a, b) => b.normalizedBonus - a.normalizedBonus)
+    .map((r, idx) => ({
+      rank: idx + 1,
+      department: r.department,
+      shortName: r.shortName,
+      totalTarget: r.totalTarget,
+      achieved: r.achieved,
+      baseIndex: r.baseIndex,
+      additionalIndex: r.additionalIndex,
+      normalizedBonus: r.normalizedBonus,
+    }))
+
+  return ranked
+}
+
+type SheetIndexingPayload = {
+  cseLike?: {
+    totalWeightage?: number
+    totalIndex?: number
+    additionalIndex?: number
+    activityIndexing?: Array<{
+      sNo: number
+      activityName: string
+      weightage: number
+      totalTarget: number
+      attained: number
+      actualIndex: number
+      permittedIndex: number
+    }>
+  }
+  overallIndexing?: Array<{
+    rank: number
+    department: string
+    shortName: string
+    totalTarget: number
+    achieved: number
+    baseIndex: number
+    additionalIndex: number
+    normalizedBonus: number
+  }>
+  ddpJournalPublicationsOverall?: DDPActivityOverall
+  ddpJournalDeptBreakdown?: DDPActivityWiseStatus[]
+  ddpAllActivities?: DDPActivityOverall[]
+  ddpOverallTotals?: {
+    proposedTargets: number
+    proposedAchieved: number
+    pending: number
+  }
+}
+
+const sheetData = ddpIndexingSheet as SheetIndexingPayload
+
 // ---- Overall Indexing (All Departments Ranking) ----
 export const ddpOverallIndexing: DDPDepartmentOverall[] = [
   { rank: 1, department: 'Mechanical Engineering', shortName: 'MECH', totalTarget: 413, achieved: 305, baseIndex: 0.450, additionalIndex: 0.152, normalizedBonus: 0.498 },
@@ -78,72 +207,46 @@ export const ddpOverallIndexing: DDPDepartmentOverall[] = [
   { rank: 15, department: 'Computer Technology', shortName: 'CT', totalTarget: 156, achieved: 88, baseIndex: 0.218, additionalIndex: 0.028, normalizedBonus: 0.232 },
 ]
 
+// Same structure as ddpOverallIndexing, sourced from the Excel workbook summary.
+export const ddpSheetOverallIndexing: DDPDepartmentOverall[] =
+  (sheetData.overallIndexing || []).map(d => ({
+    rank: d.rank,
+    department: d.department,
+    shortName: d.shortName,
+    totalTarget: d.totalTarget,
+    achieved: d.achieved,
+    baseIndex: d.baseIndex,
+    additionalIndex: d.additionalIndex,
+    normalizedBonus: d.normalizedBonus,
+  }))
+
 // ---- CSE Department: Index Calculation ----
-export const cseTotalWeightage = 100
-export const cseTotalIndex = 0.451
-export const cseAdditionalIndex = 0.0790
+export const cseTotalWeightage = sheetData.cseLike?.totalWeightage ?? 100
+export const cseTotalIndex = sheetData.cseLike?.totalIndex ?? 0.451
+export const cseAdditionalIndex = sheetData.cseLike?.additionalIndex ?? 0.0790
 
 // ---- CSE Department: Activity-wise Total Indexing ----
-export const cseActivityIndexing: DDPActivity[] = [
-  { sNo: 1, activityName: 'JOURNAL PUBLICATIONS (SCI / WOS)', weightage: 5, totalTarget: 21, attained: 20, actualIndex: 0.952, permittedIndex: 0.952 },
-  { sNo: 2, activityName: 'JOURNAL PUBLICATIONS (SCOPUS)', weightage: 5, totalTarget: 35, attained: 32, actualIndex: 0.914, permittedIndex: 0.914 },
-  { sNo: 3, activityName: 'CONFERENCE PUBLICATIONS', weightage: 3, totalTarget: 45, attained: 42, actualIndex: 0.933, permittedIndex: 0.933 },
-  { sNo: 4, activityName: 'BOOK / BOOK CHAPTER PUBLISHED', weightage: 2, totalTarget: 8, attained: 6, actualIndex: 0.750, permittedIndex: 0.750 },
-  { sNo: 5, activityName: 'RESEARCH PROPOSALS SUBMITTED', weightage: 3, totalTarget: 15, attained: 12, actualIndex: 0.800, permittedIndex: 0.800 },
-  { sNo: 6, activityName: 'RESEARCH FUNDING, RS. IN LAKHS', weightage: 5, totalTarget: 60, attained: 0, actualIndex: 0.000, permittedIndex: 0.000 },
-  { sNo: 7, activityName: 'PATENTS PUBLISHED', weightage: 3, totalTarget: 12, attained: 10, actualIndex: 0.833, permittedIndex: 0.833 },
-  { sNo: 8, activityName: 'PATENTS GRANTED', weightage: 3, totalTarget: 5, attained: 3, actualIndex: 0.600, permittedIndex: 0.600 },
-  { sNo: 9, activityName: 'CONSULTANCY PROJECTS COMPLETED', weightage: 3, totalTarget: 8, attained: 5, actualIndex: 0.625, permittedIndex: 0.625 },
-  { sNo: 10, activityName: 'INDUSTRIAL CONSULTANCY PROJECTS, RS IN LAKHS', weightage: 3, totalTarget: 12, attained: 0, actualIndex: 0.000, permittedIndex: 0.000 },
-  { sNo: 11, activityName: 'SEED MONEY PROJECTS', weightage: 2, totalTarget: 6, attained: 4, actualIndex: 0.667, permittedIndex: 0.667 },
-  { sNo: 12, activityName: 'GUEST LECTURE DELIVERED', weightage: 2, totalTarget: 9, attained: 7, actualIndex: 0.778, permittedIndex: 0.778 },
-  { sNo: 13, activityName: 'MOU SIGNED', weightage: 2, totalTarget: 1, attained: 1, actualIndex: 1.000, permittedIndex: 1.000 },
-  { sNo: 14, activityName: 'INTERNATIONAL MOU SIGNED', weightage: 3, totalTarget: 1, attained: 0, actualIndex: 0.000, permittedIndex: 0.000 },
-  { sNo: 15, activityName: 'INVITE NEW COMPANIES FOR STUDENT PLACEMENTS', weightage: 6, totalTarget: 20, attained: 12, actualIndex: 0.600, permittedIndex: 0.600 },
-  { sNo: 16, activityName: 'PLACEMENT TARGETS', weightage: 6, totalTarget: 60, attained: 7, actualIndex: 0.117, permittedIndex: 0.117 },
-  { sNo: 17, activityName: 'INDUSTRY COLLABORATIVE / SUPPORTING / SPONSORED LECTURES', weightage: 2, totalTarget: 1, attained: 0, actualIndex: 0.000, permittedIndex: 0.000 },
-  { sNo: 18, activityName: 'INVITING SCIENTISTS / EXPERTS FROM REPUTED RESEARCH LABS', weightage: 2, totalTarget: 1, attained: 2, actualIndex: 2.000, permittedIndex: 1.000 },
-  { sNo: 19, activityName: 'COLLABORATIVE INITIATIVES IN FUNDING, CONSULTANCY, PROJECTS', weightage: 3, totalTarget: 12, attained: 50, actualIndex: 4.170, permittedIndex: 1.000 },
-  { sNo: 20, activityName: 'FDP / STTP ORGANISED', weightage: 3, totalTarget: 1, attained: 0, actualIndex: 0.000, permittedIndex: 0.000 },
-  { sNo: 21, activityName: 'PARTIAL DELIVERY OF COURSES', weightage: 2, totalTarget: 2, attained: 2, actualIndex: 1.000, permittedIndex: 1.000 },
-  { sNo: 22, activityName: 'CERTIFICATE / VALUE-ADDED COURSES / PS', weightage: 2, totalTarget: 2, attained: 0, actualIndex: 0.000, permittedIndex: 0.000 },
-  { sNo: 23, activityName: 'NPTEL COURSES', weightage: 3, totalTarget: 15, attained: 8, actualIndex: 0.533, permittedIndex: 0.533 },
-  { sNo: 24, activityName: 'STUDENT AWARDS / ACHIEVEMENTS', weightage: 5, totalTarget: 25, attained: 18, actualIndex: 0.720, permittedIndex: 0.720 },
-  { sNo: 25, activityName: 'EVENTS ORGANIZED', weightage: 5, totalTarget: 680, attained: 575, actualIndex: 0.846, permittedIndex: 0.846 },
-]
+export const cseActivityIndexing: DDPActivity[] =
+  (sheetData.cseLike?.activityIndexing || []).map(a => ({
+    sNo: a.sNo,
+    activityName: a.activityName,
+    weightage: a.weightage,
+    totalTarget: a.totalTarget,
+    attained: a.attained,
+    actualIndex: a.actualIndex,
+    permittedIndex: a.permittedIndex,
+  }))
 
 // ---- Overall Activity-wise DDP Attainment Status (Journal Publications SCI/WOS as example) ----
 export const ddpJournalPublicationsOverall: DDPActivityOverall = {
-  activityName: 'JOURNAL PUBLICATIONS (SCI / WOS)',
-  proposedTarget: 238,
-  proposedAchieved: 168,
-  pending: 70,
+  activityName: sheetData.ddpJournalPublicationsOverall?.activityName ?? 'JOURNAL PUBLICATIONS (SCI / WOS)',
+  proposedTarget: sheetData.ddpJournalPublicationsOverall?.proposedTarget ?? 238,
+  proposedAchieved: sheetData.ddpJournalPublicationsOverall?.proposedAchieved ?? 168,
+  pending: sheetData.ddpJournalPublicationsOverall?.pending ?? 70,
 }
 
-export const ddpJournalDeptBreakdown: DDPActivityWiseStatus[] = [
-  { sNo: 1, department: 'Agricultural Engineering', shortName: 'AGRI', totalTarget: 5, achieved: 8, pending: -3, bipIds: '2478, 2490' },
-  { sNo: 2, department: 'Artificial Intelligence and Data Science', shortName: 'AIDS', totalTarget: 15, achieved: 2, pending: 13, bipIds: '2560, 2663' },
-  { sNo: 3, department: 'Artificial Intelligence and Machine Learning', shortName: 'AIML', totalTarget: 5, achieved: 5, pending: 0, bipIds: '2515, 2703' },
-  { sNo: 4, department: 'Biomedical Engineering', shortName: 'BME', totalTarget: 2, achieved: 1, pending: 1, bipIds: '2676' },
-  { sNo: 5, department: 'Biotechnology', shortName: 'BIOTECH', totalTarget: 9, achieved: 8, pending: 1, bipIds: '2648, 2649' },
-  { sNo: 6, department: 'Chemistry', shortName: 'CHEM', totalTarget: 15, achieved: 19, pending: -4, bipIds: '2370, 2388' },
-  { sNo: 7, department: 'Civil Engineering', shortName: 'CIVIL', totalTarget: 6, achieved: 4, pending: 2, bipIds: '2431, 2491' },
-  { sNo: 8, department: 'Computer Science and Business Systems', shortName: 'CSBS', totalTarget: 1, achieved: 0, pending: 1, bipIds: '' },
-  { sNo: 9, department: 'Computer Science and Design', shortName: 'CSD', totalTarget: 0, achieved: 0, pending: 0, bipIds: '' },
-  { sNo: 10, department: 'Computer Science & Engineering', shortName: 'CSE', totalTarget: 21, achieved: 20, pending: 1, bipIds: '2304, 2495' },
-  { sNo: 11, department: 'Computer Technology', shortName: 'CT', totalTarget: 3, achieved: 1, pending: 2, bipIds: '2743' },
-  { sNo: 12, department: 'Electrical and Electronics Engineering', shortName: 'EEE', totalTarget: 16, achieved: 8, pending: 8, bipIds: '2475, 2592' },
-  { sNo: 13, department: 'Electronics and Communication Engineering', shortName: 'ECE', totalTarget: 27, achieved: 22, pending: 5, bipIds: '2316, 2372' },
-  { sNo: 14, department: 'Electronics and Instrumentation Engineering', shortName: 'EIE', totalTarget: 8, achieved: 5, pending: 3, bipIds: '2410, 2455' },
-  { sNo: 15, department: 'Food Technology', shortName: 'FT', totalTarget: 3, achieved: 4, pending: -1, bipIds: '2520' },
-  { sNo: 16, department: 'Information Technology', shortName: 'IT', totalTarget: 12, achieved: 8, pending: 4, bipIds: '2380, 2445' },
-  { sNo: 17, department: 'Mechanical Engineering', shortName: 'MECH', totalTarget: 18, achieved: 15, pending: 3, bipIds: '2290, 2350' },
-  { sNo: 18, department: 'Mechatronics Engineering', shortName: 'MTRX', totalTarget: 8, achieved: 4, pending: 4, bipIds: '2680, 2715' },
-  { sNo: 19, department: 'Mathematics', shortName: 'MATH', totalTarget: 10, achieved: 12, pending: -2, bipIds: '2340, 2398' },
-  { sNo: 20, department: 'Physics', shortName: 'PHY', totalTarget: 8, achieved: 6, pending: 2, bipIds: '2420, 2485' },
-  { sNo: 21, department: 'School of Management Studies', shortName: 'SMS', totalTarget: 6, achieved: 3, pending: 3, bipIds: '2580, 2606, 2750' },
-  { sNo: 22, department: 'Textile Technology', shortName: 'TT', totalTarget: 1, achieved: 0, pending: 1, bipIds: '' },
-]
+export const ddpJournalDeptBreakdown: DDPActivityWiseStatus[] =
+  sheetData.ddpJournalDeptBreakdown || []
 
 // ---- Month-wise DDP Attainment (CSE Department) ----
 export const cseMonthlyDDPStatus = {
@@ -165,39 +268,13 @@ export const cseMonthlyActivityStatus: DDPMonthlyDeptActivity[] = [
 
 // ---- Overall Targets, Achieved, and Pending (All Activities) ----
 export const ddpOverallTotals = {
-  proposedTargets: 7314,
-  proposedAchieved: 5146,
-  pending: 1497,
+  proposedTargets: sheetData.ddpOverallTotals?.proposedTargets ?? 7314,
+  proposedAchieved: sheetData.ddpOverallTotals?.proposedAchieved ?? 5146,
+  pending: sheetData.ddpOverallTotals?.pending ?? 1497,
 }
 
 // ---- All Activities Summary (College-wide) ----
-export const ddpAllActivities: DDPActivityOverall[] = [
-  { activityName: 'JOURNAL PUBLICATIONS (SCI / WOS)', proposedTarget: 238, proposedAchieved: 168, pending: 70 },
-  { activityName: 'JOURNAL PUBLICATIONS (SCOPUS)', proposedTarget: 380, proposedAchieved: 285, pending: 95 },
-  { activityName: 'CONFERENCE PUBLICATIONS', proposedTarget: 520, proposedAchieved: 412, pending: 108 },
-  { activityName: 'BOOK / BOOK CHAPTER PUBLISHED', proposedTarget: 85, proposedAchieved: 62, pending: 23 },
-  { activityName: 'RESEARCH PROPOSALS SUBMITTED', proposedTarget: 165, proposedAchieved: 128, pending: 37 },
-  { activityName: 'RESEARCH FUNDING, RS. IN LAKHS', proposedTarget: 480, proposedAchieved: 215, pending: 265 },
-  { activityName: 'PATENTS PUBLISHED', proposedTarget: 142, proposedAchieved: 108, pending: 34 },
-  { activityName: 'PATENTS GRANTED', proposedTarget: 58, proposedAchieved: 32, pending: 26 },
-  { activityName: 'CONSULTANCY PROJECTS', proposedTarget: 95, proposedAchieved: 68, pending: 27 },
-  { activityName: 'INDUSTRIAL CONSULTANCY, RS IN LAKHS', proposedTarget: 120, proposedAchieved: 45, pending: 75 },
-  { activityName: 'SEED MONEY PROJECTS', proposedTarget: 72, proposedAchieved: 48, pending: 24 },
-  { activityName: 'GUEST LECTURES DELIVERED', proposedTarget: 185, proposedAchieved: 152, pending: 33 },
-  { activityName: 'MOU SIGNED', proposedTarget: 42, proposedAchieved: 35, pending: 7 },
-  { activityName: 'INTERNATIONAL MOU SIGNED', proposedTarget: 18, proposedAchieved: 8, pending: 10 },
-  { activityName: 'NEW COMPANIES FOR PLACEMENTS', proposedTarget: 280, proposedAchieved: 195, pending: 85 },
-  { activityName: 'PLACEMENT TARGETS', proposedTarget: 850, proposedAchieved: 520, pending: 330 },
-  { activityName: 'INDUSTRY COLLABORATIVE LECTURES', proposedTarget: 65, proposedAchieved: 42, pending: 23 },
-  { activityName: 'EXPERTS FROM RESEARCH LABS', proposedTarget: 48, proposedAchieved: 38, pending: 10 },
-  { activityName: 'COLLABORATIVE INITIATIVES', proposedTarget: 135, proposedAchieved: 98, pending: 37 },
-  { activityName: 'FDP / STTP ORGANISED', proposedTarget: 92, proposedAchieved: 65, pending: 27 },
-  { activityName: 'PARTIAL DELIVERY OF COURSES', proposedTarget: 55, proposedAchieved: 42, pending: 13 },
-  { activityName: 'CERTIFICATE / VALUE-ADDED COURSES', proposedTarget: 180, proposedAchieved: 135, pending: 45 },
-  { activityName: 'NPTEL COURSES', proposedTarget: 220, proposedAchieved: 168, pending: 52 },
-  { activityName: 'STUDENT AWARDS', proposedTarget: 310, proposedAchieved: 248, pending: 62 },
-  { activityName: 'EVENTS ORGANIZED', proposedTarget: 2479, proposedAchieved: 1949, pending: 530 },
-]
+export const ddpAllActivities: DDPActivityOverall[] = sheetData.ddpAllActivities || []
 
 // ---- Monthly Trend by Month (for time-series charts) ----
 export const ddpMonthlyTrend = [

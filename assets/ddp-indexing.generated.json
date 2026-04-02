@@ -1,0 +1,2195 @@
+{
+  "sourceFile": "Premium SSG Project - DDP Ranking_Index calculation (2).xlsx",
+  "generatedAt": "2026-03-18T05:20:45.861Z",
+  "sheets": [
+    "Sheet1",
+    "Summary",
+    "Dept. 1",
+    "Dept. 2",
+    "Dept. 3",
+    "Dept. 4"
+  ],
+  "overallIndexing": [
+    {
+      "rank": 1,
+      "department": "Dept. 1",
+      "shortName": "DEPT1",
+      "totalTarget": 1051,
+      "achieved": 683,
+      "baseIndex": 0.8,
+      "additionalIndex": 0.057,
+      "cappedBonus": 0.85,
+      "normalizedBonus": 0.82,
+      "sheetName": "Dept. 1",
+      "activityCount": 33
+    },
+    {
+      "rank": 2,
+      "department": "Dept. 2",
+      "shortName": "DEPT2",
+      "totalTarget": 1051,
+      "achieved": 602,
+      "baseIndex": 0.72,
+      "additionalIndex": 0.139,
+      "cappedBonus": 0.77,
+      "normalizedBonus": 0.77,
+      "sheetName": "Dept. 2",
+      "activityCount": 33
+    },
+    {
+      "rank": 3,
+      "department": "Dept. 3",
+      "shortName": "DEPT3",
+      "totalTarget": 1051,
+      "achieved": 672,
+      "baseIndex": 0.8,
+      "additionalIndex": 0,
+      "cappedBonus": 0.8,
+      "normalizedBonus": 0.8,
+      "sheetName": "Dept. 3",
+      "activityCount": 33
+    },
+    {
+      "rank": 4,
+      "department": "Dept. 4",
+      "shortName": "DEPT4",
+      "totalTarget": 1051,
+      "achieved": 706,
+      "baseIndex": 0.84,
+      "additionalIndex": 0.055,
+      "cappedBonus": 0.89,
+      "normalizedBonus": 0.86,
+      "sheetName": "Dept. 4",
+      "activityCount": 33
+    }
+  ],
+  "departments": [
+    {
+      "name": "Dept. 1",
+      "shortName": "DEPT1",
+      "totalWeightage": 100,
+      "totalTarget": 1051,
+      "achieved": 683,
+      "rawIndex": 0.65,
+      "baseIndex": 0.8,
+      "additionalIndexRaw": null,
+      "additionalIndex": 0.057,
+      "cappedBonus": 0.85,
+      "activities": [
+        {
+          "sNo": 1,
+          "activityName": "Journal Publications (SCI / WoS)",
+          "weightage": 10,
+          "totalTarget": 21,
+          "attained": 21,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 2,
+          "activityName": "Journal Publications (Scopus)",
+          "weightage": 6,
+          "totalTarget": 71,
+          "attained": 69,
+          "actualIndex": 0.97,
+          "permittedIndex": 0.97,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 3,
+          "activityName": "Research Funding, Rs. in Lakhs",
+          "weightage": 8,
+          "totalTarget": 60,
+          "attained": 65,
+          "actualIndex": 1.08,
+          "permittedIndex": 1,
+          "additionalActual": 0.08,
+          "additionalPermitted": 0.08
+        },
+        {
+          "sNo": 4,
+          "activityName": "Industrial Consultancy Projects, Rs in Lakhs",
+          "weightage": 5,
+          "totalTarget": 12,
+          "attained": 10,
+          "actualIndex": 0.83,
+          "permittedIndex": 0.83,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 5,
+          "activityName": "Patent Publications",
+          "weightage": 3,
+          "totalTarget": 25,
+          "attained": 15,
+          "actualIndex": 0.6,
+          "permittedIndex": 0.6,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 6,
+          "activityName": "National Conference",
+          "weightage": 2,
+          "totalTarget": 1,
+          "attained": 4,
+          "actualIndex": 4,
+          "permittedIndex": 1,
+          "additionalActual": 3,
+          "additionalPermitted": 1
+        },
+        {
+          "sNo": 7,
+          "activityName": "International Conference",
+          "weightage": 5,
+          "totalTarget": 1,
+          "attained": 1,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 8,
+          "activityName": "Guest Lecture by Industry",
+          "weightage": 3,
+          "totalTarget": 12,
+          "attained": 8,
+          "actualIndex": 0.67,
+          "permittedIndex": 0.67,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 9,
+          "activityName": "Lecture by Alumni",
+          "weightage": 2,
+          "totalTarget": 12,
+          "attained": 9,
+          "actualIndex": 0.75,
+          "permittedIndex": 0.75,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 10,
+          "activityName": "Workshop / Seminar / OBT / In-House Training",
+          "weightage": 3,
+          "totalTarget": 12,
+          "attained": 10,
+          "actualIndex": 0.83,
+          "permittedIndex": 0.83,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 11,
+          "activityName": "MOOC / NPTEL / E-Content Development",
+          "weightage": 2,
+          "totalTarget": 1,
+          "attained": 3,
+          "actualIndex": 3,
+          "permittedIndex": 1,
+          "additionalActual": 2,
+          "additionalPermitted": 1
+        },
+        {
+          "sNo": 12,
+          "activityName": "Guest Lecture delivered",
+          "weightage": 2,
+          "totalTarget": 9,
+          "attained": 8,
+          "actualIndex": 0.89,
+          "permittedIndex": 0.89,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 13,
+          "activityName": "MoU signed",
+          "weightage": 2,
+          "totalTarget": 1,
+          "attained": 1,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 14,
+          "activityName": "International MoU signed",
+          "weightage": 3,
+          "totalTarget": 1,
+          "attained": 1,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 15,
+          "activityName": "Invite New Companies for Student Placements",
+          "weightage": 6,
+          "totalTarget": 20,
+          "attained": 19,
+          "actualIndex": 0.95,
+          "permittedIndex": 0.95,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 16,
+          "activityName": "Placement Targets",
+          "weightage": 6,
+          "totalTarget": 60,
+          "attained": 7,
+          "actualIndex": 0.12,
+          "permittedIndex": 0.12,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 17,
+          "activityName": "Industry Collaborative / Supporting / Sponsored Lab",
+          "weightage": 2,
+          "totalTarget": 1,
+          "attained": 1,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 18,
+          "activityName": "Inviting Scientists / Experts from a Reputed Research Laboratory",
+          "weightage": 2,
+          "totalTarget": 1,
+          "attained": 0,
+          "actualIndex": 0,
+          "permittedIndex": 0,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 19,
+          "activityName": "Collaborative initiatives in funding, Consultancy, Patents, & Publications",
+          "weightage": 3,
+          "totalTarget": 3,
+          "attained": 4,
+          "actualIndex": 1.33,
+          "permittedIndex": 1,
+          "additionalActual": 0.33,
+          "additionalPermitted": 0.33
+        },
+        {
+          "sNo": 20,
+          "activityName": "FDP / STTP Organised",
+          "weightage": 3,
+          "totalTarget": 1,
+          "attained": 1,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 21,
+          "activityName": "Partial Delivery of Courses",
+          "weightage": 2,
+          "totalTarget": 2,
+          "attained": 1,
+          "actualIndex": 0.5,
+          "permittedIndex": 0.5,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 22,
+          "activityName": "Certificate / Value-Added Courses / PS",
+          "weightage": 2,
+          "totalTarget": 2,
+          "attained": 0,
+          "actualIndex": 0,
+          "permittedIndex": 0,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 23,
+          "activityName": "Skill upgradation of Non-teaching staff (Outside)",
+          "weightage": 2,
+          "totalTarget": 3,
+          "attained": 2,
+          "actualIndex": 0.67,
+          "permittedIndex": 0.67,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 24,
+          "activityName": "Department Newsletter and Technical Magazine",
+          "weightage": 1,
+          "totalTarget": 2,
+          "attained": 1,
+          "actualIndex": 0.5,
+          "permittedIndex": 0.5,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 25,
+          "activityName": "Technical event / Hackathon Participation (Student's Participation)",
+          "weightage": 3,
+          "totalTarget": 384,
+          "attained": 150,
+          "actualIndex": 0.39,
+          "permittedIndex": 0.39,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 26,
+          "activityName": "Commercial Product development",
+          "weightage": 2,
+          "totalTarget": 1,
+          "attained": 1,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 27,
+          "activityName": "Technical Society",
+          "weightage": 1,
+          "totalTarget": 2,
+          "attained": 1,
+          "actualIndex": 0.5,
+          "permittedIndex": 0.5,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 28,
+          "activityName": "Technical Society / Professional Bodies Membership",
+          "weightage": 1,
+          "totalTarget": 100,
+          "attained": 80,
+          "actualIndex": 0.8,
+          "permittedIndex": 0.8,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 29,
+          "activityName": "Publication in Conferences",
+          "weightage": 2,
+          "totalTarget": 34,
+          "attained": 30,
+          "actualIndex": 0.88,
+          "permittedIndex": 0.88,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 30,
+          "activityName": "Online Courses (NPTEL)",
+          "weightage": 2,
+          "totalTarget": 75,
+          "attained": 70,
+          "actualIndex": 0.93,
+          "permittedIndex": 0.93,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 31,
+          "activityName": "FDP / STTP attending / Faculty Internship / Industrial training",
+          "weightage": 2,
+          "totalTarget": 46,
+          "attained": 40,
+          "actualIndex": 0.87,
+          "permittedIndex": 0.87,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 32,
+          "activityName": "Professional Competency",
+          "weightage": 1,
+          "totalTarget": 34,
+          "attained": 20,
+          "actualIndex": 0.59,
+          "permittedIndex": 0.59,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 33,
+          "activityName": "Technical Competency",
+          "weightage": 1,
+          "totalTarget": 41,
+          "attained": 30,
+          "actualIndex": 0.73,
+          "permittedIndex": 0.73,
+          "additionalActual": null,
+          "additionalPermitted": null
+        }
+      ]
+    },
+    {
+      "name": "Dept. 2",
+      "shortName": "DEPT2",
+      "totalWeightage": 100,
+      "totalTarget": 1051,
+      "achieved": 602,
+      "rawIndex": 0.57,
+      "baseIndex": 0.72,
+      "additionalIndexRaw": 0.259,
+      "additionalIndex": 0.139,
+      "cappedBonus": 0.77,
+      "activities": [
+        {
+          "sNo": 1,
+          "activityName": "Journal Publications (SCI / WoS)",
+          "weightage": 10,
+          "totalTarget": 21,
+          "attained": 24,
+          "actualIndex": 1.14,
+          "permittedIndex": 1,
+          "additionalActual": 0.14,
+          "additionalPermitted": 0.14
+        },
+        {
+          "sNo": 2,
+          "activityName": "Journal Publications (Scopus)",
+          "weightage": 6,
+          "totalTarget": 71,
+          "attained": 50,
+          "actualIndex": 0.7,
+          "permittedIndex": 0.7,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 3,
+          "activityName": "Research Funding, Rs. in Lakhs",
+          "weightage": 8,
+          "totalTarget": 60,
+          "attained": 50,
+          "actualIndex": 0.83,
+          "permittedIndex": 0.83,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 4,
+          "activityName": "Industrial Consultancy Projects, Rs in Lakhs",
+          "weightage": 5,
+          "totalTarget": 12,
+          "attained": 14,
+          "actualIndex": 1.17,
+          "permittedIndex": 1,
+          "additionalActual": 0.17,
+          "additionalPermitted": 0.17
+        },
+        {
+          "sNo": 5,
+          "activityName": "Patent Publications",
+          "weightage": 3,
+          "totalTarget": 25,
+          "attained": 28,
+          "actualIndex": 1.12,
+          "permittedIndex": 1,
+          "additionalActual": 0.12,
+          "additionalPermitted": 0.12
+        },
+        {
+          "sNo": 6,
+          "activityName": "National Conference",
+          "weightage": 2,
+          "totalTarget": 1,
+          "attained": 6,
+          "actualIndex": 6,
+          "permittedIndex": 1,
+          "additionalActual": 5,
+          "additionalPermitted": 1
+        },
+        {
+          "sNo": 7,
+          "activityName": "International Conference",
+          "weightage": 5,
+          "totalTarget": 1,
+          "attained": 2,
+          "actualIndex": 2,
+          "permittedIndex": 1,
+          "additionalActual": 1,
+          "additionalPermitted": 1
+        },
+        {
+          "sNo": 8,
+          "activityName": "Guest Lecture by Industry",
+          "weightage": 3,
+          "totalTarget": 12,
+          "attained": 7,
+          "actualIndex": 0.58,
+          "permittedIndex": 0.58,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 9,
+          "activityName": "Lecture by Alumni",
+          "weightage": 2,
+          "totalTarget": 12,
+          "attained": 9,
+          "actualIndex": 0.75,
+          "permittedIndex": 0.75,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 10,
+          "activityName": "Workshop / Seminar / OBT / In-House Training",
+          "weightage": 3,
+          "totalTarget": 12,
+          "attained": 13,
+          "actualIndex": 1.08,
+          "permittedIndex": 1,
+          "additionalActual": 0.08,
+          "additionalPermitted": 0.08
+        },
+        {
+          "sNo": 11,
+          "activityName": "MOOC / NPTEL / E-Content Development",
+          "weightage": 2,
+          "totalTarget": 1,
+          "attained": 4,
+          "actualIndex": 4,
+          "permittedIndex": 1,
+          "additionalActual": 3,
+          "additionalPermitted": 1
+        },
+        {
+          "sNo": 12,
+          "activityName": "Guest Lecture delivered",
+          "weightage": 2,
+          "totalTarget": 9,
+          "attained": 7,
+          "actualIndex": 0.78,
+          "permittedIndex": 0.78,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 13,
+          "activityName": "MoU signed",
+          "weightage": 2,
+          "totalTarget": 1,
+          "attained": 2,
+          "actualIndex": 2,
+          "permittedIndex": 1,
+          "additionalActual": 1,
+          "additionalPermitted": 1
+        },
+        {
+          "sNo": 14,
+          "activityName": "International MoU signed",
+          "weightage": 3,
+          "totalTarget": 1,
+          "attained": 0,
+          "actualIndex": 0,
+          "permittedIndex": 0,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 15,
+          "activityName": "Invite New Companies for Student Placements",
+          "weightage": 6,
+          "totalTarget": 20,
+          "attained": 5,
+          "actualIndex": 0.25,
+          "permittedIndex": 0.25,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 16,
+          "activityName": "Placement Targets",
+          "weightage": 6,
+          "totalTarget": 60,
+          "attained": 10,
+          "actualIndex": 0.17,
+          "permittedIndex": 0.17,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 17,
+          "activityName": "Industry Collaborative / Supporting / Sponsored Lab",
+          "weightage": 2,
+          "totalTarget": 1,
+          "attained": 1,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 18,
+          "activityName": "Inviting Scientists / Experts from a Reputed Research Laboratory",
+          "weightage": 2,
+          "totalTarget": 1,
+          "attained": 0,
+          "actualIndex": 0,
+          "permittedIndex": 0,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 19,
+          "activityName": "Collaborative initiatives in funding, Consultancy, Patents, & Publications",
+          "weightage": 3,
+          "totalTarget": 3,
+          "attained": 3,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 20,
+          "activityName": "FDP / STTP Organised",
+          "weightage": 3,
+          "totalTarget": 1,
+          "attained": 1,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 21,
+          "activityName": "Partial Delivery of Courses",
+          "weightage": 2,
+          "totalTarget": 2,
+          "attained": 1,
+          "actualIndex": 0.5,
+          "permittedIndex": 0.5,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 22,
+          "activityName": "Certificate / Value-Added Courses / PS",
+          "weightage": 2,
+          "totalTarget": 2,
+          "attained": 1,
+          "actualIndex": 0.5,
+          "permittedIndex": 0.5,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 23,
+          "activityName": "Skill upgradation of Non-teaching staff (Outside)",
+          "weightage": 2,
+          "totalTarget": 3,
+          "attained": 1,
+          "actualIndex": 0.33,
+          "permittedIndex": 0.33,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 24,
+          "activityName": "Department Newsletter and Technical Magazine",
+          "weightage": 1,
+          "totalTarget": 2,
+          "attained": 1,
+          "actualIndex": 0.5,
+          "permittedIndex": 0.5,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 25,
+          "activityName": "Technical event / Hackathon Participation (Student's Participation)",
+          "weightage": 3,
+          "totalTarget": 384,
+          "attained": 100,
+          "actualIndex": 0.26,
+          "permittedIndex": 0.26,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 26,
+          "activityName": "Commercial Product development",
+          "weightage": 2,
+          "totalTarget": 1,
+          "attained": 1,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 27,
+          "activityName": "Technical Society",
+          "weightage": 1,
+          "totalTarget": 2,
+          "attained": 1,
+          "actualIndex": 0.5,
+          "permittedIndex": 0.5,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 28,
+          "activityName": "Technical Society / Professional Bodies Membership",
+          "weightage": 1,
+          "totalTarget": 100,
+          "attained": 70,
+          "actualIndex": 0.7,
+          "permittedIndex": 0.7,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 29,
+          "activityName": "Publication in Conferences",
+          "weightage": 2,
+          "totalTarget": 34,
+          "attained": 30,
+          "actualIndex": 0.88,
+          "permittedIndex": 0.88,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 30,
+          "activityName": "Online Courses (NPTEL)",
+          "weightage": 2,
+          "totalTarget": 75,
+          "attained": 70,
+          "actualIndex": 0.93,
+          "permittedIndex": 0.93,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 31,
+          "activityName": "FDP / STTP attending / Faculty Internship / Industrial training",
+          "weightage": 2,
+          "totalTarget": 46,
+          "attained": 40,
+          "actualIndex": 0.87,
+          "permittedIndex": 0.87,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 32,
+          "activityName": "Professional Competency",
+          "weightage": 1,
+          "totalTarget": 34,
+          "attained": 20,
+          "actualIndex": 0.59,
+          "permittedIndex": 0.59,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 33,
+          "activityName": "Technical Competency",
+          "weightage": 1,
+          "totalTarget": 41,
+          "attained": 30,
+          "actualIndex": 0.73,
+          "permittedIndex": 0.73,
+          "additionalActual": null,
+          "additionalPermitted": null
+        }
+      ]
+    },
+    {
+      "name": "Dept. 3",
+      "shortName": "DEPT3",
+      "totalWeightage": 100,
+      "totalTarget": 1051,
+      "achieved": 672,
+      "rawIndex": 0.64,
+      "baseIndex": 0.8,
+      "additionalIndexRaw": 0,
+      "additionalIndex": 0,
+      "cappedBonus": 0.8,
+      "activities": [
+        {
+          "sNo": 1,
+          "activityName": "Journal Publications (SCI / WoS)",
+          "weightage": 10,
+          "totalTarget": 21,
+          "attained": 21,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 2,
+          "activityName": "Journal Publications (Scopus)",
+          "weightage": 6,
+          "totalTarget": 71,
+          "attained": 69,
+          "actualIndex": 0.97,
+          "permittedIndex": 0.97,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 3,
+          "activityName": "Research Funding, Rs. in Lakhs",
+          "weightage": 8,
+          "totalTarget": 60,
+          "attained": 60,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 4,
+          "activityName": "Industrial Consultancy Projects, Rs in Lakhs",
+          "weightage": 5,
+          "totalTarget": 12,
+          "attained": 10,
+          "actualIndex": 0.83,
+          "permittedIndex": 0.83,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 5,
+          "activityName": "Patent Publications",
+          "weightage": 3,
+          "totalTarget": 25,
+          "attained": 15,
+          "actualIndex": 0.6,
+          "permittedIndex": 0.6,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 6,
+          "activityName": "National Conference",
+          "weightage": 2,
+          "totalTarget": 1,
+          "attained": 1,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 7,
+          "activityName": "International Conference",
+          "weightage": 5,
+          "totalTarget": 1,
+          "attained": 1,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 8,
+          "activityName": "Guest Lecture by Industry",
+          "weightage": 3,
+          "totalTarget": 12,
+          "attained": 8,
+          "actualIndex": 0.67,
+          "permittedIndex": 0.67,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 9,
+          "activityName": "Lecture by Alumni",
+          "weightage": 2,
+          "totalTarget": 12,
+          "attained": 9,
+          "actualIndex": 0.75,
+          "permittedIndex": 0.75,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 10,
+          "activityName": "Workshop / Seminar / OBT / In-House Training",
+          "weightage": 3,
+          "totalTarget": 12,
+          "attained": 10,
+          "actualIndex": 0.83,
+          "permittedIndex": 0.83,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 11,
+          "activityName": "MOOC / NPTEL / E-Content Development",
+          "weightage": 2,
+          "totalTarget": 1,
+          "attained": 1,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 12,
+          "activityName": "Guest Lecture delivered",
+          "weightage": 2,
+          "totalTarget": 9,
+          "attained": 8,
+          "actualIndex": 0.89,
+          "permittedIndex": 0.89,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 13,
+          "activityName": "MoU signed",
+          "weightage": 2,
+          "totalTarget": 1,
+          "attained": 1,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 14,
+          "activityName": "International MoU signed",
+          "weightage": 3,
+          "totalTarget": 1,
+          "attained": 1,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 15,
+          "activityName": "Invite New Companies for Student Placements",
+          "weightage": 6,
+          "totalTarget": 20,
+          "attained": 19,
+          "actualIndex": 0.95,
+          "permittedIndex": 0.95,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 16,
+          "activityName": "Placement Targets",
+          "weightage": 6,
+          "totalTarget": 60,
+          "attained": 7,
+          "actualIndex": 0.12,
+          "permittedIndex": 0.12,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 17,
+          "activityName": "Industry Collaborative / Supporting / Sponsored Lab",
+          "weightage": 2,
+          "totalTarget": 1,
+          "attained": 1,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 18,
+          "activityName": "Inviting Scientists / Experts from a Reputed Research Laboratory",
+          "weightage": 2,
+          "totalTarget": 1,
+          "attained": 0,
+          "actualIndex": 0,
+          "permittedIndex": 0,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 19,
+          "activityName": "Collaborative initiatives in funding, Consultancy, Patents, & Publications",
+          "weightage": 3,
+          "totalTarget": 3,
+          "attained": 3,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 20,
+          "activityName": "FDP / STTP Organised",
+          "weightage": 3,
+          "totalTarget": 1,
+          "attained": 1,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 21,
+          "activityName": "Partial Delivery of Courses",
+          "weightage": 2,
+          "totalTarget": 2,
+          "attained": 1,
+          "actualIndex": 0.5,
+          "permittedIndex": 0.5,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 22,
+          "activityName": "Certificate / Value-Added Courses / PS",
+          "weightage": 2,
+          "totalTarget": 2,
+          "attained": 0,
+          "actualIndex": 0,
+          "permittedIndex": 0,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 23,
+          "activityName": "Skill upgradation of Non-teaching staff (Outside)",
+          "weightage": 2,
+          "totalTarget": 3,
+          "attained": 2,
+          "actualIndex": 0.67,
+          "permittedIndex": 0.67,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 24,
+          "activityName": "Department Newsletter and Technical Magazine",
+          "weightage": 1,
+          "totalTarget": 2,
+          "attained": 1,
+          "actualIndex": 0.5,
+          "permittedIndex": 0.5,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 25,
+          "activityName": "Technical event / Hackathon Participation (Student's Participation)",
+          "weightage": 3,
+          "totalTarget": 384,
+          "attained": 150,
+          "actualIndex": 0.39,
+          "permittedIndex": 0.39,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 26,
+          "activityName": "Commercial Product development",
+          "weightage": 2,
+          "totalTarget": 1,
+          "attained": 1,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 27,
+          "activityName": "Technical Society",
+          "weightage": 1,
+          "totalTarget": 2,
+          "attained": 1,
+          "actualIndex": 0.5,
+          "permittedIndex": 0.5,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 28,
+          "activityName": "Technical Society / Professional Bodies Membership",
+          "weightage": 1,
+          "totalTarget": 100,
+          "attained": 80,
+          "actualIndex": 0.8,
+          "permittedIndex": 0.8,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 29,
+          "activityName": "Publication in Conferences",
+          "weightage": 2,
+          "totalTarget": 34,
+          "attained": 30,
+          "actualIndex": 0.88,
+          "permittedIndex": 0.88,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 30,
+          "activityName": "Online Courses (NPTEL)",
+          "weightage": 2,
+          "totalTarget": 75,
+          "attained": 70,
+          "actualIndex": 0.93,
+          "permittedIndex": 0.93,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 31,
+          "activityName": "FDP / STTP attending / Faculty Internship / Industrial training",
+          "weightage": 2,
+          "totalTarget": 46,
+          "attained": 40,
+          "actualIndex": 0.87,
+          "permittedIndex": 0.87,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 32,
+          "activityName": "Professional Competency",
+          "weightage": 1,
+          "totalTarget": 34,
+          "attained": 20,
+          "actualIndex": 0.59,
+          "permittedIndex": 0.59,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 33,
+          "activityName": "Technical Competency",
+          "weightage": 1,
+          "totalTarget": 41,
+          "attained": 30,
+          "actualIndex": 0.73,
+          "permittedIndex": 0.73,
+          "additionalActual": null,
+          "additionalPermitted": null
+        }
+      ]
+    },
+    {
+      "name": "Dept. 4",
+      "shortName": "DEPT4",
+      "totalWeightage": 100,
+      "totalTarget": 1051,
+      "achieved": 706,
+      "rawIndex": 0.67,
+      "baseIndex": 0.84,
+      "additionalIndexRaw": 0.063,
+      "additionalIndex": 0.055,
+      "cappedBonus": 0.89,
+      "activities": [
+        {
+          "sNo": 1,
+          "activityName": "Journal Publications (SCI / WoS)",
+          "weightage": 10,
+          "totalTarget": 21,
+          "attained": 22,
+          "actualIndex": 1.05,
+          "permittedIndex": 1,
+          "additionalActual": 0.05,
+          "additionalPermitted": 0.05
+        },
+        {
+          "sNo": 2,
+          "activityName": "Journal Publications (Scopus)",
+          "weightage": 6,
+          "totalTarget": 71,
+          "attained": 69,
+          "actualIndex": 0.97,
+          "permittedIndex": 0.97,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 3,
+          "activityName": "Research Funding, Rs. in Lakhs",
+          "weightage": 8,
+          "totalTarget": 60,
+          "attained": 50,
+          "actualIndex": 0.83,
+          "permittedIndex": 0.83,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 4,
+          "activityName": "Industrial Consultancy Projects, Rs in Lakhs",
+          "weightage": 5,
+          "totalTarget": 12,
+          "attained": 26,
+          "actualIndex": 2.17,
+          "permittedIndex": 1,
+          "additionalActual": 1.17,
+          "additionalPermitted": 1
+        },
+        {
+          "sNo": 5,
+          "activityName": "Patent Publications",
+          "weightage": 3,
+          "totalTarget": 25,
+          "attained": 15,
+          "actualIndex": 0.6,
+          "permittedIndex": 0.6,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 6,
+          "activityName": "National Conference",
+          "weightage": 2,
+          "totalTarget": 1,
+          "attained": 1,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 7,
+          "activityName": "International Conference",
+          "weightage": 5,
+          "totalTarget": 1,
+          "attained": 1,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 8,
+          "activityName": "Guest Lecture by Industry",
+          "weightage": 3,
+          "totalTarget": 12,
+          "attained": 8,
+          "actualIndex": 0.67,
+          "permittedIndex": 0.67,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 9,
+          "activityName": "Lecture by Alumni",
+          "weightage": 2,
+          "totalTarget": 12,
+          "attained": 9,
+          "actualIndex": 0.75,
+          "permittedIndex": 0.75,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 10,
+          "activityName": "Workshop / Seminar / OBT / In-House Training",
+          "weightage": 3,
+          "totalTarget": 12,
+          "attained": 12,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 11,
+          "activityName": "MOOC / NPTEL / E-Content Development",
+          "weightage": 2,
+          "totalTarget": 1,
+          "attained": 1,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 12,
+          "activityName": "Guest Lecture delivered",
+          "weightage": 2,
+          "totalTarget": 9,
+          "attained": 8,
+          "actualIndex": 0.89,
+          "permittedIndex": 0.89,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 13,
+          "activityName": "MoU signed",
+          "weightage": 2,
+          "totalTarget": 1,
+          "attained": 1,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 14,
+          "activityName": "International MoU signed",
+          "weightage": 3,
+          "totalTarget": 1,
+          "attained": 1,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 15,
+          "activityName": "Invite New Companies for Student Placements",
+          "weightage": 6,
+          "totalTarget": 20,
+          "attained": 19,
+          "actualIndex": 0.95,
+          "permittedIndex": 0.95,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 16,
+          "activityName": "Placement Targets",
+          "weightage": 6,
+          "totalTarget": 60,
+          "attained": 30,
+          "actualIndex": 0.5,
+          "permittedIndex": 0.5,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 17,
+          "activityName": "Industry Collaborative / Supporting / Sponsored Lab",
+          "weightage": 2,
+          "totalTarget": 1,
+          "attained": 1,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 18,
+          "activityName": "Inviting Scientists / Experts from a Reputed Research Laboratory",
+          "weightage": 2,
+          "totalTarget": 1,
+          "attained": 0,
+          "actualIndex": 0,
+          "permittedIndex": 0,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 19,
+          "activityName": "Collaborative initiatives in funding, Consultancy, Patents, & Publications",
+          "weightage": 3,
+          "totalTarget": 3,
+          "attained": 3,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 20,
+          "activityName": "FDP / STTP Organised",
+          "weightage": 3,
+          "totalTarget": 1,
+          "attained": 1,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 21,
+          "activityName": "Partial Delivery of Courses",
+          "weightage": 2,
+          "totalTarget": 2,
+          "attained": 1,
+          "actualIndex": 0.5,
+          "permittedIndex": 0.5,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 22,
+          "activityName": "Certificate / Value-Added Courses / PS",
+          "weightage": 2,
+          "totalTarget": 2,
+          "attained": 2,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 23,
+          "activityName": "Skill upgradation of Non-teaching staff (Outside)",
+          "weightage": 2,
+          "totalTarget": 3,
+          "attained": 2,
+          "actualIndex": 0.67,
+          "permittedIndex": 0.67,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 24,
+          "activityName": "Department Newsletter and Technical Magazine",
+          "weightage": 1,
+          "totalTarget": 2,
+          "attained": 1,
+          "actualIndex": 0.5,
+          "permittedIndex": 0.5,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 25,
+          "activityName": "Technical event / Hackathon Participation (Student's Participation)",
+          "weightage": 3,
+          "totalTarget": 384,
+          "attained": 150,
+          "actualIndex": 0.39,
+          "permittedIndex": 0.39,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 26,
+          "activityName": "Commercial Product development",
+          "weightage": 2,
+          "totalTarget": 1,
+          "attained": 1,
+          "actualIndex": 1,
+          "permittedIndex": 1,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 27,
+          "activityName": "Technical Society",
+          "weightage": 1,
+          "totalTarget": 2,
+          "attained": 1,
+          "actualIndex": 0.5,
+          "permittedIndex": 0.5,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 28,
+          "activityName": "Technical Society / Professional Bodies Membership",
+          "weightage": 1,
+          "totalTarget": 100,
+          "attained": 80,
+          "actualIndex": 0.8,
+          "permittedIndex": 0.8,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 29,
+          "activityName": "Publication in Conferences",
+          "weightage": 2,
+          "totalTarget": 34,
+          "attained": 30,
+          "actualIndex": 0.88,
+          "permittedIndex": 0.88,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 30,
+          "activityName": "Online Courses (NPTEL)",
+          "weightage": 2,
+          "totalTarget": 75,
+          "attained": 70,
+          "actualIndex": 0.93,
+          "permittedIndex": 0.93,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 31,
+          "activityName": "FDP / STTP attending / Faculty Internship / Industrial training",
+          "weightage": 2,
+          "totalTarget": 46,
+          "attained": 40,
+          "actualIndex": 0.87,
+          "permittedIndex": 0.87,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 32,
+          "activityName": "Professional Competency",
+          "weightage": 1,
+          "totalTarget": 34,
+          "attained": 20,
+          "actualIndex": 0.59,
+          "permittedIndex": 0.59,
+          "additionalActual": null,
+          "additionalPermitted": null
+        },
+        {
+          "sNo": 33,
+          "activityName": "Technical Competency",
+          "weightage": 1,
+          "totalTarget": 41,
+          "attained": 30,
+          "actualIndex": 0.73,
+          "permittedIndex": 0.73,
+          "additionalActual": null,
+          "additionalPermitted": null
+        }
+      ]
+    }
+  ],
+  "cseLike": {
+    "totalWeightage": 100,
+    "totalIndex": 0.8,
+    "additionalIndex": 0.057,
+    "activityIndexing": [
+      {
+        "sNo": 1,
+        "activityName": "Journal Publications (SCI / WoS)",
+        "weightage": 10,
+        "totalTarget": 21,
+        "attained": 21,
+        "actualIndex": 1,
+        "permittedIndex": 1,
+        "additionalActual": null,
+        "additionalPermitted": null
+      },
+      {
+        "sNo": 2,
+        "activityName": "Journal Publications (Scopus)",
+        "weightage": 6,
+        "totalTarget": 71,
+        "attained": 69,
+        "actualIndex": 0.97,
+        "permittedIndex": 0.97,
+        "additionalActual": null,
+        "additionalPermitted": null
+      },
+      {
+        "sNo": 3,
+        "activityName": "Research Funding, Rs. in Lakhs",
+        "weightage": 8,
+        "totalTarget": 60,
+        "attained": 65,
+        "actualIndex": 1.08,
+        "permittedIndex": 1,
+        "additionalActual": 0.08,
+        "additionalPermitted": 0.08
+      },
+      {
+        "sNo": 4,
+        "activityName": "Industrial Consultancy Projects, Rs in Lakhs",
+        "weightage": 5,
+        "totalTarget": 12,
+        "attained": 10,
+        "actualIndex": 0.83,
+        "permittedIndex": 0.83,
+        "additionalActual": null,
+        "additionalPermitted": null
+      },
+      {
+        "sNo": 5,
+        "activityName": "Patent Publications",
+        "weightage": 3,
+        "totalTarget": 25,
+        "attained": 15,
+        "actualIndex": 0.6,
+        "permittedIndex": 0.6,
+        "additionalActual": null,
+        "additionalPermitted": null
+      },
+      {
+        "sNo": 6,
+        "activityName": "National Conference",
+        "weightage": 2,
+        "totalTarget": 1,
+        "attained": 4,
+        "actualIndex": 4,
+        "permittedIndex": 1,
+        "additionalActual": 3,
+        "additionalPermitted": 1
+      },
+      {
+        "sNo": 7,
+        "activityName": "International Conference",
+        "weightage": 5,
+        "totalTarget": 1,
+        "attained": 1,
+        "actualIndex": 1,
+        "permittedIndex": 1,
+        "additionalActual": null,
+        "additionalPermitted": null
+      },
+      {
+        "sNo": 8,
+        "activityName": "Guest Lecture by Industry",
+        "weightage": 3,
+        "totalTarget": 12,
+        "attained": 8,
+        "actualIndex": 0.67,
+        "permittedIndex": 0.67,
+        "additionalActual": null,
+        "additionalPermitted": null
+      },
+      {
+        "sNo": 9,
+        "activityName": "Lecture by Alumni",
+        "weightage": 2,
+        "totalTarget": 12,
+        "attained": 9,
+        "actualIndex": 0.75,
+        "permittedIndex": 0.75,
+        "additionalActual": null,
+        "additionalPermitted": null
+      },
+      {
+        "sNo": 10,
+        "activityName": "Workshop / Seminar / OBT / In-House Training",
+        "weightage": 3,
+        "totalTarget": 12,
+        "attained": 10,
+        "actualIndex": 0.83,
+        "permittedIndex": 0.83,
+        "additionalActual": null,
+        "additionalPermitted": null
+      },
+      {
+        "sNo": 11,
+        "activityName": "MOOC / NPTEL / E-Content Development",
+        "weightage": 2,
+        "totalTarget": 1,
+        "attained": 3,
+        "actualIndex": 3,
+        "permittedIndex": 1,
+        "additionalActual": 2,
+        "additionalPermitted": 1
+      },
+      {
+        "sNo": 12,
+        "activityName": "Guest Lecture delivered",
+        "weightage": 2,
+        "totalTarget": 9,
+        "attained": 8,
+        "actualIndex": 0.89,
+        "permittedIndex": 0.89,
+        "additionalActual": null,
+        "additionalPermitted": null
+      },
+      {
+        "sNo": 13,
+        "activityName": "MoU signed",
+        "weightage": 2,
+        "totalTarget": 1,
+        "attained": 1,
+        "actualIndex": 1,
+        "permittedIndex": 1,
+        "additionalActual": null,
+        "additionalPermitted": null
+      },
+      {
+        "sNo": 14,
+        "activityName": "International MoU signed",
+        "weightage": 3,
+        "totalTarget": 1,
+        "attained": 1,
+        "actualIndex": 1,
+        "permittedIndex": 1,
+        "additionalActual": null,
+        "additionalPermitted": null
+      },
+      {
+        "sNo": 15,
+        "activityName": "Invite New Companies for Student Placements",
+        "weightage": 6,
+        "totalTarget": 20,
+        "attained": 19,
+        "actualIndex": 0.95,
+        "permittedIndex": 0.95,
+        "additionalActual": null,
+        "additionalPermitted": null
+      },
+      {
+        "sNo": 16,
+        "activityName": "Placement Targets",
+        "weightage": 6,
+        "totalTarget": 60,
+        "attained": 7,
+        "actualIndex": 0.12,
+        "permittedIndex": 0.12,
+        "additionalActual": null,
+        "additionalPermitted": null
+      },
+      {
+        "sNo": 17,
+        "activityName": "Industry Collaborative / Supporting / Sponsored Lab",
+        "weightage": 2,
+        "totalTarget": 1,
+        "attained": 1,
+        "actualIndex": 1,
+        "permittedIndex": 1,
+        "additionalActual": null,
+        "additionalPermitted": null
+      },
+      {
+        "sNo": 18,
+        "activityName": "Inviting Scientists / Experts from a Reputed Research Laboratory",
+        "weightage": 2,
+        "totalTarget": 1,
+        "attained": 0,
+        "actualIndex": 0,
+        "permittedIndex": 0,
+        "additionalActual": null,
+        "additionalPermitted": null
+      },
+      {
+        "sNo": 19,
+        "activityName": "Collaborative initiatives in funding, Consultancy, Patents, & Publications",
+        "weightage": 3,
+        "totalTarget": 3,
+        "attained": 4,
+        "actualIndex": 1.33,
+        "permittedIndex": 1,
+        "additionalActual": 0.33,
+        "additionalPermitted": 0.33
+      },
+      {
+        "sNo": 20,
+        "activityName": "FDP / STTP Organised",
+        "weightage": 3,
+        "totalTarget": 1,
+        "attained": 1,
+        "actualIndex": 1,
+        "permittedIndex": 1,
+        "additionalActual": null,
+        "additionalPermitted": null
+      },
+      {
+        "sNo": 21,
+        "activityName": "Partial Delivery of Courses",
+        "weightage": 2,
+        "totalTarget": 2,
+        "attained": 1,
+        "actualIndex": 0.5,
+        "permittedIndex": 0.5,
+        "additionalActual": null,
+        "additionalPermitted": null
+      },
+      {
+        "sNo": 22,
+        "activityName": "Certificate / Value-Added Courses / PS",
+        "weightage": 2,
+        "totalTarget": 2,
+        "attained": 0,
+        "actualIndex": 0,
+        "permittedIndex": 0,
+        "additionalActual": null,
+        "additionalPermitted": null
+      },
+      {
+        "sNo": 23,
+        "activityName": "Skill upgradation of Non-teaching staff (Outside)",
+        "weightage": 2,
+        "totalTarget": 3,
+        "attained": 2,
+        "actualIndex": 0.67,
+        "permittedIndex": 0.67,
+        "additionalActual": null,
+        "additionalPermitted": null
+      },
+      {
+        "sNo": 24,
+        "activityName": "Department Newsletter and Technical Magazine",
+        "weightage": 1,
+        "totalTarget": 2,
+        "attained": 1,
+        "actualIndex": 0.5,
+        "permittedIndex": 0.5,
+        "additionalActual": null,
+        "additionalPermitted": null
+      },
+      {
+        "sNo": 25,
+        "activityName": "Technical event / Hackathon Participation (Student's Participation)",
+        "weightage": 3,
+        "totalTarget": 384,
+        "attained": 150,
+        "actualIndex": 0.39,
+        "permittedIndex": 0.39,
+        "additionalActual": null,
+        "additionalPermitted": null
+      },
+      {
+        "sNo": 26,
+        "activityName": "Commercial Product development",
+        "weightage": 2,
+        "totalTarget": 1,
+        "attained": 1,
+        "actualIndex": 1,
+        "permittedIndex": 1,
+        "additionalActual": null,
+        "additionalPermitted": null
+      },
+      {
+        "sNo": 27,
+        "activityName": "Technical Society",
+        "weightage": 1,
+        "totalTarget": 2,
+        "attained": 1,
+        "actualIndex": 0.5,
+        "permittedIndex": 0.5,
+        "additionalActual": null,
+        "additionalPermitted": null
+      },
+      {
+        "sNo": 28,
+        "activityName": "Technical Society / Professional Bodies Membership",
+        "weightage": 1,
+        "totalTarget": 100,
+        "attained": 80,
+        "actualIndex": 0.8,
+        "permittedIndex": 0.8,
+        "additionalActual": null,
+        "additionalPermitted": null
+      },
+      {
+        "sNo": 29,
+        "activityName": "Publication in Conferences",
+        "weightage": 2,
+        "totalTarget": 34,
+        "attained": 30,
+        "actualIndex": 0.88,
+        "permittedIndex": 0.88,
+        "additionalActual": null,
+        "additionalPermitted": null
+      },
+      {
+        "sNo": 30,
+        "activityName": "Online Courses (NPTEL)",
+        "weightage": 2,
+        "totalTarget": 75,
+        "attained": 70,
+        "actualIndex": 0.93,
+        "permittedIndex": 0.93,
+        "additionalActual": null,
+        "additionalPermitted": null
+      },
+      {
+        "sNo": 31,
+        "activityName": "FDP / STTP attending / Faculty Internship / Industrial training",
+        "weightage": 2,
+        "totalTarget": 46,
+        "attained": 40,
+        "actualIndex": 0.87,
+        "permittedIndex": 0.87,
+        "additionalActual": null,
+        "additionalPermitted": null
+      },
+      {
+        "sNo": 32,
+        "activityName": "Professional Competency",
+        "weightage": 1,
+        "totalTarget": 34,
+        "attained": 20,
+        "actualIndex": 0.59,
+        "permittedIndex": 0.59,
+        "additionalActual": null,
+        "additionalPermitted": null
+      },
+      {
+        "sNo": 33,
+        "activityName": "Technical Competency",
+        "weightage": 1,
+        "totalTarget": 41,
+        "attained": 30,
+        "actualIndex": 0.73,
+        "permittedIndex": 0.73,
+        "additionalActual": null,
+        "additionalPermitted": null
+      }
+    ]
+  },
+  "ddpJournalPublicationsOverall": {
+    "activityName": "Journal Publications (SCI / WoS)",
+    "proposedTarget": 84,
+    "proposedAchieved": 88,
+    "pending": -4
+  },
+  "ddpJournalDeptBreakdown": [
+    {
+      "sNo": 1,
+      "department": "Dept. 1",
+      "shortName": "DEPT1",
+      "totalTarget": 21,
+      "achieved": 21,
+      "pending": 0,
+      "bipIds": ""
+    },
+    {
+      "sNo": 2,
+      "department": "Dept. 2",
+      "shortName": "DEPT2",
+      "totalTarget": 21,
+      "achieved": 24,
+      "pending": -3,
+      "bipIds": ""
+    },
+    {
+      "sNo": 3,
+      "department": "Dept. 3",
+      "shortName": "DEPT3",
+      "totalTarget": 21,
+      "achieved": 21,
+      "pending": 0,
+      "bipIds": ""
+    },
+    {
+      "sNo": 4,
+      "department": "Dept. 4",
+      "shortName": "DEPT4",
+      "totalTarget": 21,
+      "achieved": 22,
+      "pending": -1,
+      "bipIds": ""
+    }
+  ],
+  "ddpAllActivities": [
+    {
+      "activityName": "Journal Publications (SCI / WoS)",
+      "proposedTarget": 84,
+      "proposedAchieved": 88,
+      "pending": -4
+    },
+    {
+      "activityName": "Journal Publications (Scopus)",
+      "proposedTarget": 284,
+      "proposedAchieved": 257,
+      "pending": 27
+    },
+    {
+      "activityName": "Research Funding, Rs. in Lakhs",
+      "proposedTarget": 240,
+      "proposedAchieved": 225,
+      "pending": 15
+    },
+    {
+      "activityName": "Industrial Consultancy Projects, Rs in Lakhs",
+      "proposedTarget": 48,
+      "proposedAchieved": 60,
+      "pending": -12
+    },
+    {
+      "activityName": "Patent Publications",
+      "proposedTarget": 100,
+      "proposedAchieved": 73,
+      "pending": 27
+    },
+    {
+      "activityName": "National Conference",
+      "proposedTarget": 4,
+      "proposedAchieved": 12,
+      "pending": -8
+    },
+    {
+      "activityName": "International Conference",
+      "proposedTarget": 4,
+      "proposedAchieved": 5,
+      "pending": -1
+    },
+    {
+      "activityName": "Guest Lecture by Industry",
+      "proposedTarget": 48,
+      "proposedAchieved": 31,
+      "pending": 17
+    },
+    {
+      "activityName": "Lecture by Alumni",
+      "proposedTarget": 48,
+      "proposedAchieved": 36,
+      "pending": 12
+    },
+    {
+      "activityName": "Workshop / Seminar / OBT / In-House Training",
+      "proposedTarget": 48,
+      "proposedAchieved": 45,
+      "pending": 3
+    },
+    {
+      "activityName": "MOOC / NPTEL / E-Content Development",
+      "proposedTarget": 4,
+      "proposedAchieved": 9,
+      "pending": -5
+    },
+    {
+      "activityName": "Guest Lecture delivered",
+      "proposedTarget": 36,
+      "proposedAchieved": 31,
+      "pending": 5
+    },
+    {
+      "activityName": "MoU signed",
+      "proposedTarget": 4,
+      "proposedAchieved": 5,
+      "pending": -1
+    },
+    {
+      "activityName": "International MoU signed",
+      "proposedTarget": 4,
+      "proposedAchieved": 3,
+      "pending": 1
+    },
+    {
+      "activityName": "Invite New Companies for Student Placements",
+      "proposedTarget": 80,
+      "proposedAchieved": 62,
+      "pending": 18
+    },
+    {
+      "activityName": "Placement Targets",
+      "proposedTarget": 240,
+      "proposedAchieved": 54,
+      "pending": 186
+    },
+    {
+      "activityName": "Industry Collaborative / Supporting / Sponsored Lab",
+      "proposedTarget": 4,
+      "proposedAchieved": 4,
+      "pending": 0
+    },
+    {
+      "activityName": "Inviting Scientists / Experts from a Reputed Research Laboratory",
+      "proposedTarget": 4,
+      "proposedAchieved": 0,
+      "pending": 4
+    },
+    {
+      "activityName": "Collaborative initiatives in funding, Consultancy, Patents, & Publications",
+      "proposedTarget": 12,
+      "proposedAchieved": 13,
+      "pending": -1
+    },
+    {
+      "activityName": "FDP / STTP Organised",
+      "proposedTarget": 4,
+      "proposedAchieved": 4,
+      "pending": 0
+    },
+    {
+      "activityName": "Partial Delivery of Courses",
+      "proposedTarget": 8,
+      "proposedAchieved": 4,
+      "pending": 4
+    },
+    {
+      "activityName": "Certificate / Value-Added Courses / PS",
+      "proposedTarget": 8,
+      "proposedAchieved": 3,
+      "pending": 5
+    },
+    {
+      "activityName": "Skill upgradation of Non-teaching staff (Outside)",
+      "proposedTarget": 12,
+      "proposedAchieved": 7,
+      "pending": 5
+    },
+    {
+      "activityName": "Department Newsletter and Technical Magazine",
+      "proposedTarget": 8,
+      "proposedAchieved": 4,
+      "pending": 4
+    },
+    {
+      "activityName": "Technical event / Hackathon Participation (Student's Participation)",
+      "proposedTarget": 1536,
+      "proposedAchieved": 550,
+      "pending": 986
+    },
+    {
+      "activityName": "Commercial Product development",
+      "proposedTarget": 4,
+      "proposedAchieved": 4,
+      "pending": 0
+    },
+    {
+      "activityName": "Technical Society",
+      "proposedTarget": 8,
+      "proposedAchieved": 4,
+      "pending": 4
+    },
+    {
+      "activityName": "Technical Society / Professional Bodies Membership",
+      "proposedTarget": 400,
+      "proposedAchieved": 310,
+      "pending": 90
+    },
+    {
+      "activityName": "Publication in Conferences",
+      "proposedTarget": 136,
+      "proposedAchieved": 120,
+      "pending": 16
+    },
+    {
+      "activityName": "Online Courses (NPTEL)",
+      "proposedTarget": 300,
+      "proposedAchieved": 280,
+      "pending": 20
+    },
+    {
+      "activityName": "FDP / STTP attending / Faculty Internship / Industrial training",
+      "proposedTarget": 184,
+      "proposedAchieved": 160,
+      "pending": 24
+    },
+    {
+      "activityName": "Professional Competency",
+      "proposedTarget": 136,
+      "proposedAchieved": 80,
+      "pending": 56
+    },
+    {
+      "activityName": "Technical Competency",
+      "proposedTarget": 164,
+      "proposedAchieved": 120,
+      "pending": 44
+    }
+  ],
+  "ddpOverallTotals": {
+    "proposedTargets": 4204,
+    "proposedAchieved": 2663,
+    "pending": 1541
+  }
+}
