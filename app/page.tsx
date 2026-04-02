@@ -12,6 +12,8 @@ export default function Page() {
     if (isAuthenticated) {
       if (user?.roles?.includes('dean')) {
         router.push('/college')
+      } else if (user?.roles?.includes('student')) {
+        router.push('/student/dashboard')
       } else {
         router.push('/dashboard')
       }

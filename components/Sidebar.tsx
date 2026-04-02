@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/store";
 import { useRoles } from "@/hooks/useRoles";
+import { studentNavItems } from "@/lib/student-navigation";
 import {
   LayoutDashboard,
   FileText,
@@ -64,7 +65,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const router = useRouter();
   const pathname = usePathname();
   const { user, logout } = useAuthStore();
-  const { isFaculty, isHod, isDean, isVerification, isMaintenance } =
+  const { isFaculty, isHod, isDean, isStudent, isVerification, isMaintenance } =
     useRoles();
   const [profileOpen, setProfileOpen] = useState(false);
   const [achievementsExpanded, setAchievementsExpanded] = useState(false);
@@ -86,8 +87,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
           label: "Dashboard",
           href: "/dashboard",
           icon: LayoutDashboard,
-          show: !isDean(),
+          show: !isDean() && !isStudent(),
         },
+      ],
+    },
+    {
+      title: "Student",
+      items: [
+        {
+          label: "Dashboard",
+          href: "/student/dashboard",
+          icon: LayoutDashboard,
+          show: isStudent(),
+        },
+        {
+          label: "Overview",
+          href: "/student/overview",
+          icon: FileText,
+          show: isStudent(),
+        },
+        ...studentNavItems.map((item) => ({
+          label: item.label,
+          href: `/student/${item.slug}`,
+          icon: FileText,
+          show: isStudent(),
+        })),
       ],
     },
     {
@@ -239,6 +263,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       faculty: "bg-purple-100 text-purple-700",
       hod: "bg-emerald-500/20 text-emerald-300",
       dean: "bg-violet-100 text-violet-700",
+      student: "bg-indigo-100 text-indigo-700",
       verification: "bg-amber-500/20 text-amber-300",
       maintenance: "bg-red-500/20 text-red-300",
     };
@@ -262,11 +287,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           className="flex items-center gap-3 overflow-hidden"
         >
           <div className="w-9 h-9 bg-[#7D53F6] rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
-            <span className="text-white font-bold text-lg">F</span>
+            <span className="text-white font-bold text-lg">I</span>
           </div>
           {!collapsed && (
             <span className="font-semibold text-sm whitespace-nowrap animate-fade-in">
-              Faculty Tracker
+              Information Portal
             </span>
           )}
         </Link>

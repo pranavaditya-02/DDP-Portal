@@ -26,6 +26,8 @@ export interface Role {
 
 export const availableResources: Resource[] = [
   { id: 'dashboard', label: 'Dashboard', icon: 'LayoutDashboard', href: '/dashboard', group: 'Overview' },
+  { id: 'student-dashboard', label: 'Student Dashboard', icon: 'LayoutDashboard', href: '/student/dashboard', group: 'Overview' },
+  { id: 'student-overview', label: 'Student Overview', icon: 'FileText', href: '/student/overview', group: 'Overview' },
   { id: 'my-activities', label: 'My Activities', icon: 'FileText', href: '/activities', group: 'Faculty' },
   { id: 'submit-achievements', label: 'Submit Achievements', icon: 'Award', href: '/achievements/submit', group: 'Faculty' },
   { id: 'submit-action-plan', label: 'Submit Action Plan', icon: 'Clipboard', href: '/action-plan/submit', group: 'Faculty' },
@@ -70,7 +72,13 @@ export const roles: Role[] = [
     isSystem: true, createdAt: '2024-01-01', usersCount: 3,
   },
   {
-    id: 6, name: 'Guest Reviewer', description: 'External reviewer with read-only access',
+    id: 6, name: 'Student', description: 'Student user with student achievements and reports access',
+    passwordPrefix: 'st', editAccess: true, deleteAccess: false, status: true,
+    resources: ['student-dashboard', 'student-overview'],
+    isSystem: true, createdAt: '2026-04-02', usersCount: 120,
+  },
+  {
+    id: 7, name: 'Guest Reviewer', description: 'External reviewer with read-only access',
     passwordPrefix: 'gr', editAccess: false, deleteAccess: false, status: true,
     resources: ['dashboard', 'leaderboard'],
     isSystem: false, createdAt: '2025-06-15', usersCount: 4,
@@ -254,7 +262,7 @@ export const adminStats = {
   totalUsers: 198,
   activeUsers: 185,
   newUsersThisMonth: 5,
-  totalRoles: 5,
+  totalRoles: 6,
   systemUptime: '99.9%',
   lastBackup: '2026-02-10 02:00 AM',
   storageUsed: '2.4 GB / 10 GB',
@@ -487,6 +495,7 @@ export const userGrowthData = [
 // ---- Admin: role distribution ----
 export const roleDistributionData = [
   { role: 'Faculty', count: 165, color: '#3b82f6' },
+  { role: 'Student', count: 120, color: '#6366f1' },
   { role: 'HOD', count: 6, color: '#10b981' },
   { role: 'Dean', count: 2, color: '#8b5cf6' },
   { role: 'Verification', count: 8, color: '#f59e0b' },

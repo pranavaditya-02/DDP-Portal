@@ -14,12 +14,15 @@ const DEMO_ACCOUNTS = [
   { label: 'Faculty', email: 'faculty@bit.edu', name: 'Dr. Priya Sharma', roles: ['faculty'], departmentId: 1, color: 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200' },
   { label: 'HOD', email: 'hod@bit.edu', name: 'Dr. Rajesh Kumar', roles: ['faculty', 'hod'], departmentId: 1, color: 'bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-200' },
   { label: 'Dean', email: 'dean@bit.edu', name: 'Dr. Anitha Devi', roles: ['faculty', 'dean'], departmentId: undefined, color: 'bg-purple-100 text-purple-700 border-purple-200 hover:bg-purple-200' },
+  { label: 'Student', email: 'student@bit.edu', name: 'Arun Student', roles: ['student'], departmentId: 1, color: 'bg-indigo-100 text-indigo-700 border-indigo-200 hover:bg-indigo-200' },
   { label: 'Verification', email: 'verify@bit.edu', name: 'Prof. Suresh Babu', roles: ['faculty', 'verification'], departmentId: 1, color: 'bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-200' },
   { label: 'Admin', email: 'admin@bit.edu', name: 'Admin User', roles: ['maintenance'], departmentId: undefined, color: 'bg-red-100 text-red-700 border-red-200 hover:bg-red-200' },
 ]
 
 function getPostLoginRoute(roles: string[] = []) {
-  return roles.includes('dean') ? '/college' : '/dashboard'
+  if (roles.includes('dean')) return '/college'
+  if (roles.includes('student')) return '/student/dashboard'
+  return '/dashboard'
 }
 
 export default function LoginPage() {
@@ -162,7 +165,7 @@ export default function LoginPage() {
           </div>
 
           {/* Demo Login Buttons */}
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
             {DEMO_ACCOUNTS.map((account) => (
               <button
                 key={account.label}

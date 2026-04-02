@@ -23,6 +23,7 @@ export const useRoles = () => {
     isFaculty: (): boolean => user?.roles.includes('faculty') ?? false,
     isHod: (): boolean => user?.roles.includes('hod') ?? false,
     isDean: (): boolean => user?.roles.includes('dean') ?? false,
+    isStudent: (): boolean => user?.roles.includes('student') ?? false,
     isVerification: (): boolean => user?.roles.includes('verification') ?? false,
     isMaintenance: (): boolean => user?.roles.includes('maintenance') ?? false,
 
