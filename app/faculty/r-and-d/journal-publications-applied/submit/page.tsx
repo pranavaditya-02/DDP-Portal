@@ -166,7 +166,6 @@ function FileUpload({
 export default function JournalPublicationsAppliedSubmitPage() {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
-
   const [formData, setFormData] = useState<FormData>({
     cadre: "",
     taskId: "",
@@ -534,7 +533,7 @@ export default function JournalPublicationsAppliedSubmitPage() {
                     Special Lab <RequiredAst />
                   </label>
                   <input
-                    id="specialLab"
+                    id="specialLab"  
                     name="specialLab"
                     value={formData.specialLab}
                     onChange={handleChange}

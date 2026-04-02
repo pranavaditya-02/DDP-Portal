@@ -1,15 +1,16 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import {
   deanStats, monthlyTrends, yearlyComparisonData,
   collegeActivityTypeData, facultyGrowthData,
   deptRadarData, leaderboard,
 } from '@/lib/mock-data'
 import {
-  ddpOverallIndexing, ddpAllActivities, ddpOverallTotals,
-  ddpJournalDeptBreakdown, ddpMonthlyTrend,
+  ddpOverallIndexing, ddpSheetOverallIndexing, ddpAllActivities, ddpOverallTotals,
+  ddpJournalPublicationsOverall, ddpJournalDeptBreakdown, ddpMonthlyTrend,
   ddpCategoryAchievementRates, getDDPInsights,
+  buildDDPRealtimeOverallIndexing,
 } from '@/lib/ddp-data'
 import { useRealData } from '@/hooks/useRealData'
 import DateRangePicker, { type DateRange } from '@/components/DateRangePicker'
@@ -77,12 +78,6 @@ function pctTextColor(pct: number) {
    ================================================================ */
 
 const insights = getDDPInsights()
-
-const ddpDeptIndexData = ddpOverallIndexing.slice(0, 10).map(d => ({
-  dept: d.shortName,
-  baseIndex: +(d.baseIndex * 100).toFixed(1),
-  additionalIndex: +(d.additionalIndex * 100).toFixed(1),
-}))
 
 const ACTIVITY_OPTIONS = ['All', ...ddpAllActivities.map(a => a.activityName)]
 
@@ -196,6 +191,18 @@ export default function CollegePage() {
   const [selectedActivity, setSelectedActivity] = useState(ACTIVITY_OPTIONS[0])
   const [showAllIndexing, setShowAllIndexing] = useState(false)
   const [showAllJournal, setShowAllJournal] = useState(false)
+  const realtimeOverallIndexing = useMemo(() => buildDDPRealtimeOverallIndexing(realDeptRankings), [realDeptRankings])
+  const activeOverallIndexing = realtimeOverallIndexing.length
+    ? realtimeOverallIndexing
+    : (ddpSheetOverallIndexing.length ? ddpSheetOverallIndexing : ddpOverallIndexing)
+  const ddpDeptIndexData = useMemo(() => activeOverallIndexing.slice(0, 10).map(d => ({
+    dept: d.shortName,
+    baseIndex: +(d.baseIndex * 100).toFixed(1),
+    additionalIndex: +(d.additionalIndex * 100).toFixed(1),
+  })), [activeOverallIndexing])
+
+  const journalBaseTarget = Math.max(ddpJournalPublicationsOverall.proposedTarget, 1)
+  const journalBaseAchieved = Math.max(ddpJournalPublicationsOverall.proposedAchieved, 1)
 
   const allAggregated = {
     activityName: 'All',
@@ -209,17 +216,17 @@ export default function CollegePage() {
   const selectedDeptData = selectedActivity === 'All'
     ? ddpJournalDeptBreakdown.map(d => ({
         ...d,
-        totalTarget: Math.round(d.totalTarget * (allAggregated.proposedTarget / 238)),
-        achieved: Math.round(d.achieved * (allAggregated.proposedAchieved / 168)),
-        pending: Math.round(d.totalTarget * (allAggregated.proposedTarget / 238)) - Math.round(d.achieved * (allAggregated.proposedAchieved / 168)),
+        totalTarget: Math.round(d.totalTarget * (allAggregated.proposedTarget / journalBaseTarget)),
+        achieved: Math.round(d.achieved * (allAggregated.proposedAchieved / journalBaseAchieved)),
+        pending: Math.round(d.totalTarget * (allAggregated.proposedTarget / journalBaseTarget)) - Math.round(d.achieved * (allAggregated.proposedAchieved / journalBaseAchieved)),
       }))
-    : selectedActivity === 'JOURNAL PUBLICATIONS (SCI / WOS)'
+    : selectedActivity.toUpperCase() === 'JOURNAL PUBLICATIONS (SCI / WOS)'
       ? ddpJournalDeptBreakdown
       : ddpJournalDeptBreakdown.map(d => ({
           ...d,
-          totalTarget: Math.round(d.totalTarget * (selectedAct.proposedTarget / 238)),
-          achieved: Math.round(d.achieved * (selectedAct.proposedAchieved / 168)),
-          pending: Math.round(d.totalTarget * (selectedAct.proposedTarget / 238)) - Math.round(d.achieved * (selectedAct.proposedAchieved / 168)),
+          totalTarget: Math.round(d.totalTarget * (selectedAct.proposedTarget / journalBaseTarget)),
+          achieved: Math.round(d.achieved * (selectedAct.proposedAchieved / journalBaseAchieved)),
+          pending: Math.round(d.totalTarget * (selectedAct.proposedTarget / journalBaseTarget)) - Math.round(d.achieved * (selectedAct.proposedAchieved / journalBaseAchieved)),
         }))
 
   const activityMaxima = {
@@ -425,13 +432,13 @@ export default function CollegePage() {
             <table className="w-full text-xs">
               <thead>
                 <tr className="bg-slate-700 text-white">
-                  {['Rank', 'Department', 'Total Target', 'Achieved', 'Base Index', 'Additional Index', 'Normalized Bonus'].map((col, i) => (
+                  {['Rank', 'Department', 'Total Target', 'Achieved', 'Base Index', 'Additional Index', 'Normalized'].map((col, i) => (
                     <th key={col} className={`${i < 2 ? 'text-left' : 'text-right'} px-4 py-3 font-semibold`}>{col}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {(showAllIndexing ? ddpOverallIndexing : ddpOverallIndexing.slice(0, 8)).map((d, i) => {
+                {(showAllIndexing ? activeOverallIndexing : activeOverallIndexing.slice(0, 8)).map((d, i) => {
                   const pct = Math.round((d.achieved / d.totalTarget) * 100)
                   return (
                     <tr key={d.shortName} className={`border-b border-slate-100 hover:bg-slate-50/50 transition-colors ${i === 0 ? 'bg-yellow-50/60' : i === 1 ? 'bg-slate-50/40' : ''}`}>

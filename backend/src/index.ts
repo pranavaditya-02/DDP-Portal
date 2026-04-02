@@ -5,6 +5,8 @@ import dotenv from 'dotenv';
 import { logger } from './utils/logger';
 import authRoutes from './routes/auth.routes';
 import activityRoutes from './routes/activity.routes';
+import importRoutes from './routes/import.routes';
+import { verifyMysqlConnection } from './database/mysql';
 
 dotenv.config();
 
@@ -34,6 +36,7 @@ app.get('/api/health', (req, res) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/activities', activityRoutes);
+app.use('/api/import', importRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -53,6 +56,9 @@ app.use((req, res) => {
 const server = app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`);
   logger.info(`Environment: ${process.env.NODE_ENV}`);
+  verifyMysqlConnection().catch((error) => {
+    logger.warn('MySQL verification failed on startup:', error);
+  });
 });
 
 // Graceful shutdown

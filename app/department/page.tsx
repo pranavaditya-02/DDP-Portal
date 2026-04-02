@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { useAuthStore } from '@/lib/store'
 import { useRoles } from '@/hooks/useRoles'
 import {
@@ -15,6 +15,7 @@ import {
   cseActivityIndexing, cseTotalWeightage, cseTotalIndex, cseAdditionalIndex,
   cseMonthlyDDPStatus, cseMonthlyActivities,
   cseDDPMonthlyBreakdown, ddpOverallIndexing,
+  buildDDPRealtimeActivityIndexing, buildDDPRealtimeOverallIndexing,
 } from '@/lib/ddp-data'
 import {
   ChartCard, TrendAreaChart,
@@ -173,8 +174,6 @@ export default function DepartmentPage() {
   const perf = deptPerformanceIndex
 
   const deptShort = DEPT_OPTIONS.find(d => d.id === activeDeptId)?.short || 'CSE'
-  const ddpRanking = ddpOverallIndexing.find(d => d.shortName === deptShort) || ddpOverallIndexing[1]
-  const ddpAchievementPct = Math.round((ddpRanking.achieved / ddpRanking.totalTarget) * 100)
 
   /* ---- Real CSV-derived dept stats ---- */
   const [dateRange, setDateRange] = useState<DateRange>({ from: '', to: '' })
@@ -188,10 +187,18 @@ export default function DepartmentPage() {
   const headerDeptShort = realCode || stats.departmentShort
   const deptFacultyRankings = realDeptFacultyRankings[realCode] || []
   const deptRankPosition = realDeptRankings.findIndex(d => d.shortCode === realCode) + 1
+  const realtimeOverallIndexing = useMemo(() => buildDDPRealtimeOverallIndexing(realDeptRankings), [realDeptRankings])
+  const ddpRanking = realtimeOverallIndexing.find(d => d.shortName === deptShort)
+    || ddpOverallIndexing.find(d => d.shortName === deptShort)
+    || ddpOverallIndexing[1]
+  const ddpAchievementPct = Math.round((ddpRanking.achieved / Math.max(ddpRanking.totalTarget, 1)) * 100)
 
-  const activities = cseActivityIndexing
+  const activities = useMemo(() => realDept ? buildDDPRealtimeActivityIndexing(realDept) : cseActivityIndexing, [realDept])
   const criticalActivities = activities.filter(a => a.attained === 0)
   const exceedingActivities = activities.filter(a => a.attained > a.totalTarget)
+  const computedTotalWeightage = Math.max(activities.reduce((sum, a) => sum + a.weightage, 0), 1)
+  const computedBaseIndex = activities.reduce((sum, a) => sum + (a.permittedIndex * a.weightage), 0) / computedTotalWeightage
+  const computedAdditionalIndex = activities.reduce((sum, a) => sum + (Math.min(1, Math.max(0, a.actualIndex - 1)) * a.weightage), 0) / computedTotalWeightage
 
   const monthlyChartData = cseDDPMonthlyBreakdown.map(m => ({
     month: m.month,
@@ -351,9 +358,9 @@ export default function DepartmentPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <KpiCard label="Total Weightage" value={cseTotalWeightage}
             gradient="bg-gradient-to-br from-violet-50 to-purple-50 text-violet-700" borderColor="border-violet-200" />
-          <KpiCard label="Total Index (weightage)" value={cseTotalIndex.toFixed(3)}
+          <KpiCard label="Total Index (weightage)" value={(realDept ? computedBaseIndex : cseTotalIndex).toFixed(3)}
             gradient="bg-gradient-to-br from-green-50 to-emerald-50 text-green-700" borderColor="border-green-200" />
-          <KpiCard label="Additional Index (weightage)" value={cseAdditionalIndex.toFixed(4)}
+          <KpiCard label="Additional Index (weightage)" value={(realDept ? computedAdditionalIndex : cseAdditionalIndex).toFixed(4)}
             gradient="bg-gradient-to-br from-teal-50 to-cyan-50 text-teal-700" borderColor="border-teal-200" />
         </div>
 

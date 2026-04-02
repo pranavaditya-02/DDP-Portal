@@ -122,6 +122,19 @@ export const apiClient = {
     });
     return response.data;
   },
+
+  importEventsAttendedCsv: async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await client.post('/import/events-attended/csv', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    return response.data;
+  },
 };
 
 export default client;

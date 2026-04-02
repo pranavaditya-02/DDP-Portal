@@ -1,174 +1,85 @@
-import bcrypt from 'bcrypt';
-import { prisma } from '../database/client';
 import { generateToken } from '../middleware/auth';
 import { logger } from '../utils/logger';
 
 export class AuthService {
+  private isBypassEnabled(): boolean {
+    return (process.env.AUTH_BYPASS ?? 'false').toLowerCase() === 'true';
+  }
+
+  private prismaDisabledError(): Error {
+    return new Error('Auth data operations are disabled because Prisma is not in use. Enable AUTH_BYPASS=true for development login.');
+  }
+
   async register(email: string, password: string, name: string, employeeId: string) {
-    try {
-      // Check if user already exists
-      const existingUser = await prisma.user.findUnique({
-        where: { email },
-      });
-
-      if (existingUser) {
-        throw new Error('User already exists');
-      }
-
-      // Hash password
-      const passwordHash = await bcrypt.hash(password, 10);
-
-      // Create user
-      const user = await prisma.user.create({
-        data: {
-          email,
-          passwordHash,
-          name,
-          employeeId,
-        },
-        include: {
-          userRoles: {
-            include: {
-              role: true,
-            },
-          },
-        },
-      });
-
-      logger.info(`User registered: ${email}`);
-
-      return {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-      };
-    } catch (error) {
-      logger.error('Registration error:', error);
-      throw error;
-    }
+    logger.warn(`Register requested for ${email} but Prisma is disabled.`);
+    void password;
+    void name;
+    void employeeId;
+    throw this.prismaDisabledError();
   }
 
   async login(email: string, password: string) {
     try {
-      // Find user
-      const user = await prisma.user.findUnique({
-        where: { email },
-        include: {
-          userRoles: {
-            where: { isActive: true },
-            include: {
-              role: true,
-            },
-          },
-        },
-      });
-
-      if (!user) {
-        throw new Error('User not found');
+      if (!this.isBypassEnabled()) {
+        throw this.prismaDisabledError();
       }
 
-      // Verify password
-      const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-      if (!isPasswordValid) {
-        throw new Error('Invalid password');
-      }
+      const roleCsv = process.env.AUTH_BYPASS_ROLES || 'admin,faculty,verification,hod,dean';
+      const roles = roleCsv
+        .split(',')
+        .map((r) => r.trim())
+        .filter(Boolean);
 
-      // Extract roles
-      const roles = user.userRoles.map((ur) => ur.role.roleName);
-
-      // Generate token
       const token = generateToken({
-        id: user.id,
-        email: user.email,
+        id: 1,
+        email,
         roles,
-        departmentId: user.departmentId || undefined,
       });
 
-      logger.info(`User logged in: ${email}`);
+      logger.warn(`AUTH_BYPASS login used for ${email}`);
 
       return {
         token,
         user: {
-          id: user.id,
-          email: user.email,
-          name: user.name,
+          id: 1,
+          email,
+          name: 'Bypass User',
           roles,
-          departmentId: user.departmentId,
+          departmentId: null,
         },
       };
     } catch (error) {
       logger.error('Login error:', error);
+      void password;
       throw error;
     }
   }
 
   async getUserWithRoles(userId: number) {
-    try {
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        include: {
-          userRoles: {
-            where: { isActive: true },
-            include: {
-              role: true,
-              department: true,
-            },
-          },
-          department: true,
-        },
-      });
-
-      if (!user) {
-        return null;
-      }
-
-      const roles = user.userRoles.map((ur) => ur.role.roleName);
-
-      return {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        roles,
-        departmentId: user.departmentId,
-        userRoles: user.userRoles,
-      };
-    } catch (error) {
-      logger.error('Error fetching user with roles:', error);
-      throw error;
+    if (!this.isBypassEnabled()) {
+      logger.warn(`getUserWithRoles(${userId}) requested but Prisma is disabled.`);
+      return null;
     }
+
+    const roleCsv = process.env.AUTH_BYPASS_ROLES || 'admin,faculty,verification,hod,dean';
+    const roles = roleCsv
+      .split(',')
+      .map((r) => r.trim())
+      .filter(Boolean);
+
+    return {
+      id: userId,
+      email: 'bypass@local.dev',
+      name: 'Bypass User',
+      roles,
+      departmentId: null,
+      userRoles: [],
+    };
   }
 
   async verifyTokenAndGetUser(token: string) {
-    try {
-      const user = await prisma.user.findUnique({
-        where: { email: token },
-        include: {
-          userRoles: {
-            where: { isActive: true },
-            include: {
-              role: true,
-            },
-          },
-        },
-      });
-
-      if (!user) {
-        return null;
-      }
-
-      const roles = user.userRoles.map((ur) => ur.role.roleName);
-
-      return {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        roles,
-        departmentId: user.departmentId,
-      };
-    } catch (error) {
-      logger.error('Error verifying token:', error);
-      return null;
-    }
+    void token;
+    return null;
   }
 }
 

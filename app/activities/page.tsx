@@ -9,6 +9,7 @@ import {
   Calendar, Tag, Award,
 } from 'lucide-react'
 import Link from 'next/link'
+import { apiClient } from '@/lib/api'
 
 const STATUS_OPTIONS = ['all', 'approved', 'pending', 'rejected'] as const
 const CATEGORY_OPTIONS = ['all', 'Research', 'Teaching', 'Professional Development', 'Service', 'Industry'] as const
@@ -41,6 +42,9 @@ export default function ActivitiesPage() {
   const [statusFilter, setStatusFilter] = useState<typeof STATUS_OPTIONS[number]>('all')
   const [categoryFilter, setCategoryFilter] = useState<typeof CATEGORY_OPTIONS[number]>('all')
   const [sort, setSort] = useState<string>('date-desc')
+  const [importFile, setImportFile] = useState<File | null>(null)
+  const [isImporting, setIsImporting] = useState(false)
+  const [importMessage, setImportMessage] = useState<string | null>(null)
 
   const filtered = useMemo(() => {
     let data = [...myActivities]
@@ -79,6 +83,32 @@ export default function ActivitiesPage() {
     rejected: myActivities.filter(a => a.status === 'rejected').length,
   }), [])
 
+  const handleImport = async () => {
+    if (!importFile) {
+      setImportMessage('Please choose a CSV file before importing.')
+      return
+    }
+
+    try {
+      setIsImporting(true)
+      setImportMessage(null)
+      const response = await apiClient.importEventsAttendedCsv(importFile)
+      const summary = response?.summary
+      if (summary) {
+        setImportMessage(
+          `Imported. Rows: ${summary.processedRows}, Events inserted: ${summary.insertedEvents}, Submissions inserted: ${summary.insertedSubmissions}, Documents inserted: ${summary.insertedDocuments}, Skipped: ${summary.skippedRows}`
+        )
+      } else {
+        setImportMessage('Import completed successfully.')
+      }
+    } catch (error: any) {
+      const message = error?.response?.data?.message || error?.message || 'Import failed.'
+      setImportMessage(message)
+    } finally {
+      setIsImporting(false)
+    }
+  }
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto">
       {/* Header */}
@@ -94,6 +124,30 @@ export default function ActivitiesPage() {
           <Plus className="w-4 h-4" />
           Submit Activity
         </Link>
+      </div>
+
+      <div className="bg-white rounded-xl border border-slate-200 p-4 mb-6">
+        <h2 className="text-sm font-semibold text-slate-900 mb-2">Bulk Import (Events Attended CSV)</h2>
+        <p className="text-xs text-slate-500 mb-3">Upload a CSV file to import legacy Events Attended records into the database.</p>
+        <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+          <input
+            type="file"
+            accept=".csv,text/csv"
+            onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+            className="block w-full text-sm text-slate-600 file:mr-4 file:py-2 file:px-3 file:rounded-md file:border-0 file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200"
+          />
+          <button
+            type="button"
+            onClick={handleImport}
+            disabled={isImporting}
+            className="btn-primary disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {isImporting ? 'Importing...' : 'Import CSV'}
+          </button>
+        </div>
+        {importMessage && (
+          <p className="mt-3 text-xs text-slate-600">{importMessage}</p>
+        )}
       </div>
 
       {/* Status tabs */}
