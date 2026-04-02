@@ -45,3 +45,14 @@
 {"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-03-20 08:57:55"}
 {"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-03-20 08:57:55"}
 {"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-03-20 08:57:56"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-02 13:35:59"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-02 13:35:59"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-02 13:36:01"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-02 13:36:41"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-02 13:36:41"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-02 13:36:42"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-02 13:37:44"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-02 13:37:44"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-02 13:37:45"}
+{"level":"info","message":"GET /","service":"faculty-tracking-api","timestamp":"2026-04-02 13:40:40"}
+{"level":"info","message":"GET /favicon.ico","service":"faculty-tracking-api","timestamp":"2026-04-02 13:40:40"}
