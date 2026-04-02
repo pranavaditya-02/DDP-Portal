@@ -70,7 +70,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [achievementsExpanded, setAchievementsExpanded] = useState(false);
   const [owiExpanded, setOwiExpanded] = useState(false);
   const [rndExpanded, setRndExpanded] = useState(false);
-
+  const [studentAchievementsExpanded, setStudentAchievementsExpanded] = useState(false);
   const handleLogout = () => {
     logout();
     router.push("/login");
@@ -194,6 +194,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: "resourcePerson", label: "Resource Person", icon: UserCheck },
   ];
 
+  const studentAchievementItems = [
+    { id: "onlineCourse", label: "Online Course", icon: Video },
+    { id: "competitionReport", label: "Competition Report", icon: Trophy },
+  ];
+
   const owiItems = [
     { label: "COE", slug: "coe" },
     { label: "External VIP Visit", slug: "external-vip-visit" },
@@ -308,13 +313,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     key={item.href}
                     href={item.href}
                     onClick={() => setMobileOpen(false)}
-                    className={`group flex items-center gap-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 relative ${
-                      collapsed ? "justify-center px-2" : "px-3"
-                    } ${
-                      active
+                    className={`group flex items-center gap-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 relative ${collapsed ? "justify-center px-2" : "px-3"
+                      } ${active
                         ? "bg-blue-600/20 text-blue-400"
                         : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                    }`}
+                      }`}
                     title={collapsed ? item.label : undefined}
                   >
                     {active && (
@@ -395,11 +398,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         key={item.id}
                         href={href}
                         onClick={() => setMobileOpen(false)}
-                        className={`w-full flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 ${
-                          pathname === href
-                            ? "bg-blue-600/20 text-blue-400"
-                            : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                        }`}
+                        className={`w-full flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 ${pathname === href
+                          ? "bg-blue-600/20 text-blue-400"
+                          : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                          }`}
                       >
                         <Icon className="w-4 h-4 flex-shrink-0" />
                         <span className="flex-1 text-left truncate">
@@ -452,11 +454,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       key={item.slug}
                       href={href}
                       onClick={() => setMobileOpen(false)}
-                      className={`flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 relative ${
-                        active
-                          ? "bg-blue-600/20 text-blue-400"
-                          : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                      }`}
+                      className={`flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 relative ${active
+                        ? "bg-blue-600/20 text-blue-400"
+                        : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                        }`}
                     >
                       {active && (
                         <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-blue-500 rounded-r-full" />
@@ -495,11 +496,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       key={item.slug}
                       href={href}
                       onClick={() => setMobileOpen(false)}
-                      className={`flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 relative ${
-                        active
-                          ? "bg-blue-600/20 text-blue-400"
-                          : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                      }`}
+                      className={`flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 relative ${active
+                        ? "bg-blue-600/20 text-blue-400"
+                        : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                        }`}
                     >
                       {active && (
                         <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-blue-500 rounded-r-full" />
@@ -512,7 +512,62 @@ export const Sidebar: React.FC<SidebarProps> = ({
             )}
           </div>
         )}
+        {/* Student Achievements Section */}
+        {!collapsed && (
+          <div>
+            <button
+              onClick={() =>
+                setStudentAchievementsExpanded(!studentAchievementsExpanded)
+              }
+              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-150"
+            >
+              <div className="flex items-center gap-3">
+                <Trophy className="w-5 h-5 flex-shrink-0" />
+                <span>Student Achievements</span>
+              </div>
+              <ChevronDown
+                className={`w-4 h-4 transition-transform ${studentAchievementsExpanded ? "rotate-180" : ""
+                  }`}
+              />
+            </button>
+
+            {studentAchievementsExpanded && (
+              <div className="space-y-1 mt-2 ml-2">
+                {studentAchievementItems.map((item) => {
+                  const Icon = item.icon;
+
+                  const href =
+                    item.id === "onlineCourse"
+                      ? "/student-achievements/online-course"
+                      : item.id === "competitionReport"
+                        ? "/student-achievements/competition-report"
+                        : null;
+
+                  if (!href) return null;
+
+                  return (
+                    <Link
+                      key={item.id}
+                      href={href}
+                      onClick={() => setMobileOpen(false)}
+                      className={`w-full flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 ${pathname === href
+                          ? "bg-blue-600/20 text-blue-400"
+                          : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                        }`}
+                    >
+                      <Icon className="w-4 h-4 flex-shrink-0" />
+                      <span className="flex-1 text-left truncate">
+                        {item.label}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </nav>
+
 
       {/* User Profile Section */}
       <div className="border-t border-slate-800 p-3">
