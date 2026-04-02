@@ -13,7 +13,7 @@ import { useState } from 'react';
 export const Navigation: React.FC = () => {
   const router = useRouter();
   const { user, logout } = useAuthStore();
-  const { isFaculty, isHod, isDean, isVerification, isMaintenance } = useRoles();
+  const { isFaculty, isHod, isDean, isStudent, isVerification, isMaintenance } = useRoles();
   const [isOpen, setIsOpen] = useState(false);
 
   const handleLogout = () => {
@@ -29,8 +29,13 @@ export const Navigation: React.FC = () => {
     // Faculty items
     {
       label: 'Dashboard',
-      href: '/dashboard',
+      href: isStudent() ? '/student/dashboard' : '/dashboard',
       show: !isDean(),
+    },
+    {
+      label: 'Overview',
+      href: '/student/overview',
+      show: isStudent(),
     },
     {
       label: 'My Activities',
