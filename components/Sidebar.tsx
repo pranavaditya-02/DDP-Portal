@@ -68,6 +68,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const { isFaculty, isHod, isDean, isStudent, isVerification, isMaintenance } =
     useRoles();
   const [profileOpen, setProfileOpen] = useState(false);
+  const [activityExpanded, setActivityExpanded] = useState(false);
   const [achievementsExpanded, setAchievementsExpanded] = useState(false);
   const [owiExpanded, setOwiExpanded] = useState(false);
   const [rndExpanded, setRndExpanded] = useState(false);
@@ -376,71 +377,87 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         ))}
 
-        {/* Faculty Achievements Section */}
+        {/* Activity Section */}
         {isFaculty() && !isDean() && !collapsed && (
           <div>
             <button
-              onClick={() => setAchievementsExpanded(!achievementsExpanded)}
-              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-purple-50 hover:text-[#7D53F6] transition-all duration-150"
+              onClick={() => setActivityExpanded(!activityExpanded)}
+              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-150"
             >
               <div className="flex items-center gap-3">
-                <Trophy className="w-5 h-5 flex-shrink-0" />
-                <span>Faculty Achievements</span>
+                <Clipboard className="w-5 h-5 flex-shrink-0" />
+                <span>Activity</span>
               </div>
               <ChevronDown
-                className={`w-4 h-4 transition-transform ${achievementsExpanded ? "rotate-180" : ""}`}
+                className={`w-4 h-4 transition-transform ${activityExpanded ? "rotate-180" : ""}`}
               />
             </button>
-            {achievementsExpanded && (
-              <div className="space-y-1 mt-2 ml-2">
-                {achievementItems.map((item) => {
-                  const Icon = item.icon;
-                  const href =
-                    item.id === "awards"
-                      ? "/achievements/notable-achievements-and-awards"
-                      : item.id === "econtent"
-                        ? "/achievements/e-content-developed"
-                        : item.id === "eventAttended"
-                          ? "/achievements/events-attended"
-                          : item.id === "eventOrganized"
-                            ? "/achievements/events-organized"
-                            : item.id === "examiner"
-                              ? "/achievements/external-examiner"
-                              : item.id === "guestLecture"
-                                ? "/achievements/guest-lecture-delivered"
-                                : item.id === "internationalVisit"
-                                  ? "/achievements/international-visit"
-                                  : item.id === "newsletter"
-                                    ? "/achievements/newsletter"
-                                    : item.id === "reviewer"
-                                      ? "/achievements/journal-reviewer"
-                                      : item.id === "onlineCourse"
-                                        ? "/achievements/online-course"
-                                        : item.id === "papers"
-                                          ? "/achievements/paper-presentation"
-                                          : item.id === "resourcePerson"
-                                            ? "/achievements/resource-person"
-                                            : null;
+            {activityExpanded && (
+              <div className="space-y-3 mt-2 ml-2">
+                {/* Faculty Achievements Section */}
+                <div>
+                  <button
+                    onClick={() => setAchievementsExpanded(!achievementsExpanded)}
+                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-150"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Trophy className="w-5 h-5 flex-shrink-0" />
+                      <span>Faculty Achievements</span>
+                    </div>
+                    <ChevronDown
+                      className={`w-4 h-4 transition-transform ${achievementsExpanded ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                  {achievementsExpanded && (
+                    <div className="space-y-1 mt-2 ml-2">
+                      {achievementItems.map((item) => {
+                        const Icon = item.icon;
+                        const href =
+                          item.id === "awards"
+                            ? "/achievements/notable-achievements-and-awards"
+                            : item.id === "econtent"
+                              ? "/achievements/e-content-developed"
+                              : item.id === "eventAttended"
+                                ? "/achievements/events-attended"
+                                : item.id === "eventOrganized"
+                                  ? "/achievements/events-organized"
+                                  : item.id === "examiner"
+                                    ? "/achievements/external-examiner"
+                                    : item.id === "guestLecture"
+                                      ? "/achievements/guest-lecture-delivered"
+                                      : item.id === "internationalVisit"
+                                        ? "/achievements/international-visit"
+                                        : item.id === "newsletter"
+                                          ? "/achievements/newsletter"
+                                          : item.id === "reviewer"
+                                            ? "/achievements/journal-reviewer"
+                                            : item.id === "onlineCourse"
+                                              ? "/achievements/online-course"
+                                              : item.id === "papers"
+                                                ? "/achievements/paper-presentation"
+                                                : item.id === "resourcePerson"
+                                                  ? "/achievements/resource-person"
+                                                  : null;
 
-                  if (href) {
-                    return (
-                      <Link
-                        key={item.id}
-                        href={href}
-                        onClick={() => setMobileOpen(false)}
-                        className={`w-full flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 ${
-                          pathname === href
-                            ? "bg-purple-100 text-purple-700"
-                            : "text-slate-500 hover:bg-purple-50 hover:text-[#7D53F6]"
-                        }`}
-                      >
-                        <Icon className="w-4 h-4 flex-shrink-0" />
-                        <span className="flex-1 text-left truncate">
-                          {item.label}
-                        </span>
-                      </Link>
-                    );
-                  }
+                        if (href) {
+                          return (
+                            <Link
+                              key={item.id}
+                              href={href}
+                              onClick={() => setMobileOpen(false)}
+                              className={`w-full flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 ${
+                                pathname === href
+                                  ? "bg-blue-600/20 text-blue-400"
+                                  : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                              }`}
+                            >
+                              <Icon className="w-4 h-4 flex-shrink-0" />
+                              <span className="flex-1 text-left truncate">
+                                {item.label}
+                              </span>
+                            </Link>
+                          );
+                        }
 
                   return (
                     <button
@@ -501,91 +518,130 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         )}
 
-        {/* OWI (Outside World Interaction) Section */}
-        {isFaculty() && !isDean() && !collapsed && (
-          <div>
-            <button
-              onClick={() => setOwiExpanded(!owiExpanded)}
-              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-purple-50 hover:text-[#7D53F6] transition-all duration-150"
-            >
-              <div className="flex items-center gap-3">
-                <Users className="w-5 h-5 flex-shrink-0" />
-                <span>OWI</span>
-              </div>
-              <ChevronDown
-                className={`w-4 h-4 transition-transform ${owiExpanded ? "rotate-180" : ""}`}
-              />
-            </button>
-            {owiExpanded && (
-              <div className="space-y-1 mt-2 ml-2">
-                {owiItems.map((item) => {
-                  const href = `/faculty/outside-world/${item.slug}`;
-                  const active = isActive(href);
-                  return (
-                    <Link
-                      key={item.slug}
-                      href={href}
-                      onClick={() => setMobileOpen(false)}
-                      className={`flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 relative ${
-                        active
-                          ? "bg-purple-100 text-purple-700"
-                          : "text-slate-500 hover:bg-purple-50 hover:text-[#7D53F6]"
-                      }`}
-                    >
-                      {active && (
-                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-[#7D53F6] rounded-r-full" />
-                      )}
-                      <span className="flex-1 truncate">{item.label}</span>
-                    </Link>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
+                {/* OWI (Outside World Interaction) Section */}
+                <div>
+                  <button
+                    onClick={() => setOwiExpanded(!owiExpanded)}
+                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-150"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Users className="w-5 h-5 flex-shrink-0" />
+                      <span>OWI (Outside World Interaction)</span>
+                    </div>
+                    <ChevronDown
+                      className={`w-4 h-4 transition-transform ${owiExpanded ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                  {owiExpanded && (
+                    <div className="space-y-1 mt-2 ml-2">
+                      {owiItems.map((item) => {
+                        const href = `/faculty/outside-world/${item.slug}`;
+                        const active = isActive(href);
+                        return (
+                          <Link
+                            key={item.slug}
+                            href={href}
+                            onClick={() => setMobileOpen(false)}
+                            className={`flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 relative ${
+                              active
+                                ? "bg-blue-600/20 text-blue-400"
+                                : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                            }`}
+                          >
+                            {active && (
+                              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-blue-500 rounded-r-full" />
+                            )}
+                            <span className="flex-1 truncate">{item.label}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
 
-        {/* R&D Section */}
-        {isFaculty() && !isDean() && !collapsed && (
-          <div>
-            <button
-              onClick={() => setRndExpanded(!rndExpanded)}
-              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-150"
-            >
-              <div className="flex items-center gap-3">
-                <FileText className="w-5 h-5 flex-shrink-0" />
-                <span>R&amp;D</span>
-              </div>
-              <ChevronDown
-                className={`w-4 h-4 transition-transform ${rndExpanded ? "rotate-180" : ""}`}
-              />
-            </button>
-            {rndExpanded && (
-              <div className="space-y-1 mt-2 ml-2">
-                {rndItems.map((item) => {
-                  const href = `/faculty/r-and-d/${item.slug}`;
-                  const active = isActive(href);
-                  return (
-                    <Link
-                      key={item.slug}
-                      href={href}
-                      onClick={() => setMobileOpen(false)}
-                      className={`flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 relative ${
-                        active
-                          ? "bg-blue-600/20 text-blue-400"
-                          : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                      }`}
-                    >
-                      {active && (
-                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-blue-500 rounded-r-full" />
-                      )}
-                      <span className="flex-1 truncate">{item.label}</span>
-                    </Link>
-                  );
-                })}
-              </div>
-            )}
+                {/* R&D Section */}
+                <div>
+                  <button
+                    onClick={() => setRndExpanded(!rndExpanded)}
+                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-150"
+                  >
+                    <div className="flex items-center gap-3">
+                      <FileText className="w-5 h-5 flex-shrink-0" />
+                      <span>R&amp;D</span>
+                    </div>
+                    <ChevronDown
+                      className={`w-4 h-4 transition-transform ${rndExpanded ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                  {rndExpanded && (
+                    <div className="space-y-1 mt-2 ml-2">
+                      {rndItems.map((item) => {
+                        const href = `/faculty/r-and-d/${item.slug}`;
+                        const active = isActive(href);
+                        return (
+                          <Link
+                            key={item.slug}
+                            href={href}
+                            onClick={() => setMobileOpen(false)}
+                            className={`flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 relative ${
+                              active
+                                ? "bg-blue-600/20 text-blue-400"
+                                : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                            }`}
+                          >
+                            {active && (
+                              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-blue-500 rounded-r-full" />
+                            )}
+                            <span className="flex-1 truncate">{item.label}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
           </div>
         )}
+                {/* Student Achievements Section */}
+                <div>
+                  <button
+                    onClick={() => setStudentExpanded(!studentExpanded)}
+                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-150"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Clipboard className="w-5 h-5 flex-shrink-0" />
+                      <span>Student Achievements</span>
+                    </div>
+                    <ChevronDown
+                      className={`w-4 h-4 transition-transform ${studentExpanded ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                  {studentExpanded && (
+                    <div className="space-y-1 mt-2 ml-2">
+                      {studentItems.map((item) => {
+                        const Icon = item.icon;
+                        const href = item.href;
+                        return (
+                          <Link
+                            key={item.id}
+                            href={href}
+                            onClick={() => setMobileOpen(false)}
+                            className={`w-full flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 ${
+                              pathname === href
+                                ? "bg-blue-600/20 text-blue-400"
+                                : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                            }`}
+                          >
+                            <Icon className="w-4 h-4 flex-shrink-0" />
+                            <span className="flex-1 text-left truncate">{item.label}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
       </nav>
 
       {/* User Profile Section */}
@@ -665,7 +721,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           >
             <LogOut className="w-5 h-5" />
           </button>
-        )}
+        )}+35 
       </div>
     </aside>
   );

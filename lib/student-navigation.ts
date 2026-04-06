@@ -4,9 +4,9 @@ export interface StudentNavItem {
 }
 
 export const studentNavItems: StudentNavItem[] = [
-  { label: "Student Achievements", slug: "student-achievements" },
-  { label: "Activity Master", slug: "activity/master" },
-  { label: "Activity Logger", slug: "activity/logger" },
+  { label: "", slug: "student-achievements" },
+  { label: "Activity Event", slug: "activity-event" },
+  { label: "Activity Logger", slug: "activity-logger" },
   { label: "Paper Presentation Report", slug: "paper-presentation-report" },
   { label: "Project Competition Report", slug: "project-competition-report" },
   { label: "Competition Report", slug: "competition-report" },
