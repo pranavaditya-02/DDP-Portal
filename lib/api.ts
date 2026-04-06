@@ -1,6 +1,63 @@
 import axios, { AxiosInstance } from 'axios';
 import { useAuthStore } from './store';
 
+export interface EventMasterRecord {
+  id: number;
+  maximumCount: number;
+  appliedCount: number;
+  balanceCount: number;
+  applyByStudent: boolean;
+  eventCode: string;
+  eventName: string;
+  eventOrganizer: string | null;
+  webLink: string | null;
+  eventCategory: string | null;
+  status: string;
+  startDate: string | null;
+  endDate: string | null;
+  durationDays: number | null;
+  eventLocation: string | null;
+  eventLevel: string | null;
+  state: string | null;
+  country: string | null;
+  withinBit: boolean;
+  relatedToSpecialLab: boolean;
+  department: string | null;
+  competitionName: string | null;
+  totalLevelOfCompetition: string | null;
+  eligibleForRewards: boolean;
+  winnerRewards: string | null;
+  createdDate: string;
+  updatedDate: string;
+}
+
+export interface CreateEventPayload {
+  maximumCount: number;
+  appliedCount: number;
+  balanceCount: number;
+  applyByStudent: boolean;
+  eventCode: string;
+  eventName: string;
+  eventOrganizer?: string | null;
+  webLink?: string | null;
+  eventCategory?: string | null;
+  status: string;
+  startDate?: string | null;
+  endDate?: string | null;
+  durationDays?: number | null;
+  eventLocation?: string | null;
+  eventLevel?: string | null;
+  state?: string | null;
+  country?: string | null;
+  withinBit: boolean;
+  relatedToSpecialLab: boolean;
+  department?: string | null;
+  competitionName?: string | null;
+  totalLevelOfCompetition?: string | null;
+  eligibleForRewards: boolean;
+  winnerRewards?: string | null;
+}
+
 const apiBaseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 const client: AxiosInstance = axios.create({
@@ -133,6 +190,16 @@ export const apiClient = {
       },
     });
 
+    return response.data;
+  },
+
+  getEvents: async (): Promise<{ events: EventMasterRecord[] }> => {
+    const response = await client.get('/events');
+    return response.data;
+  },
+
+  createEvent: async (data: CreateEventPayload): Promise<{ message: string; event: EventMasterRecord }> => {
+    const response = await client.post('/events', data);
     return response.data;
   },
 };
