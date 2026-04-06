@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
-import { Landmark, Plus, Trash2 } from "lucide-react";
+import { Landmark, Plus, Trash2, Search } from "lucide-react";
 
 type Status = "Initiated" | "Approved" | "Rejected";
 
@@ -66,9 +66,9 @@ const PURPOSE_OPTIONS = [
 
 function StatusBadge({ status }: { status: Status }) {
   const styles: Record<Status, string> = {
-    Initiated: "bg-yellow-100 text-yellow-800",
-    Approved: "bg-green-100 text-green-800",
-    Rejected: "bg-red-100 text-red-800",
+    Initiated: "bg-amber-50 text-amber-700 border border-amber-200",
+    Approved: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+    Rejected: "bg-red-50 text-red-700 border border-red-200",
   };
   return (
     <span
@@ -83,11 +83,18 @@ export default function IrpVisitPage() {
   const [records, setRecords] = useState<IrpVisitRecord[]>(sampleData);
   const [statusFilter, setStatusFilter] = useState<"All" | Status>("All");
   const [purposeFilter, setPurposeFilter] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const filtered = records.filter(
-    (r) =>
-      (statusFilter === "All" || r.verification === statusFilter) &&
-      (purposeFilter === "All" || r.purposeOfVisit === purposeFilter),
+  const filtered = useMemo(() =>
+    records.filter(
+      (r) =>
+        (statusFilter === "All" || r.verification === statusFilter) &&
+        (purposeFilter === "All" || r.purposeOfVisit === purposeFilter) &&
+        (searchQuery === "" ||
+          r.claimedForDepartment.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          r.modeOfInteraction.toLowerCase().includes(searchQuery.toLowerCase())),
+    ),
+    [records, statusFilter, purposeFilter, searchQuery]
   );
 
   const handleDelete = (id: string) => {
@@ -99,9 +106,11 @@ export default function IrpVisitPage() {
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Landmark className="h-6 w-6 text-indigo-600" />
+        <div className="mb-6 rounded-2xl border border-violet-100 bg-white p-5 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="bg-violet-50 p-3 rounded-lg">
+              <Landmark className="h-6 w-6 text-violet-600" />
+            </div>
             <div>
               <h1 className="text-2xl font-bold text-slate-900">
                 OWI - IRP Visit
@@ -113,14 +122,29 @@ export default function IrpVisitPage() {
           </div>
           <Link
             href="/faculty/outside-world/irp-visit/submit"
-            className="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-[#2572ed] hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-violet-600 hover:bg-violet-700 transition-colors"
           >
             <Plus className="h-4 w-4 mr-2" />
             Add Record
           </Link>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl p-4 mb-6 flex flex-col md:flex-row gap-4">
+        <div className="bg-white border border-violet-100 rounded-2xl p-5 shadow-sm mb-6 flex flex-col md:flex-row gap-4">
+          <div className="flex-1">
+            <label className="block text-xs font-medium text-slate-600 mb-1">
+              Search
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search by department or mode..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-3 py-2 pl-10 border border-violet-200 rounded-md text-sm focus:outline-none focus:ring-violet-500 focus:border-violet-500"
+              />
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+            </div>
+          </div>
           <div className="flex-1">
             <label className="block text-xs font-medium text-slate-600 mb-1">
               Purpose of Visit
@@ -128,7 +152,7 @@ export default function IrpVisitPage() {
             <select
               value={purposeFilter}
               onChange={(e) => setPurposeFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 border border-violet-200 rounded-md text-sm focus:outline-none focus:ring-violet-500 focus:border-violet-500"
             >
               {PURPOSE_OPTIONS.map((option) => (
                 <option key={option} value={option}>
@@ -146,7 +170,7 @@ export default function IrpVisitPage() {
               onChange={(e) =>
                 setStatusFilter(e.target.value as "All" | Status)
               }
-              className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 border border-violet-200 rounded-md text-sm focus:outline-none focus:ring-violet-500 focus:border-violet-500"
             >
               {STATUS_OPTIONS.map((option) => (
                 <option key={option} value={option}>
@@ -157,11 +181,11 @@ export default function IrpVisitPage() {
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+        <div className="bg-white border border-violet-100 rounded-2xl overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200">
+                <tr className="bg-gradient-to-r from-violet-50 to-violet-100 border-b border-violet-200 text-slate-900">
                   {[
                     "ID",
                     "Task ID",
@@ -199,7 +223,7 @@ export default function IrpVisitPage() {
                   filtered.map((r) => (
                     <tr
                       key={r.id}
-                      className="hover:bg-slate-50 transition-colors"
+                      className="hover:bg-violet-50 transition-colors"
                     >
                       <td className="px-4 py-3 font-medium text-slate-900 whitespace-nowrap">
                         {r.id}
@@ -251,7 +275,7 @@ export default function IrpVisitPage() {
               </tbody>
             </table>
           </div>
-          <div className="px-4 py-3 border-t border-slate-100 text-xs text-slate-500">
+          <div className="px-4 py-3 border-t border-violet-100 bg-violet-50 text-xs text-slate-500">
             Showing {filtered.length} of {records.length} record
             {records.length !== 1 ? "s" : ""}
           </div>

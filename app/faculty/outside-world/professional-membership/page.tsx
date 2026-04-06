@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
-import { Award, Plus, Trash2 } from "lucide-react";
+import { Award, Plus, Trash2, Search } from "lucide-react";
 
 type Status = "Initiated" | "Approved" | "Rejected";
 
@@ -57,14 +57,14 @@ const MEMBERSHIP_CATEGORY_OPTIONS = [
 
 function StatusBadge({ status }: { status: Status }) {
   const styles: Record<Status, string> = {
-    Initiated: "bg-yellow-100 text-yellow-800",
-    Approved: "bg-green-100 text-green-800",
-    Rejected: "bg-red-100 text-red-800",
+    Initiated: "bg-amber-50 text-amber-700 border border-amber-200",
+    Approved: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+    Rejected: "bg-red-50 text-red-700 border border-red-200",
   };
 
   return (
     <span
-      className={`px-2 py-1 rounded-full text-xs font-medium ${styles[status]}`}
+      className={`px-3 py-1 rounded-full text-xs font-semibold ${styles[status]}`}
     >
       {status}
     </span>
@@ -76,12 +76,22 @@ export default function ProfessionalMembershipPage() {
     useState<ProfessionalMembershipRecord[]>(sampleData);
   const [statusFilter, setStatusFilter] = useState<"All" | Status>("All");
   const [membershipFilter, setMembershipFilter] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const filtered = records.filter(
-    (record) =>
-      (statusFilter === "All" || record.owiVerification === statusFilter) &&
-      (membershipFilter === "All" ||
-        record.membershipCategory === membershipFilter),
+  const filtered = useMemo(
+    () =>
+      records.filter(
+        (record) =>
+          (statusFilter === "All" || record.owiVerification === statusFilter) &&
+          (membershipFilter === "All" ||
+            record.membershipCategory === membershipFilter) &&
+          (searchQuery === "" ||
+            record.nameOfProfessionalBody.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            record.faculty.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            record.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            record.taskId.toLowerCase().includes(searchQuery.toLowerCase()))
+      ),
+    [records, statusFilter, membershipFilter, searchQuery]
   );
 
   const handleDelete = (id: string) => {
@@ -91,38 +101,59 @@ export default function ProfessionalMembershipPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Award className="h-6 w-6 text-indigo-600" />
+    <div className="w-full p-4 sm:p-6 lg:p-8">
+      {/* Header */}
+      <div className="mb-8 rounded-2xl border border-violet-100 bg-white p-5 shadow-sm sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-start gap-4">
+            <div className="inline-flex rounded-lg bg-violet-50 p-3">
+              <Award className="h-6 w-6 text-violet-600" />
+            </div>
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">
-                OWI - Professional Membership
+              <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
+                Professional Membership
               </h1>
-              <p className="text-sm text-slate-500">
-                Professional membership records for faculty and institute
+              <p className="mt-1 text-sm text-slate-500">
+                Manage professional and institute membership records
               </p>
             </div>
           </div>
           <Link
             href="/faculty/outside-world/professional-membership/submit"
-            className="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-[#2572ed] hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700 transition-colors whitespace-nowrap"
           >
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4" />
             Add Record
           </Link>
         </div>
+      </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl p-4 mb-6 flex flex-col md:flex-row gap-4">
-          <div className="flex-1">
-            <label className="block text-xs font-medium text-slate-600 mb-1">
+      {/* Filters and Search */}
+      <div className="mb-6 rounded-2xl border border-violet-100 bg-white p-5 shadow-sm sm:p-6">
+        {/* Search Bar */}
+        <div className="mb-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-5 w-5 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search by organization, faculty name, or ID..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-violet-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent text-sm"
+            />
+          </div>
+        </div>
+
+        {/* Filter Dropdowns */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-2">
               Membership Category
             </label>
             <select
               value={membershipFilter}
               onChange={(e) => setMembershipFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 border border-violet-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
             >
               {MEMBERSHIP_CATEGORY_OPTIONS.map((option) => (
                 <option key={option} value={option}>
@@ -131,16 +162,16 @@ export default function ProfessionalMembershipPage() {
               ))}
             </select>
           </div>
-          <div className="flex-1">
-            <label className="block text-xs font-medium text-slate-600 mb-1">
-              OWI Verification
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-2">
+              Verification Status
             </label>
             <select
               value={statusFilter}
               onChange={(e) =>
                 setStatusFilter(e.target.value as "All" | Status)
               }
-              className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 border border-violet-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
             >
               {STATUS_OPTIONS.map((option) => (
                 <option key={option} value={option}>
@@ -150,97 +181,98 @@ export default function ProfessionalMembershipPage() {
             </select>
           </div>
         </div>
+      </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-200">
-                  {[
-                    "ID",
-                    "Membership Category",
-                    "Faculty",
-                    "Task ID",
-                    "Professional Body",
-                    "Membership Type",
-                    "Category",
-                    "Verification",
-                    "Submitted",
-                    "Actions",
-                  ].map((head) => (
-                    <th
-                      key={head}
-                      className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide whitespace-nowrap"
-                    >
-                      {head}
-                    </th>
-                  ))}
+
+        <div className="rounded-2xl border border-violet-100 bg-white shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-gradient-to-r from-violet-50 to-violet-100 border-b border-violet-100">
+                {[
+                  "ID",
+                  "Membership Category",
+                  "Faculty",
+                  "Task ID",
+                  "Professional Body",
+                  "Membership Type",
+                  "Category",
+                  "Verification",
+                  "Submitted",
+                  "Actions",
+                ].map((head) => (
+                  <th
+                    key={head}
+                    className="px-4 py-3 text-left text-xs font-semibold text-slate-900 uppercase tracking-wide whitespace-nowrap"
+                  >
+                    {head}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-violet-50">
+              {filtered.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={10}
+                    className="px-4 py-10 text-center text-slate-400 text-sm"
+                  >
+                    No records found matching your search criteria.
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {filtered.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={10}
-                      className="px-4 py-10 text-center text-slate-400 text-sm"
-                    >
-                      No records found.
+              ) : (
+                filtered.map((record) => (
+                  <tr
+                    key={record.id}
+                    className="hover:bg-violet-50 transition-colors"
+                  >
+                    <td className="px-4 py-3 font-semibold text-slate-900 whitespace-nowrap">
+                      {record.id}
+                    </td>
+                    <td className="px-4 py-3 text-slate-700 whitespace-nowrap">
+                      {record.membershipCategory}
+                    </td>
+                    <td className="px-4 py-3 text-slate-700 whitespace-nowrap">
+                      {record.faculty}
+                    </td>
+                    <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
+                      {record.taskId}
+                    </td>
+                    <td className="px-4 py-3 text-slate-700 whitespace-nowrap max-w-[220px] truncate">
+                      {record.nameOfProfessionalBody}
+                    </td>
+                    <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
+                      {record.membershipType}
+                    </td>
+                    <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
+                      {record.category}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <StatusBadge status={record.owiVerification} />
+                    </td>
+                    <td className="px-4 py-3 text-slate-500 whitespace-nowrap">
+                      {record.submittedOn}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      {record.owiVerification === "Initiated" && (
+                        <button
+                          onClick={() => handleDelete(record.id)}
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 rounded transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
                     </td>
                   </tr>
-                ) : (
-                  filtered.map((record) => (
-                    <tr
-                      key={record.id}
-                      className="hover:bg-slate-50 transition-colors"
-                    >
-                      <td className="px-4 py-3 font-medium text-slate-900 whitespace-nowrap">
-                        {record.id}
-                      </td>
-                      <td className="px-4 py-3 text-slate-700 whitespace-nowrap">
-                        {record.membershipCategory}
-                      </td>
-                      <td className="px-4 py-3 text-slate-700 whitespace-nowrap">
-                        {record.faculty}
-                      </td>
-                      <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
-                        {record.taskId}
-                      </td>
-                      <td className="px-4 py-3 text-slate-700 whitespace-nowrap max-w-[220px] truncate">
-                        {record.nameOfProfessionalBody}
-                      </td>
-                      <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
-                        {record.membershipType}
-                      </td>
-                      <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
-                        {record.category}
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <StatusBadge status={record.owiVerification} />
-                      </td>
-                      <td className="px-4 py-3 text-slate-500 whitespace-nowrap">
-                        {record.submittedOn}
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        {record.owiVerification === "Initiated" && (
-                          <button
-                            onClick={() => handleDelete(record.id)}
-                            className="text-red-500 hover:text-red-700 p-1 rounded transition-colors"
-                            title="Delete"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-          <div className="px-4 py-3 border-t border-slate-100 text-xs text-slate-500">
-            Showing {filtered.length} of {records.length} record
-            {records.length !== 1 ? "s" : ""}
-          </div>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+        <div className="px-4 py-3 border-t border-violet-100 bg-violet-50 text-xs text-slate-600 font-medium">
+          Showing {filtered.length} of {records.length} record
+          {records.length !== 1 ? "s" : ""}
         </div>
       </div>
     </div>

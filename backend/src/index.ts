@@ -6,6 +6,7 @@ import { logger } from './utils/logger';
 import authRoutes from './routes/auth.routes';
 import activityRoutes from './routes/activity.routes';
 import importRoutes from './routes/import.routes';
+import alertsRoutes from './routes/alerts.routes';
 import { verifyMysqlConnection } from './database/mysql';
 
 dotenv.config();
@@ -37,6 +38,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/import', importRoutes);
+app.use('/api/alerts', alertsRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

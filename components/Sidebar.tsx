@@ -34,6 +34,7 @@ import {
   Plane,
   Video,
   UserCheck,
+  Mail,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -175,6 +176,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
           icon: Trophy,
           show: isDean(),
         },
+        {
+          label: "Task Compliance",
+          href: "/college/task-compliance",
+          icon: ClipboardCheck,
+          show: isDean(),
+        },
       ],
     },
     {
@@ -197,6 +204,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
           label: "Role Management",
           href: "/roles",
           icon: Shield,
+          show: isMaintenance(),
+        },
+        {
+          label: "Workflow Deadlines",
+          href: "/activities/admin",
+          icon: Calendar,
+          show: isMaintenance(),
+        },
+        {
+          label: "Email Templates",
+          href: "/activities/admin/mail-alerts",
+          icon: Mail,
           show: isMaintenance(),
         },
       ],

@@ -53,7 +53,7 @@ export const DashboardShell: React.FC<{ children: React.ReactNode }> = ({ childr
       />
 
       {/* Main content area */}
-      <main className={`flex-1 min-h-screen transition-all duration-300 ease-in-out ml-0 ${desktopMargin} overflow-x-hidden`}>
+      <main className={`dashboard-main flex-1 min-h-screen transition-all duration-300 ease-in-out ml-0 ${desktopMargin} overflow-x-hidden`}>
         {/* Mobile top bar */}
         <div className="md:hidden sticky top-0 z-30 flex items-center gap-3 h-14 px-4 bg-white border-b border-slate-200 shadow-sm">
           <button

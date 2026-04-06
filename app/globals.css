@@ -254,6 +254,13 @@
   .hover-lift {
     @apply hover:-translate-y-1 hover:shadow-lg transition-all duration-300;
   }
+
+  /* Make authenticated dashboard pages use full content width. */
+  .dashboard-main > div[class*='max-w-'][class*='mx-auto'] {
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
 }
 
 /* Animations */

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
-import { Briefcase, Plus, Trash2 } from "lucide-react";
+import { Briefcase, Plus, Trash2, Search } from "lucide-react";
 
 type Verification = "Initiated" | "Approved" | "Rejected";
 
@@ -59,9 +59,9 @@ const MODE_OPTIONS = ["All", "Online", "Offline"];
 
 function VerificationBadge({ status }: { status: Verification }) {
   const styles: Record<Verification, string> = {
-    Initiated: "bg-yellow-100 text-yellow-800",
-    Approved: "bg-green-100 text-green-800",
-    Rejected: "bg-red-100 text-red-800",
+    Initiated: "bg-amber-50 text-amber-700 border border-amber-200",
+    Approved: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+    Rejected: "bg-red-50 text-red-700 border border-red-200",
   };
   return (
     <span
@@ -78,12 +78,19 @@ export default function TrainingToIndustryPage() {
     "All" | Verification
   >("All");
   const [modeFilter, setModeFilter] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const filtered = records.filter(
-    (record) =>
-      (verificationFilter === "All" ||
-        record.owiVerification === verificationFilter) &&
-      (modeFilter === "All" || record.modeOfTraining === modeFilter),
+  const filtered = useMemo(() =>
+    records.filter(
+      (record) =>
+        (verificationFilter === "All" ||
+          record.owiVerification === verificationFilter) &&
+        (modeFilter === "All" || record.modeOfTraining === modeFilter) &&
+        (searchQuery === "" ||
+          record.faculty.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          record.industryName.toLowerCase().includes(searchQuery.toLowerCase())),
+    ),
+    [records, verificationFilter, modeFilter, searchQuery]
   );
 
   const handleDelete = (id: string) => {
@@ -95,9 +102,11 @@ export default function TrainingToIndustryPage() {
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Briefcase className="h-6 w-6 text-indigo-600" />
+        <div className="mb-6 rounded-2xl border border-violet-100 bg-white p-5 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="bg-violet-50 p-3 rounded-lg">
+              <Briefcase className="h-6 w-6 text-violet-600" />
+            </div>
             <div>
               <h1 className="text-2xl font-bold text-slate-900">
                 OWI - Training to Industry
@@ -109,14 +118,29 @@ export default function TrainingToIndustryPage() {
           </div>
           <Link
             href="/faculty/outside-world/training-to-industry/submit"
-            className="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-[#2572ed] hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-violet-600 hover:bg-violet-700 transition-colors"
           >
             <Plus className="h-4 w-4 mr-2" />
             Add Record
           </Link>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl p-4 mb-6 flex flex-col md:flex-row gap-4">
+        <div className="bg-white border border-violet-100 rounded-2xl p-5 shadow-sm mb-6 flex flex-col md:flex-row gap-4">
+          <div className="flex-1">
+            <label className="block text-xs font-medium text-slate-600 mb-1">
+              Search
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search by faculty or industry..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-3 py-2 pl-10 border border-violet-200 rounded-md text-sm focus:outline-none focus:ring-violet-500 focus:border-violet-500"
+              />
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+            </div>
+          </div>
           <div className="flex-1">
             <label className="block text-xs font-medium text-slate-600 mb-1">
               Mode of Training
@@ -124,7 +148,7 @@ export default function TrainingToIndustryPage() {
             <select
               value={modeFilter}
               onChange={(e) => setModeFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 border border-violet-200 rounded-md text-sm focus:outline-none focus:ring-violet-500 focus:border-violet-500"
             >
               {MODE_OPTIONS.map((option) => (
                 <option key={option} value={option}>
@@ -142,7 +166,7 @@ export default function TrainingToIndustryPage() {
               onChange={(e) =>
                 setVerificationFilter(e.target.value as "All" | Verification)
               }
-              className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full px-3 py-2 border border-violet-200 rounded-md text-sm focus:outline-none focus:ring-violet-500 focus:border-violet-500"
             >
               {VERIFICATION_OPTIONS.map((option) => (
                 <option key={option} value={option}>
@@ -153,11 +177,11 @@ export default function TrainingToIndustryPage() {
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+        <div className="bg-white border border-violet-100 rounded-2xl overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200">
+                <tr className="bg-gradient-to-r from-violet-50 to-violet-100 border-b border-violet-200 text-slate-900">
                   {[
                     "ID",
                     "Faculty",
@@ -195,7 +219,7 @@ export default function TrainingToIndustryPage() {
                   filtered.map((record) => (
                     <tr
                       key={record.id}
-                      className="hover:bg-slate-50 transition-colors"
+                      className="hover:bg-violet-50 transition-colors"
                     >
                       <td className="px-4 py-3 font-medium text-slate-900 whitespace-nowrap">
                         {record.id}
@@ -247,7 +271,7 @@ export default function TrainingToIndustryPage() {
               </tbody>
             </table>
           </div>
-          <div className="px-4 py-3 border-t border-slate-100 text-xs text-slate-500">
+          <div className="px-4 py-3 border-t border-violet-100 bg-violet-50 text-xs text-slate-500">
             Showing {filtered.length} of {records.length} record
             {records.length !== 1 ? "s" : ""}
           </div>
