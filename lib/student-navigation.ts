@@ -5,8 +5,8 @@ export interface StudentNavItem {
 
 export const studentNavItems: StudentNavItem[] = [
   { label: "Student Achievements", slug: "student-achievements" },
-  { label: "Activity Master", slug: "activity-master" },
-  { label: "Activity Logger", slug: "activity-logger" },
+  { label: "Activity Master", slug: "activity/master" },
+  { label: "Activity Logger", slug: "activity/logger" },
   { label: "Paper Presentation Report", slug: "paper-presentation-report" },
   { label: "Project Competition Report", slug: "project-competition-report" },
   { label: "Competition Report", slug: "competition-report" },
@@ -14,8 +14,9 @@ export const studentNavItems: StudentNavItem[] = [
   { label: "Patent Report", slug: "patent-report" },
   { label: "Patent Tracker", slug: "patent-tracker" },
   { label: "Internship", slug: "internship" },
-  { label: "Internship Tracker", slug: "internship-tracker" },
-  { label: "Internship Report", slug: "internship-report" },
+  { label: "Industries", slug: "industries" },
+  { label: "Internship Tracker", slug: "internship/tracker" },
+  { label: "Internship Report", slug: "internship/report" },
   { label: "Product", slug: "product" },
   { label: "Online Course", slug: "online-course" },
   { label: "Journal Publication", slug: "journal-publication" },

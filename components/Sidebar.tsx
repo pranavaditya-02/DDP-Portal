@@ -220,10 +220,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
   ];
 
   const studentItems = [
-    { id: "activityMaster", label: "Activity Master", icon: Clipboard, href: "/students/activity-master" },
-    { id: "activityLogger", label: "Activity Logger", icon: PlusCircle, href: "/students/activity-logger" },
-    { id: "internshipTracker", label: "Internship Tracker", icon: GraduationCap, href: "/students/internship/tracker" },
-    { id: "internshipReport", label: "Internship Report", icon: ClipboardCheck, href: "/students/internship/report" },
+    { id: "activityMaster", label: "Activity Master", icon: Clipboard, href: "/student/activity/master" },
+    { id: "activityLogger", label: "Activity Logger", icon: PlusCircle, href: "/student/activity/logger" },
+    { id: "internshipTracker", label: "Internship Tracker", icon: GraduationCap, href: "/student/internship/tracker" },
+    { id: "internshipReport", label: "Internship Report", icon: ClipboardCheck, href: "/student/internship/report" },
   ];
 
   const owiItems = [
@@ -461,7 +461,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         )}
         
         {/* Student Achievements Section */}
-        {isFaculty() && !isDean() && !collapsed && (
+        {(isFaculty() || isVerification() || isHod() ) && !isDean() && !collapsed && (
           <div>
             <button
               onClick={() => setStudentExpanded(!studentExpanded)}

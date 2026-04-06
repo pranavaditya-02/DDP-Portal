@@ -56,3 +56,380 @@
 {"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-02 13:37:45"}
 {"level":"info","message":"GET /","service":"faculty-tracking-api","timestamp":"2026-04-02 13:40:40"}
 {"level":"info","message":"GET /favicon.ico","service":"faculty-tracking-api","timestamp":"2026-04-02 13:40:40"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-03 11:47:25"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-03 11:47:25"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-03 11:47:26"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-03 11:47:55"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-03 11:47:55"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-03 11:47:56"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-03 11:54:33"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-03 11:54:33"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-03 11:54:35"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-03 11:56:18"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-03 11:56:18"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-03 11:56:19"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-03 11:57:34"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-03 11:57:34"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-03 11:57:35"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-03 12:00:41"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-03 12:00:41"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-03 12:00:42"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 12:01:49"}
+{"level":"warn","message":"Invalid token:","service":"faculty-tracking-api","timestamp":"2026-04-03 12:01:49"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 12:01:49"}
+{"level":"warn","message":"Invalid token:","service":"faculty-tracking-api","timestamp":"2026-04-03 12:01:49"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-03 12:03:21"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-03 12:03:21"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 12:03:21"}
+{"level":"warn","message":"Invalid token:","service":"faculty-tracking-api","timestamp":"2026-04-03 12:03:21"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 12:03:21"}
+{"level":"warn","message":"Invalid token:","service":"faculty-tracking-api","timestamp":"2026-04-03 12:03:21"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-03 12:03:23"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 12:03:25"}
+{"level":"warn","message":"Invalid token:","service":"faculty-tracking-api","timestamp":"2026-04-03 12:03:25"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 12:03:25"}
+{"level":"warn","message":"Invalid token:","service":"faculty-tracking-api","timestamp":"2026-04-03 12:03:25"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-03 12:05:40"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-03 12:05:40"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-03 12:05:48"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-03 12:06:39"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-03 12:06:39"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-03 12:06:40"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-03 12:07:31"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-03 12:07:31"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-03 12:07:32"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-03 12:07:40"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-03 12:07:40"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-03 12:07:41"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-03 12:08:12"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-03 12:08:12"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-03 12:08:13"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-03 12:08:45"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-03 12:08:45"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-03 12:08:46"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 12:10:42"}
+{"body":"\r\n{\r\n    \"industry\": \"Education Technology\",\r\n    \"address\": \"Hyderabad, Telangana, India\",\r\n    \"website_link\": \"https://www.edunext.io\",\r\n}","expose":true,"level":"error","message":"Unhandled error: Expected double-quoted property name in JSON at position 140","service":"faculty-tracking-api","stack":"SyntaxError: Expected double-quoted property name in JSON at position 140\n    at JSON.parse (<anonymous>)\n    at parse (E:\\code\\college\\DDP\\DDP-Portal\\backend\\node_modules\\body-parser\\lib\\types\\json.js:92:19)\n    at E:\\code\\college\\DDP\\DDP-Portal\\backend\\node_modules\\body-parser\\lib\\read.js:128:18\n    at AsyncResource.runInAsyncScope (node:async_hooks:206:9)\n    at invokeCallback (E:\\code\\college\\DDP\\DDP-Portal\\backend\\node_modules\\raw-body\\index.js:238:16)\n    at done (E:\\code\\college\\DDP\\DDP-Portal\\backend\\node_modules\\raw-body\\index.js:227:7)\n    at IncomingMessage.onEnd (E:\\code\\college\\DDP\\DDP-Portal\\backend\\node_modules\\raw-body\\index.js:287:7)\n    at IncomingMessage.emit (node:events:524:28)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)","status":400,"statusCode":400,"timestamp":"2026-04-03 12:12:41","type":"entity.parse.failed"}
+{"level":"info","message":"POST /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 12:14:18"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-03 12:22:20"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-03 12:22:20"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-03 12:22:21"}
+{"level":"info","message":"POST /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 12:22:46"}
+{"level":"info","message":"POST /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 12:22:56"}
+{"level":"info","message":"POST /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 12:23:44"}
+{"level":"info","message":"PUT /api/companies/:30002","service":"faculty-tracking-api","timestamp":"2026-04-03 12:24:39"}
+{"level":"info","message":"PUT /api/companies/:30003","service":"faculty-tracking-api","timestamp":"2026-04-03 12:25:02"}
+{"level":"info","message":"PUT /api/companies/:5","service":"faculty-tracking-api","timestamp":"2026-04-03 12:25:23"}
+{"level":"info","message":"PUT /api/companies/30003","service":"faculty-tracking-api","timestamp":"2026-04-03 12:26:03"}
+{"level":"info","message":"DELETE /api/companies/30003","service":"faculty-tracking-api","timestamp":"2026-04-03 12:26:23"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-03 12:29:43"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-03 12:29:43"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-03 12:29:44"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-03 12:31:51"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-03 12:31:51"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-03 12:31:52"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 12:32:21"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 12:32:21"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-03 12:32:41"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-03 12:32:41"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-03 12:32:42"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 12:32:55"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 12:32:56"}
+{"level":"info","message":"POST /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 12:33:08"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 12:33:17"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 12:33:17"}
+{"level":"info","message":"POST /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 12:33:27"}
+{"level":"info","message":"POST /api/companies/","service":"faculty-tracking-api","timestamp":"2026-04-03 12:40:59"}
+{"level":"info","message":"POST /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 12:42:32"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 12:42:58"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 12:43:00"}
+{"level":"info","message":"POST /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 12:43:37"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 12:43:37"}
+{"level":"info","message":"PUT /api/companies/60002","service":"faculty-tracking-api","timestamp":"2026-04-03 12:45:00"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 12:45:00"}
+{"level":"info","message":"DELETE /api/companies/60002","service":"faculty-tracking-api","timestamp":"2026-04-03 12:45:12"}
+{"level":"info","message":"DELETE /api/companies/60001","service":"faculty-tracking-api","timestamp":"2026-04-03 12:45:17"}
+{"level":"info","message":"POST /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 12:45:25"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 12:45:25"}
+{"level":"info","message":"DELETE /api/companies/60003","service":"faculty-tracking-api","timestamp":"2026-04-03 12:45:33"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-03 14:25:42"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-03 14:25:42"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-03 14:25:44"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:26:34"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:26:34"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:27:38"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:27:39"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:27:39"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:29:21"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:29:21"}
+{"level":"info","message":"POST /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:29:28"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:29:30"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:29:39"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:29:39"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:29:40"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:31:48"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:31:48"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:31:49"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:31:49"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:31:49"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:31:50"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:31:50"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:31:50"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:31:51"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:31:51"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:31:51"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:31:51"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:31:51"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:29"}
+{"code":"ECONNRESET","errno":-4077,"level":"error","message":"Failed to fetch companies: read ECONNRESET","service":"faculty-tracking-api","stack":"Error: read ECONNRESET\n    at PromisePoolConnection.query (E:\\code\\college\\DDP\\DDP-Portal\\backend\\node_modules\\mysql2\\lib\\promise\\connection.js:29:22)\n    at CompaniesService.getAllCompanies (E:\\code\\college\\DDP\\DDP-Portal\\backend\\src\\services\\companies.service.ts:24:39)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async <anonymous> (E:\\code\\college\\DDP\\DDP-Portal\\backend\\src\\routes\\companies.routes.ts:16:23)","timestamp":"2026-04-03 14:41:29"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:29"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:30"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:30"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:30"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:31"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:31"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:33"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:33"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:33"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:33"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:34"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:34"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:34"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:35"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:35"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:35"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:35"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:35"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:36"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:36"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:36"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:37"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:37"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:37"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:37"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:37"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:37"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:37"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:37"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:38"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:38"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:38"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:38"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:38"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:38"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:38"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:45"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:41:45"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:42:17"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:42:17"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:42:17"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:42:20"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:42:20"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:42:20"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:42:20"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:42:20"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:42:20"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:05"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:06"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:06"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:06"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:06"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:06"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:06"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:07"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:07"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:07"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:07"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:07"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:14"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:14"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:14"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:16"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:16"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:17"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:17"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:19"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:19"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:43"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:43"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:44"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:46"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:47"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:47"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:48"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:48"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:48"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:48"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:48"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:48"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:49"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:49"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:45:49"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:48:10"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-03 14:48:10"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-03 14:57:33"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-03 14:57:33"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-03 14:57:34"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-04 11:10:29"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-04 11:10:29"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-04 11:10:32"}
+{"level":"info","message":"GET /api/companies/","service":"faculty-tracking-api","timestamp":"2026-04-04 11:14:39"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-04 11:14:52"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-04 11:14:52"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-04 11:14:57"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-04 11:14:57"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-04 11:14:58"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-04 11:15:06"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-04 11:15:06"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-04 11:15:07"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-04 11:15:21"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-04 11:15:21"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-04 11:15:22"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-04 11:15:29"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-04 11:15:29"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-04 11:15:30"}
+{"level":"info","message":"GET /api/companies/","service":"faculty-tracking-api","timestamp":"2026-04-04 11:15:30"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-04 11:19:36"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-04 11:19:36"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-04 11:19:37"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-04 11:19:54"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-04 11:19:54"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-04 11:19:55"}
+{"level":"info","message":"GET /api/industries/","service":"faculty-tracking-api","timestamp":"2026-04-04 11:21:00"}
+{"body":"{\r\n    \"industry\":\"DRDO\",\r\n    \"address\":\"New Delhi, India\",\r\n    \"website_link\":\"https://drdo.gov.in\",\r\n}","expose":true,"level":"error","message":"Unhandled error: Expected double-quoted property name in JSON at position 105","service":"faculty-tracking-api","stack":"SyntaxError: Expected double-quoted property name in JSON at position 105\n    at JSON.parse (<anonymous>)\n    at parse (E:\\code\\college\\DDP\\DDP-Portal\\backend\\node_modules\\body-parser\\lib\\types\\json.js:92:19)\n    at E:\\code\\college\\DDP\\DDP-Portal\\backend\\node_modules\\body-parser\\lib\\read.js:128:18\n    at AsyncResource.runInAsyncScope (node:async_hooks:206:9)\n    at invokeCallback (E:\\code\\college\\DDP\\DDP-Portal\\backend\\node_modules\\raw-body\\index.js:238:16)\n    at done (E:\\code\\college\\DDP\\DDP-Portal\\backend\\node_modules\\raw-body\\index.js:227:7)\n    at IncomingMessage.onEnd (E:\\code\\college\\DDP\\DDP-Portal\\backend\\node_modules\\raw-body\\index.js:287:7)\n    at IncomingMessage.emit (node:events:524:28)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)","status":400,"statusCode":400,"timestamp":"2026-04-04 11:23:45","type":"entity.parse.failed"}
+{"level":"info","message":"POST /api/industries/","service":"faculty-tracking-api","timestamp":"2026-04-04 11:23:55"}
+{"level":"info","message":"POST /api/industries/30001","service":"faculty-tracking-api","timestamp":"2026-04-04 11:24:47"}
+{"level":"info","message":"PUT /api/industries/30001","service":"faculty-tracking-api","timestamp":"2026-04-04 11:24:58"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-04 11:27:12"}
+{"level":"info","message":"GET /api/companies","service":"faculty-tracking-api","timestamp":"2026-04-04 11:27:12"}
+{"level":"info","message":"GET /api/industries","service":"faculty-tracking-api","timestamp":"2026-04-04 11:28:01"}
+{"level":"info","message":"PUT /api/industries/30001","service":"faculty-tracking-api","timestamp":"2026-04-04 11:29:28"}
+{"level":"info","message":"PUT /api/industries/30001","service":"faculty-tracking-api","timestamp":"2026-04-04 11:30:09"}
+{"level":"info","message":"GET /api/industries","service":"faculty-tracking-api","timestamp":"2026-04-04 11:35:11"}
+{"level":"info","message":"GET /api/industries","service":"faculty-tracking-api","timestamp":"2026-04-04 11:35:11"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-04 11:39:46"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-04 11:39:46"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-04 11:39:47"}
+{"level":"info","message":"GET /api/industries","service":"faculty-tracking-api","timestamp":"2026-04-04 11:40:26"}
+{"level":"info","message":"POST /api/import/industries/csv","service":"faculty-tracking-api","timestamp":"2026-04-04 11:43:50"}
+{"level":"info","message":"GET /api/industries","service":"faculty-tracking-api","timestamp":"2026-04-04 11:43:51"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-04 11:44:10"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-04 11:44:10"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-04 11:44:11"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-04 11:52:26"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-04 11:52:26"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-04 11:52:28"}
+{"level":"info","message":"GET /api/industries","service":"faculty-tracking-api","timestamp":"2026-04-04 11:53:37"}
+{"level":"info","message":"GET /api/industries","service":"faculty-tracking-api","timestamp":"2026-04-04 11:53:38"}
+{"level":"info","message":"PUT /api/industries/30003","service":"faculty-tracking-api","timestamp":"2026-04-04 11:53:46"}
+{"level":"info","message":"PUT /api/industries/30002","service":"faculty-tracking-api","timestamp":"2026-04-04 11:53:50"}
+{"level":"info","message":"DELETE /api/industries/30002","service":"faculty-tracking-api","timestamp":"2026-04-04 11:53:56"}
+{"level":"info","message":"DELETE /api/industries/30003","service":"faculty-tracking-api","timestamp":"2026-04-04 11:54:01"}
+{"level":"info","message":"GET /api/industries/active","service":"faculty-tracking-api","timestamp":"2026-04-04 11:54:26"}
+{"level":"info","message":"GET /api/industries/active","service":"faculty-tracking-api","timestamp":"2026-04-04 11:54:26"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-04 11:54:57"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-04 11:54:57"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-04 11:54:58"}
+{"level":"info","message":"GET /api/industries/active","service":"faculty-tracking-api","timestamp":"2026-04-04 11:56:17"}
+{"level":"info","message":"GET /api/industries/active","service":"faculty-tracking-api","timestamp":"2026-04-04 11:57:40"}
+{"level":"info","message":"GET /api/industries/active","service":"faculty-tracking-api","timestamp":"2026-04-04 11:57:40"}
+{"level":"info","message":"GET /api/industries/active","service":"faculty-tracking-api","timestamp":"2026-04-04 12:07:40"}
+{"level":"info","message":"GET /api/industries/active","service":"faculty-tracking-api","timestamp":"2026-04-04 12:07:41"}
+{"level":"info","message":"GET /api/industries/active","service":"faculty-tracking-api","timestamp":"2026-04-04 12:16:03"}
+{"level":"info","message":"GET /api/industries/active","service":"faculty-tracking-api","timestamp":"2026-04-04 12:16:04"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-04 12:24:46"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-04 12:24:46"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-04 12:24:47"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-04 12:25:30"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-04 12:25:30"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-04 12:25:31"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-04 12:25:45"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-04 12:25:45"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-04 12:25:46"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-04 12:26:11"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-04 12:26:11"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-04 12:26:12"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-04 12:35:09"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-04 12:35:09"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-04 12:35:11"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-04 12:36:45"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-04 12:36:45"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-04 12:36:47"}
+{"level":"info","message":"GET /api/industries/active","service":"faculty-tracking-api","timestamp":"2026-04-04 12:38:43"}
+{"level":"info","message":"GET /api/industries/active","service":"faculty-tracking-api","timestamp":"2026-04-04 12:38:45"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-04 12:41:11"}
+{"level":"info","message":"internship_tracker table is ready","service":"faculty-tracking-api","timestamp":"2026-04-04 12:41:11"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-04 12:41:11"}
+{"level":"info","message":"GET /api/industries/active","service":"faculty-tracking-api","timestamp":"2026-04-04 12:41:19"}
+{"level":"info","message":"GET /api/industries/active","service":"faculty-tracking-api","timestamp":"2026-04-04 12:41:19"}
+{"level":"info","message":"POST /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-04 12:43:26"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-04 12:43:28"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-04 12:43:28"}
+{"level":"info","message":"GET /favicon.ico","service":"faculty-tracking-api","timestamp":"2026-04-04 12:43:59"}
+{"level":"info","message":"GET /api/industries/active","service":"faculty-tracking-api","timestamp":"2026-04-04 12:46:03"}
+{"level":"info","message":"GET /api/industries/active","service":"faculty-tracking-api","timestamp":"2026-04-04 12:46:03"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-04 12:47:32"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-04 12:47:32"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-04 12:50:43"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-04 12:50:43"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-04 12:50:44"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-04 12:51:25"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-04 12:51:25"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-04 12:51:26"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-04 12:51:40"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-04 12:51:40"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-04 12:51:41"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-04 12:51:54"}
+{"level":"info","message":"internship_tracker table is ready","service":"faculty-tracking-api","timestamp":"2026-04-04 12:51:54"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-04 12:51:54"}
+{"level":"info","message":"GET /api/industries/active","service":"faculty-tracking-api","timestamp":"2026-04-04 12:51:58"}
+{"level":"info","message":"GET /api/industries/active","service":"faculty-tracking-api","timestamp":"2026-04-04 12:51:58"}
+{"level":"info","message":"GET /api/industries/active","service":"faculty-tracking-api","timestamp":"2026-04-04 12:52:16"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-04 12:53:06"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-04 12:53:06"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-04 12:53:12"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-04 12:53:12"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-04 12:53:29"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-04 12:53:29"}
+{"level":"info","message":"PATCH /api/internship-tracker/1/iqac","service":"faculty-tracking-api","timestamp":"2026-04-04 12:53:33"}
+{"level":"warn","message":"Invalid token:","service":"faculty-tracking-api","timestamp":"2026-04-04 12:53:33"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-04 12:53:49"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-04 12:53:49"}
+{"level":"info","message":"PATCH /api/internship-tracker/1/iqac","service":"faculty-tracking-api","timestamp":"2026-04-04 12:53:51"}
+{"level":"warn","message":"Invalid token:","service":"faculty-tracking-api","timestamp":"2026-04-04 12:53:51"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-04 12:54:41"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-04 12:54:42"}
+{"level":"info","message":"PATCH /api/internship-tracker/1/iqac","service":"faculty-tracking-api","timestamp":"2026-04-04 12:54:43"}
+{"level":"warn","message":"Invalid token:","service":"faculty-tracking-api","timestamp":"2026-04-04 12:54:43"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-04 12:55:39"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-04 12:55:40"}
+{"level":"info","message":"PATCH /api/internship-tracker/1/iqac","service":"faculty-tracking-api","timestamp":"2026-04-04 12:57:06"}
+{"level":"warn","message":"Invalid token:","service":"faculty-tracking-api","timestamp":"2026-04-04 12:57:06"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-04 12:57:10"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-04 12:57:10"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-04 12:57:18"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-04 12:57:18"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-04 12:59:48"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-04 12:59:48"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-04 12:59:49"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-04 13:00:47"}
+{"level":"info","message":"internship_tracker table is ready","service":"faculty-tracking-api","timestamp":"2026-04-04 13:00:47"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-04 13:00:47"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-04 13:01:56"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-04 13:01:56"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-04 13:04:11"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-04 13:04:11"}
+{"level":"info","message":"PATCH /api/internship-tracker/1/iqac","service":"faculty-tracking-api","timestamp":"2026-04-04 13:04:14"}
+{"level":"info","message":"PATCH /api/internship-tracker/1/iqac","service":"faculty-tracking-api","timestamp":"2026-04-04 13:04:16"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-04 13:08:03"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-04 13:08:03"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-04 13:08:04"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-04 13:12:30"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-04 13:12:30"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-04 13:12:31"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-06 08:54:46"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-06 08:54:46"}
+{"code":"ENOTFOUND","errno":-3008,"fatal":true,"hostname":"gateway01.ap-northeast-1.prod.aws.tidbcloud.com","level":"warn","message":"MySQL verification failed on startup: getaddrinfo ENOTFOUND gateway01.ap-northeast-1.prod.aws.tidbcloud.com","service":"faculty-tracking-api","stack":"Error: getaddrinfo ENOTFOUND gateway01.ap-northeast-1.prod.aws.tidbcloud.com\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26)","syscall":"getaddrinfo","timestamp":"2026-04-06 08:54:46"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-06 08:55:26"}
+{"code":"ENOTFOUND","errno":-3008,"level":"error","message":"Error listing internship trackers: getaddrinfo ENOTFOUND gateway01.ap-northeast-1.prod.aws.tidbcloud.com","service":"faculty-tracking-api","stack":"Error: getaddrinfo ENOTFOUND gateway01.ap-northeast-1.prod.aws.tidbcloud.com\n    at PromisePool.query (E:\\code\\college\\DDP\\DDP-Portal\\backend\\node_modules\\mysql2\\lib\\promise\\pool.js:36:22)\n    at ensureTableExists (E:\\code\\college\\DDP\\DDP-Portal\\backend\\src\\services\\internshipTracker.service.ts:40:14)\n    at InternshipTrackerService.listTrackers (E:\\code\\college\\DDP\\DDP-Portal\\backend\\src\\services\\internshipTracker.service.ts:145:11)\n    at <anonymous> (E:\\code\\college\\DDP\\DDP-Portal\\backend\\src\\routes\\internshipTracker.routes.ts:132:53)\n    at newFn (E:\\code\\college\\DDP\\DDP-Portal\\backend\\node_modules\\express-async-errors\\index.js:16:20)\n    at Layer.handle [as handle_request] (E:\\code\\college\\DDP\\DDP-Portal\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at next (E:\\code\\college\\DDP\\DDP-Portal\\backend\\node_modules\\express\\lib\\router\\route.js:149:13)\n    at Route.dispatch (E:\\code\\college\\DDP\\DDP-Portal\\backend\\node_modules\\express\\lib\\router\\route.js:119:3)\n    at newFn (E:\\code\\college\\DDP\\DDP-Portal\\backend\\node_modules\\express-async-errors\\index.js:16:20)\n    at Layer.handle [as handle_request] (E:\\code\\college\\DDP\\DDP-Portal\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)","timestamp":"2026-04-06 08:55:26"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-06 08:55:26"}
+{"code":"ENOTFOUND","errno":-3008,"level":"error","message":"Error listing internship trackers: getaddrinfo ENOTFOUND gateway01.ap-northeast-1.prod.aws.tidbcloud.com","service":"faculty-tracking-api","stack":"Error: getaddrinfo ENOTFOUND gateway01.ap-northeast-1.prod.aws.tidbcloud.com\n    at PromisePool.query (E:\\code\\college\\DDP\\DDP-Portal\\backend\\node_modules\\mysql2\\lib\\promise\\pool.js:36:22)\n    at ensureTableExists (E:\\code\\college\\DDP\\DDP-Portal\\backend\\src\\services\\internshipTracker.service.ts:40:14)\n    at InternshipTrackerService.listTrackers (E:\\code\\college\\DDP\\DDP-Portal\\backend\\src\\services\\internshipTracker.service.ts:145:11)\n    at <anonymous> (E:\\code\\college\\DDP\\DDP-Portal\\backend\\src\\routes\\internshipTracker.routes.ts:132:53)\n    at newFn (E:\\code\\college\\DDP\\DDP-Portal\\backend\\node_modules\\express-async-errors\\index.js:16:20)\n    at Layer.handle [as handle_request] (E:\\code\\college\\DDP\\DDP-Portal\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at next (E:\\code\\college\\DDP\\DDP-Portal\\backend\\node_modules\\express\\lib\\router\\route.js:149:13)\n    at Route.dispatch (E:\\code\\college\\DDP\\DDP-Portal\\backend\\node_modules\\express\\lib\\router\\route.js:119:3)\n    at newFn (E:\\code\\college\\DDP\\DDP-Portal\\backend\\node_modules\\express-async-errors\\index.js:16:20)\n    at Layer.handle [as handle_request] (E:\\code\\college\\DDP\\DDP-Portal\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)","timestamp":"2026-04-06 08:55:26"}
