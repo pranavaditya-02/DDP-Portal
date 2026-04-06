@@ -1,297 +1,568 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { ChangeEvent, useState, useEffect } from "react";
 import {
-  Calendar,
-  CheckCircle2,
-  Clock,
+  ChevronDown,
+  ChevronRight,
+  Database,
   Filter,
+  MoreHorizontal,
   Search,
-  Trophy,
-  Video,
-  XCircle,
+  UploadCloud,
 } from "lucide-react";
+import { SearchableSelect } from "@/components/SearchableSelect";
 
-type Status = "Approved" | "Pending" | "Rejected";
-
-interface OnlineCourseRecord {
-  id: string;
-  courseName: string;
-  provider: string;
-  mode: string;
-  duration: string;
-  status: Status;
-  submittedOn: string;
-}
-
-const SAMPLE_DATA: OnlineCourseRecord[] = [
-  {
-    id: "SC-001",
-    courseName: "Machine Learning Foundations",
-    provider: "NPTEL",
-    mode: "Online",
-    duration: "8 Weeks",
-    status: "Approved",
-    submittedOn: "2026-03-14",
-  },
-  {
-    id: "SC-002",
-    courseName: "Cloud Essentials",
-    provider: "Coursera",
-    mode: "Online",
-    duration: "40 Hours",
-    status: "Pending",
-    submittedOn: "2026-03-22",
-  },
-  {
-    id: "SC-003",
-    courseName: "Data Visualization with Power BI",
-    provider: "edX",
-    mode: "Hybrid",
-    duration: "6 Weeks",
-    status: "Rejected",
-    submittedOn: "2026-03-25",
-  },
-];
-
-const StatusBadge = ({ status }: { status: Status }) => {
-  const config = {
-    Approved: {
-      icon: CheckCircle2,
-      classes: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    },
-    Pending: {
-      icon: Clock,
-      classes: "bg-amber-50 text-amber-700 border-amber-200",
-    },
-    Rejected: {
-      icon: XCircle,
-      classes: "bg-rose-50 text-rose-700 border-rose-200",
-    },
-  }[status];
-
-  const Icon = config.icon;
-
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${config.classes}`}
-    >
-      <Icon size={12} />
-      {status}
-    </span>
-  );
+type FormState = {
+  student: string;
+  yearOfStudy: string;
+  specialLab: string;
+  onlineCourse: string;
+  courseType: string;
+  marksAvailable: string;
+  startDate: string;
+  endDate: string;
+  examDate: string;
+  durationWeeks: string;
+  partOfAcademic: string;
+  semester: string;
+  sponsorshipType: string;
+  interdisciplinary: string;
+  department: string;
+  certificateUrl: string;
+  iqacVerification: string;
+  marksObtained: string;
 };
 
-export default function StudentOnlineCoursePage() {
-  const [records] = useState<OnlineCourseRecord[]>(SAMPLE_DATA);
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("All");
-  const [modeFilter, setModeFilter] = useState<string>("All");
+const INITIAL_FORM: FormState = {
+  student: "",
+  yearOfStudy: "",
+  specialLab: "",
+  onlineCourse: "",
+  courseType: "",
+  marksAvailable: "",
+  startDate: "",
+  endDate: "",
+  examDate: "",
+  durationWeeks: "",
+  partOfAcademic: "",
+  semester: "",
+  sponsorshipType: "",
+  interdisciplinary: "",
+  department: "",
+  certificateUrl: "",
+  iqacVerification: "Initiated",
+  marksObtained: "",
+};
 
-  const modeOptions = useMemo(
-    () => ["All", ...Array.from(new Set(records.map((item) => item.mode)))],
-    [records],
-  );
+type Department = { id: number; dept_name: string };
+type Student = { id: number; name: string };
 
-  const filteredRecords = useMemo(() => {
-    const query = search.trim().toLowerCase();
+const STUDENTS: Student[] = [
+  { id: 1, name: "Jaison David" },
+  { id: 2, name: "Aakash" },
+  { id: 3, name: "Sudhir" },
+  { id: 4, name: "Arun" },
+];
 
-    return records.filter((record) => {
-      const matchesSearch =
-        !query ||
-        record.id.toLowerCase().includes(query) ||
-        record.courseName.toLowerCase().includes(query) ||
-        record.provider.toLowerCase().includes(query) ||
-        record.duration.toLowerCase().includes(query);
+export default function CreateOnlineCoursePage() {
+  const [form, setForm] = useState<FormState>(INITIAL_FORM);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [courses, setCourses] = useState<{ id: number; name: string }[]>([]);
+  const [labs, setLabs] = useState<{ id: number; specialLabName: string }[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [files, setFiles] = useState<{
+    originalProof: File | null;
+    attendedProof: File | null;
+  }>({
+    originalProof: null,
+    attendedProof: null,
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
-      const matchesStatus =
-        statusFilter === "All" || record.status === statusFilter;
-      const matchesMode = modeFilter === "All" || record.mode === modeFilter;
+  const handleSearchableChange = (name: string, value: string) => {
+    setForm((prev) => ({ ...prev, [name]: value }));
+    setError(null);
+  };
 
-      return matchesSearch && matchesStatus && matchesMode;
-    });
-  }, [records, search, statusFilter, modeFilter]);
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+    setError(null); // Clear error when user makes changes
+  };
 
-  const approvedCount = records.filter((record) => record.status === "Approved").length;
-  const pendingCount = records.filter((record) => record.status === "Pending").length;
-  const rejectedCount = records.filter((record) => record.status === "Rejected").length;
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, files: fileList } = e.target;
+    if (fileList && fileList[0]) {
+      setFiles((prev) => ({
+        ...prev,
+        [name]: fileList[0],
+      }));
+      setError(null);
+    }
+  };
 
+  const handleCancel = () => {
+    setShowCreateForm(false);
+    setForm(INITIAL_FORM);
+    setFiles({ originalProof: null, attendedProof: null });
+    setError(null);
+    setSuccess(false);
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Validate files
+      if (!files.originalProof || !files.attendedProof) {
+        setError("Both certificate files are required");
+        setLoading(false);
+        return;
+      }
+
+      // Create FormData for file upload
+      const formData = new FormData();
+
+      // Append form fields
+      Object.entries(form).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
+
+      // Append files
+      formData.append("originalProof", files.originalProof);
+      formData.append("attendedProof", files.attendedProof);
+
+      // Send request to backend
+      const response = await fetch("http://localhost:5000/api/student-online-courses", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create online course");
+      }
+
+      // Success
+      setSuccess(true);
+      setForm(INITIAL_FORM);
+      setFiles({ originalProof: null, attendedProof: null });
+
+      // Show success message for 3 seconds then reset
+      setTimeout(() => {
+        setShowCreateForm(false);
+        setSuccess(false);
+      }, 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [courseRes, labRes, deptRes] = await Promise.all([
+          fetch("http://localhost:5000/courses/active"),
+          fetch("http://localhost:5000/speciallabs/active"),
+          fetch("http://localhost:5000/departments"),
+        ]);
+
+        const coursesData = await courseRes.json();
+        const labsData = await labRes.json();
+        const departmentsData = await deptRes.json();
+
+        setCourses(coursesData);
+        setLabs(labsData);
+        setDepartments(departmentsData);
+      } catch (err) {
+        console.error("Failed to load data", err);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (!showCreateForm) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
+        <div className="mx-auto max-w-7xl space-y-5">
+
+          {/* Breadcrumb */}
+          <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-gray-400 sm:text-sm">
+            <span className="text-gray-500">Resources</span>
+            <ChevronRight size={14} className="text-gray-300" />
+            <span className="text-indigo-500 font-semibold">Online Course</span>
+          </div>
+
+          {/* Header row */}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h1 className="text-2xl font-bold text-gray-800 tracking-tight">Online Course</h1>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 transition"
+              >
+                <MoreHorizontal size={18} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowCreateForm(true)}
+                className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition"
+              >
+                Create Online Course
+              </button>
+            </div>
+          </div>
+
+          {/* Search bar */}
+          <div className="max-w-sm rounded-lg border border-gray-200 bg-white px-3.5 py-2.5 shadow-sm flex items-center gap-2">
+            <Search size={15} className="text-gray-400 shrink-0" />
+            <input
+              type="text"
+              placeholder="Search"
+              className="w-full bg-transparent text-sm text-gray-700 placeholder:text-gray-400 outline-none"
+            />
+          </div>
+
+          {/* Table card */}
+          <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+            {/* Table toolbar */}
+            <div className="flex items-center justify-end gap-2 border-b border-gray-100 px-4 py-3">
+              <button type="button" className="flex items-center gap-1.5 rounded-md border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-50 transition">
+                <Filter size={13} />
+                Filter
+                <ChevronDown size={12} />
+              </button>
+            </div>
+
+            {/* Empty state */}
+            <div className="flex min-h-[320px] flex-col items-center justify-center px-4 py-12 text-center">
+              <div className="rounded-2xl bg-gray-50 p-5 mb-4">
+                <Database size={38} className="text-gray-300" />
+              </div>
+              <p className="text-sm font-medium text-gray-500">
+                No Online Course matched the given criteria.
+              </p>
+              <p className="mt-1 text-xs text-gray-400">
+                Get started by creating your first online course record.
+              </p>
+              <button
+                type="button"
+                onClick={() => setShowCreateForm(true)}
+                className="mt-5 rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-600 hover:bg-indigo-100 transition"
+              >
+                Create Online Course
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Create form ──────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-sky-50 p-4 sm:p-6 lg:p-8">
-      <div className="mx-auto max-w-7xl space-y-6">
-        <section className="overflow-hidden rounded-3xl border border-slate-200 bg-slate-900 text-white shadow-xl shadow-slate-200/60">
-          <div className="relative px-6 py-8 sm:px-8 sm:py-10">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.24),_transparent_32%),radial-gradient(circle_at_bottom_left,_rgba(59,130,246,0.16),_transparent_28%)]" />
-            <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-              <div className="max-w-2xl space-y-3">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-sky-100">
-                  <Video size={14} />
-                  Student Achievements
-                </div>
-                <div>
-                  <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                    Online Course Records
-                  </h1>
-                  <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300 sm:text-base">
-                    Track student online course submissions, review statuses, and keep the record list filterable for quick checks.
-                  </p>
-                </div>
-              </div>
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
+      <div className="mx-auto max-w-7xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
 
-              <div className="grid grid-cols-3 gap-3 sm:gap-4">
-                {[
-                  { label: "Total", value: records.length, icon: Trophy },
-                  { label: "Approved", value: approvedCount, icon: CheckCircle2 },
-                  { label: "Pending", value: pendingCount, icon: Clock },
-                ].map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <div
-                      key={item.label}
-                      className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 backdrop-blur"
-                    >
-                      <div className="flex items-center gap-2 text-slate-200">
-                        <Icon size={14} />
-                        <span className="text-xs font-medium">{item.label}</span>
-                      </div>
-                      <div className="mt-2 text-2xl font-bold">{item.value}</div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="grid gap-4 sm:grid-cols-3">
-          {[
-            {
-              label: "Approved",
-              value: approvedCount,
-              classes: "border-emerald-200 bg-emerald-50 text-emerald-700",
-            },
-            {
-              label: "Pending",
-              value: pendingCount,
-              classes: "border-amber-200 bg-amber-50 text-amber-700",
-            },
-            {
-              label: "Rejected",
-              value: rejectedCount,
-              classes: "border-rose-200 bg-rose-50 text-rose-700",
-            },
-          ].map((item) => (
-            <div
-              key={item.label}
-              className={`rounded-2xl border px-5 py-4 shadow-sm ${item.classes}`}
+        {/* Form header */}
+        <div className="border-b border-gray-100 px-6 py-5 sm:px-8">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-gray-400 sm:text-sm">
+            <span>Resources</span>
+            <ChevronRight size={13} className="text-gray-300" />
+            <span
+              className="cursor-pointer hover:text-indigo-500 transition"
+              onClick={handleCancel}
             >
-              <div className="text-xs font-semibold uppercase tracking-wide opacity-80">
-                {item.label}
-              </div>
-              <div className="mt-2 text-3xl font-bold">{item.value}</div>
-            </div>
-          ))}
-        </section>
+              Online Course
+            </span>
+            <ChevronRight size={13} className="text-gray-300" />
+            <span className="text-gray-700 font-semibold">Create Online Course</span>
+          </div>
+          <h1 className="mt-3 text-xl font-bold text-gray-900 sm:text-2xl tracking-tight">
+            Create Online Course
+          </h1>
+          <p className="mt-1 text-sm text-gray-500">
+            Fill all required details and upload valid proof documents.
+          </p>
+        </div>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="relative w-full max-w-md">
-              <Search
-                size={16}
-                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-              />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search by ID, course, provider, or duration"
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-700 outline-none transition focus:border-sky-300 focus:bg-white focus:ring-4 focus:ring-sky-100"
-              />
-            </div>
+        {/* Error Alert */}
+        {error && (
+          <div className="mx-6 mt-4 rounded-lg border border-red-200 bg-red-50 p-4">
+            <p className="text-sm font-medium text-red-800">{error}</p>
+          </div>
+        )}
 
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-2 text-sm text-slate-500">
-                <Filter size={15} />
-                <span>Filters</span>
-              </div>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-sky-300 focus:bg-white"
-              >
-                {['All', 'Approved', 'Pending', 'Rejected'].map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
-              <select
-                value={modeFilter}
-                onChange={(e) => setModeFilter(e.target.value)}
-                className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-sky-300 focus:bg-white"
-              >
-                {modeOptions.map((mode) => (
-                  <option key={mode} value={mode}>
-                    {mode}
-                  </option>
-                ))}
-              </select>
-            </div>
+        {/* Success Alert */}
+        {success && (
+          <div className="mx-6 mt-4 rounded-lg border border-green-200 bg-green-50 p-4">
+            <p className="text-sm font-medium text-green-800">✓ Online course record created successfully!</p>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-7 bg-gradient-to-b from-white to-gray-50/60 px-6 py-7 sm:px-8 sm:py-8">
+
+          <div className="rounded-xl border border-indigo-100 bg-indigo-50/60 px-4 py-3 text-sm text-indigo-700">
+            Select records faster using searchable dropdowns for student, lab, course, and department.
           </div>
 
-          <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200">
-            <table className="min-w-full border-collapse text-sm">
-              <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                <tr>
-                  {['ID', 'Course', 'Provider', 'Mode', 'Duration', 'Status', 'Submitted On'].map((head) => (
-                    <th key={head} className="px-4 py-3 whitespace-nowrap">
-                      {head}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 bg-white">
-                {filteredRecords.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="px-4 py-12 text-center text-slate-400">
-                      No records found.
-                    </td>
-                  </tr>
-                ) : (
-                  filteredRecords.map((record) => (
-                    <tr key={record.id} className="transition-colors hover:bg-slate-50/80">
-                      <td className="px-4 py-4 font-semibold text-sky-700 whitespace-nowrap">
-                        {record.id}
-                      </td>
-                      <td className="px-4 py-4 text-slate-700 whitespace-nowrap">
-                        {record.courseName}
-                      </td>
-                      <td className="px-4 py-4 text-slate-600 whitespace-nowrap">
-                        {record.provider}
-                      </td>
-                      <td className="px-4 py-4 text-slate-600 whitespace-nowrap">
-                        {record.mode}
-                      </td>
-                      <td className="px-4 py-4 text-slate-600 whitespace-nowrap">
-                        {record.duration}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap">
-                        <StatusBadge status={record.status} />
-                      </td>
-                      <td className="px-4 py-4 text-slate-600 whitespace-nowrap">
-                        <div className="inline-flex items-center gap-2">
-                          <Calendar size={14} className="text-slate-400" />
-                          {record.submittedOn}
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <SearchableSelect
+              label="Student"
+              required
+              name="student"
+              value={form.student}
+              placeholder="Choose student"
+              options={STUDENTS.map((student) => ({
+                value: String(student.id),
+                label: `${student.name} (ID: ${student.id})`,
+              }))}
+              onChange={handleSearchableChange}
+            />
+            <SelectField label="Year of Study" required name="yearOfStudy" value={form.yearOfStudy}
+              options={["Choose year", "First", "Second", "Third", "Fourth"]}
+              onChange={handleChange} />
           </div>
-        </section>
+
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <SearchableSelect
+              label="Special Lab"
+              required
+              name="specialLab"
+              value={form.specialLab}
+              placeholder="Choose lab"
+              options={labs.map((lab) => ({
+                value: String(lab.id),
+                label: lab.specialLabName,
+              }))}
+              onChange={handleSearchableChange}
+            />
+            <SearchableSelect
+              label="Online Course"
+              required
+              name="onlineCourse"
+              value={form.onlineCourse}
+              placeholder="Choose course"
+              options={courses.map((course) => ({
+                value: String(course.id),
+                label: course.name,
+              }))}
+              onChange={handleSearchableChange}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <SelectField label="Course Type" required name="courseType" value={form.courseType}
+              options={["Choose course type", "Swayam-NPTEL", "Coursera", "Others (MBA)", "Others (Project-Outcome)"]}
+              onChange={handleChange} />
+            <SelectField label="Marks Available in Certificate" required name="marksAvailable" value={form.marksAvailable}
+              options={["Choose an option", "Yes", "No"]}
+              onChange={handleChange} />
+          </div>
+
+          {form.marksAvailable === "Yes" && (
+            <InputField
+              label="Marks Obtained"
+              required
+              name="marksObtained"
+              value={form.marksObtained}
+              placeholder="Enter marks obtained in certificate"
+              onChange={handleChange}
+            />
+          )}
+
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+            <InputField label="Start Date" required type="date" name="startDate" value={form.startDate} onChange={handleChange} />
+            <InputField label="End Date" required type="date" name="endDate" value={form.endDate} onChange={handleChange} />
+            <InputField label="Exam Date" required type="date" name="examDate" value={form.examDate} onChange={handleChange} />
+          </div>
+
+          <InputField
+            label="Course Duration in Weeks" required
+            name="durationWeeks" value={form.durationWeeks}
+            placeholder="Enter course duration in weeks"
+            onChange={handleChange}
+          />
+
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+            <SelectField label="Whether Studying as a Part of Academic?" required name="partOfAcademic" value={form.partOfAcademic}
+              options={["Choose an option", "Yes", "No"]} onChange={handleChange} />
+            <SelectField label="Type of Sponsorship" required name="sponsorshipType" value={form.sponsorshipType}
+              options={["Choose an option", "Self", "Institution", "Government", "Industry"]} onChange={handleChange} />
+            <SelectField label="Interdisciplinary" required name="interdisciplinary" value={form.interdisciplinary}
+              options={["Choose an option", "Yes", "No"]} onChange={handleChange} />
+          </div>
+
+          {/* Conditional Semester Field - Shows when partOfAcademic is Yes */}
+          {form.partOfAcademic === "Yes" && (
+            <SelectField
+              label="Select Semester"
+              required
+              name="semester"
+              value={form.semester}
+              options={["Choose semester", "1", "2", "3", "4", "5", "6", "7", "8"]}
+              onChange={handleChange}
+            />
+          )}
+
+          {/* Conditional Department Field - Fetched from Backend */}
+          {form.interdisciplinary === "Yes" && (
+            <SearchableSelect
+              label="Select Department"
+              required
+              name="department"
+              value={form.department}
+              placeholder="Choose department"
+              options={departments.map((dept) => ({
+                value: String(dept.id),
+                label: dept.dept_name,
+              }))}
+              onChange={handleSearchableChange}
+            />
+          )}
+
+          <FileField
+            label="Original Certificate Proof"
+            required
+            name="originalProof"
+            onChange={handleFileChange}
+            fileName={files.originalProof?.name}
+          />
+          <ProofHint />
+
+          <FileField
+            label="Attended Certificate"
+            required
+            name="attendedProof"
+            onChange={handleFileChange}
+            fileName={files.attendedProof?.name}
+          />
+          <ProofHint />
+
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <InputField label="Certificate URL / Website" required type="url"
+              name="certificateUrl" value={form.certificateUrl}
+              placeholder="https://example.com/certificate" onChange={handleChange} />
+            <SelectField label="IQAC Verification" required name="iqacVerification" value={form.iqacVerification}
+              options={["Initiated", "Verified", "Rejected"]} onChange={handleChange} />
+          </div>
+
+          {/* Actions */}
+          <div className="flex flex-wrap items-center justify-end gap-3 border-t border-gray-100 pt-6">
+            <button
+              type="button"
+              onClick={handleCancel}
+              disabled={loading}
+              className="rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={loading}
+              className="rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-2.5 text-sm font-semibold text-indigo-600 hover:bg-indigo-100 transition disabled:opacity-50"
+            >
+              Create &amp; Add Another
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition disabled:opacity-50"
+            >
+              {loading ? "Creating..." : "Create Online Course"}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
+  );
+}
+
+// ── Sub-components ───────────────────────────────────────────────────────────
+
+type BaseFieldProps = { label: string; name: string; required?: boolean };
+
+type InputFieldProps = BaseFieldProps & {
+  type?: string; value: string; placeholder?: string;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+};
+
+function InputField({ label, name, required, type = "text", value, placeholder, onChange }: InputFieldProps) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-sm font-semibold text-gray-700">
+        {label}{required && <span className="ml-1 text-red-500">*</span>}
+      </label>
+      <input type={type} name={name} value={value} onChange={onChange} placeholder={placeholder}
+        className="w-full rounded-lg border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-indigo-400 focus:ring-3 focus:ring-indigo-100" />
+    </div>
+  );
+}
+
+type SelectFieldProps = BaseFieldProps & {
+  value: string; options: string[];
+  onChange: (e: ChangeEvent<HTMLSelectElement>) => void;
+};
+
+function SelectField({ label, name, required, value, options, onChange }: SelectFieldProps) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-sm font-semibold text-gray-700">
+        {label}{required && <span className="ml-1 text-red-500">*</span>}
+      </label>
+      <select name={name} value={value} onChange={onChange}
+        className="w-full rounded-lg border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-800 outline-none transition focus:border-indigo-400 focus:ring-3 focus:ring-indigo-100 appearance-none">
+        {options.map((option) => (
+          <option key={option} value={option.startsWith("Choose") ? "" : option}>{option}</option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+type FileFieldProps = BaseFieldProps & {
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  fileName?: string;
+};
+
+function FileField({ label, required, name, onChange, fileName }: FileFieldProps) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-sm font-semibold text-gray-700">
+        {label}{required && <span className="ml-1 text-red-500">*</span>}
+      </label>
+      <label className="group flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-gray-300 bg-gray-50 px-4 py-4 text-sm text-gray-500 transition hover:border-indigo-400 hover:bg-indigo-50">
+        <UploadCloud size={17} className="text-gray-400 group-hover:text-indigo-500" />
+        <div className="text-center">
+          <span className="group-hover:text-indigo-600">Choose file or drag and drop</span>
+          {fileName && <p className="mt-1 text-xs text-green-600 font-medium">✓ {fileName}</p>}
+        </div>
+        <input
+          name={name}
+          type="file"
+          className="hidden"
+          onChange={onChange}
+          accept=".pdf,.jpg,.jpeg,.png"
+        />
+      </label>
+    </div>
+  );
+}
+
+function ProofHint() {
+  return (
+    <p className="-mt-3 text-xs font-medium text-red-500">
+      Please specify proof name format as: Reg.No - ODC - Date of Event.
+    </p>
   );
 }
