@@ -1,6 +1,7 @@
 import express from 'express';
 import { z } from 'zod';
-import eventMasterService from '../services/eventMaster.service';
+import eventMasterService, { EventCodeExistsError } from '../services/eventMaster.service';
+import { authenticateToken, requireRole, type AuthRequest } from '../middleware/auth';
 import { logger } from '../utils/logger';
 
 const router = express.Router();
@@ -58,9 +59,10 @@ const createEventSchema = z.object({
   winnerRewards: z.any().optional().transform(toNullableString),
 });
 
-router.get('/', async (_req, res) => {
+router.get('/', async (req, res) => {
   try {
-    const events = await eventMasterService.getAllEvents();
+    const sort = req.query.sort === 'asc' ? 'asc' : 'desc';
+    const events = await eventMasterService.getAllEvents(sort);
     return res.json({ events });
   } catch (error) {
     logger.error('Error fetching event master records:', error);
@@ -68,14 +70,38 @@ router.get('/', async (_req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', authenticateToken, requireRole('maintenance'), async (req: AuthRequest, res) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
     const data = createEventSchema.parse(req.body);
-    const event = await eventMasterService.createEvent(data);
+
+    if (data.endDate && data.startDate && new Date(data.endDate) < new Date(data.startDate)) {
+      return res.status(400).json({ error: 'End date cannot be earlier than start date' });
+    }
+
+    if (data.appliedCount > data.maximumCount) {
+      return res.status(400).json({ error: 'Applied count cannot exceed maximum count' });
+    }
+
+    const event = await eventMasterService.createEvent({
+      ...data,
+      maximumCount: data.maximumCount,
+      appliedCount: data.appliedCount,
+      balanceCount: Math.max(0, data.maximumCount - data.appliedCount),
+      winnerRewards: data.eligibleForRewards ? data.winnerRewards : null,
+    });
+
     return res.status(201).json({ message: 'Event created successfully', event });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: error.errors });
+    }
+
+    if (error instanceof EventCodeExistsError) {
+      return res.status(409).json({ error: error.message });
     }
 
     logger.error('Error creating event master record:', error);

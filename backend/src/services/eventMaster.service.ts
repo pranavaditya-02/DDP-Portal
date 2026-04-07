@@ -88,6 +88,30 @@ export interface CreateEventMasterInput {
   winnerRewards?: string | null;
 }
 
+export class EventCodeExistsError extends Error {
+  constructor(eventCode: string) {
+    super(`Event code '${eventCode}' already exists`);
+    this.name = 'EventCodeExistsError';
+  }
+}
+
+const quoteIdentifier = (identifier: string): string => {
+  const trimmed = identifier.trim();
+  if (!trimmed) {
+    throw new Error('Empty SQL identifier provided');
+  }
+
+  if (!/^[A-Za-z0-9_-]+$/.test(trimmed)) {
+    throw new Error(`Unsafe SQL identifier: ${identifier}`);
+  }
+
+  return `\`${trimmed}\``;
+};
+
+const eventMasterTableRef = `${quoteIdentifier(process.env.MYSQL_DATABASE || 'ddp')}.${quoteIdentifier(
+  process.env.MYSQL_EVENT_MASTER_TABLE || 'event_master',
+)}`;
+
 const mapRow = (row: EventMasterRow): EventMasterRecord => ({
   id: Number(row.id),
   maximumCount: Number(row.maximum_count ?? 0),
@@ -119,7 +143,8 @@ const mapRow = (row: EventMasterRow): EventMasterRecord => ({
 });
 
 class EventMasterService {
-  async getAllEvents(): Promise<EventMasterRecord[]> {
+  async getAllEvents(sort: 'asc' | 'desc' = 'desc'): Promise<EventMasterRecord[]> {
+    const sortDirection = sort === 'asc' ? 'ASC' : 'DESC';
     const [rows] = await getMysqlPool().query<EventMasterRow[]>(
       `SELECT
         id,
@@ -132,7 +157,7 @@ class EventMasterService {
         event_organizer,
         web_link,
         event_category,
-        status,
+        active_status AS status,
         start_date,
         end_date,
         duration_days,
@@ -149,16 +174,25 @@ class EventMasterService {
         winner_rewards,
         created_date,
         updated_date
-      FROM event_master
-      ORDER BY created_date DESC`
+      FROM ${eventMasterTableRef}
+      ORDER BY start_date IS NULL ASC, start_date ${sortDirection}, updated_date DESC`
     );
 
     return rows.map(mapRow);
   }
 
   async createEvent(input: CreateEventMasterInput): Promise<EventMasterRecord> {
+    const [existingRows] = await getMysqlPool().query<Array<RowDataPacket & { id: number }>>(
+      `SELECT id FROM ${eventMasterTableRef} WHERE event_code = ? LIMIT 1`,
+      [input.eventCode]
+    );
+
+    if (existingRows.length > 0) {
+      throw new EventCodeExistsError(input.eventCode);
+    }
+
     const [result] = await getMysqlPool().execute<ResultSetHeader>(
-      `INSERT INTO event_master (
+      `INSERT INTO ${eventMasterTableRef} (
         maximum_count,
         applied_count,
         balance_count,
@@ -168,7 +202,7 @@ class EventMasterService {
         event_organizer,
         web_link,
         event_category,
-        status,
+        active_status,
         start_date,
         end_date,
         duration_days,
@@ -224,7 +258,7 @@ class EventMasterService {
         event_organizer,
         web_link,
         event_category,
-        status,
+        active_status AS status,
         start_date,
         end_date,
         duration_days,
@@ -241,7 +275,7 @@ class EventMasterService {
         winner_rewards,
         created_date,
         updated_date
-      FROM event_master
+      FROM ${eventMasterTableRef}
       WHERE id = ?
       LIMIT 1`,
       [Number(result.insertId)]

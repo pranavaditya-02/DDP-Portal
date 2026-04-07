@@ -30,10 +30,8 @@ export type EventCardProps = {
   winnerRewards?: string;
   createdDate?: string;
   updatedDate?: string;
-  tags: string[];
   seatsLeft: number;
   totalSeats: number;
-  image: string;
   status?: string;
   isRegistered?: boolean;
   onRegisterSuccess?: (eventKey: number | string) => void;
@@ -48,66 +46,50 @@ export const activityMasterEvents: EventCardProps[] = [
     date: "MAR 12-14, 2026",
     location: "IIT Delhi",
     category: "Hackathon",
-    tags: ["Artificial Intelligence", "Machine Learning", "Python", "National"],
     seatsLeft: 42,
     totalSeats: 120,
-    image:
-      "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80",
   },
   {
     title: "Full Stack Web Development Bootcamp",
     date: "APR 5-10, 2026",
     location: "BITS Pilani",
     category: "Bootcamp",
-    tags: ["React", "Node.js", "Web Development", "Beginner Friendly"],
     seatsLeft: 120,
     totalSeats: 300,
-    image:
-      "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=80",
   },
   {
     title: "IoT Innovation Summit",
     date: "MAR 28, 2026",
     location: "Anna University",
     category: "Technical Symposium",
-    tags: ["IoT", "Smart Cities", "Industry 4.0", "State Level"],
+    
     seatsLeft: 5,
     totalSeats: 200,
-    image:
-      "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80",
   },
   {
     title: "Data Science Case Challenge",
     date: "APR 20-21, 2026",
     location: "PSG Tech",
     category: "Competition",
-    tags: ["Data Analytics", "Kaggle", "Mentored", "Inter-Collegeg"],
     seatsLeft: 33,
     totalSeats: 100,
-    image:
-      "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1200&q=80",
   },
   {
     title: "Embedded Systems Design Workshop",
     date: "MAY 2, 2026",
     location: "NIT Trichy",
     category: "Workshop",
-    tags: ["Embedded", "Circuits", "Hands-On", "Hardware"],
     seatsLeft: 18,
     totalSeats: 80,
-    image:
-      "https://images.unsplash.com/photo-1581092160607-ee22731d8c8f?auto=format&fit=crop&w=1200&q=80",
   },
   {
     title: "Startup Pitch Sprint",
     date: "APR 17, 2026",
     location: "T-Hub Hyderabad",
     category: "Pitch Event",
-    tags: ["Startup", "Pitching", "Mentorship", "Funding"],
+    
     seatsLeft: 70,
     totalSeats: 150,
-    image:
-      "https://images.unsplash.com/photo-1556761175-129418cb2dfe?auto=format&fit=crop&w=1200&q=80",
   },
 ];
 
@@ -156,10 +138,8 @@ export default function Card({
   winnerRewards,
   createdDate,
   updatedDate,
-  tags,
   seatsLeft,
   totalSeats,
-  image,
   isRegistered = false,
   onRegisterSuccess,
   onOpenDetails,
@@ -347,7 +327,6 @@ export default function Card({
 
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
           <div className="relative h-56 w-full overflow-hidden">
-            <div className="h-full w-full bg-cover bg-center" style={{ backgroundImage: `url(${image})` }} />
             <span className="absolute right-4 top-4 rounded-md bg-slate-900/80 px-2 py-1 text-xs font-medium text-white">
               {category}
             </span>
@@ -391,16 +370,7 @@ export default function Card({
               </div>
             )}
 
-            <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Tags</p>
-              <div className="flex flex-wrap gap-2">
-                {tags.map((tag) => (
-                  <span key={`${title}-${tag}`} className="rounded bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
+            
 
             <div className="space-y-4">
               <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-600">Complete Event Details</h3>
@@ -624,7 +594,6 @@ export default function Card({
       className="card-interactive overflow-hidden focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
     >
       <div className="relative h-44 w-full overflow-hidden">
-        <div className="h-full w-full bg-cover bg-center" style={{ backgroundImage: `url(${image})` }} />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/15 to-transparent" />
         <span className="absolute right-3 top-3 rounded-md bg-slate-900/80 px-2 py-1 text-xs font-medium text-white">
           {category}
@@ -644,14 +613,6 @@ export default function Card({
           <p className="line-clamp-2 text-sm font-medium text-emerald-700">Rewards: {winnerRewards}</p>
         )}
 
-        <div className="flex flex-wrap gap-2">
-          {tags.map((tag) => (
-            <span key={`${title}-${tag}`} className="rounded bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600">
-              {tag}
-            </span>
-          ))}
-        </div>
-
         <div className="pt-2">
           <div className="mb-2 flex items-center justify-between text-sm text-slate-500">
             <span>{safeSeatsLeft} seats left</span>
@@ -664,16 +625,7 @@ export default function Card({
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            openDetails();
-          }}
-          className="btn-primary w-full"
-        >
-          View Details
-        </button>
+        
         
       </div>
     </article>

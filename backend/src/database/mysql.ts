@@ -13,7 +13,7 @@ const createMysqlPool = (): mysql.Pool => {
     port: Number(process.env.MYSQL_PORT || 3306),
     user: process.env.MYSQL_USER || 'root',
     password: process.env.MYSQL_PASSWORD || '',
-    database: process.env.MYSQL_DATABASE || '',
+    database: process.env.MYSQL_DATABASE || 'ddp',
     waitForConnections: true,
     connectionLimit: Number(process.env.MYSQL_CONNECTION_LIMIT || 10),
     namedPlaceholders: true,
@@ -30,15 +30,10 @@ export const getMysqlPool = (): mysql.Pool => {
 };
 
 export const verifyMysqlConnection = async (): Promise<void> => {
-  if (!process.env.MYSQL_DATABASE) {
-    logger.warn('MYSQL_DATABASE is not set; MySQL bulk import endpoints will fail until configured.');
-    return;
-  }
-
   const connection = await getMysqlPool().getConnection();
   try {
     await connection.ping();
-    logger.info('MySQL connection established for bulk import.');
+    logger.info(`MySQL connection established for database: ${process.env.MYSQL_DATABASE || 'ddp'}.`);
   } finally {
     connection.release();
   }

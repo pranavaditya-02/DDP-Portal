@@ -1,691 +1,615 @@
-"use client";
+'use client'
 
-import React, { useEffect, useState } from "react";
-import Card, { activityMasterEvents, type EventCardProps } from "./Card";
-import { apiClient, type CreateEventPayload, type EventMasterRecord } from "@/lib/api";
+import React, { useDeferredValue, useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
+import {
+  ArrowLeft,
+  ArrowRight,
+  Building2,
+  CalendarDays,
+  CheckCircle2,
+  Clock3,
+  Filter,
+  MapPin,
+  Search,
+} from 'lucide-react'
+import { DM_Sans } from 'next/font/google'
+import { apiClient, type EventMasterRecord } from '@/lib/api'
+import { useRoles } from '@/hooks/useRoles'
+import { useAuthStore } from '@/lib/store'
 
-const topTabs = [
-  { key: "all", label: "All Events" },
-  { key: "registered", label: "My Registered" },
-  { key: "completed", label: "Completed" },
-] as const;
+const dmSans = DM_Sans({ subsets: ['latin'] })
 
-type TabKey = (typeof topTabs)[number]["key"];
+type UiEvent = EventMasterRecord
+type TabKey = 'all' | 'registered' | 'completed'
+type DeliveryFilter = 'all' | 'ONLINE' | 'OFFLINE'
 
-const initialFormData = {
-  maximumCount: "",
-  appliedCount: "",
-  balanceCount: "",
-  applyByStudent: "yes",
-  eventCode: "",
-  eventName: "",
-  eventOrganizer: "",
-  webLink: "",
-  eventCategory: "",
-  status: "Active",
-  startDate: "",
-  endDate: "",
-  durationDays: "",
-  eventLocation: "",
-  eventLevel: "",
-  state: "",
-  country: "",
-  withinBit: "no",
-  relatedToSpecialLab: "no",
-  department: "",
-  competitionName: "",
-  totalLevelOfCompetition: "",
-  eligibleForRewards: "no",
-  winnerRewards: "",
-  createdDate: "",
-  updatedDate: "",
-};
+type RegistrationFormData = {
+  student: string
+  eventCategory: string
+  activityEvent: string
+  fromDate: string
+  toDate: string
+  modeOfParticipation: string
+  iqacVerification: string
+}
 
-const formFields = [
-  { name: "maximumCount", label: "Maximum Count", type: "number" },
-  { name: "appliedCount", label: "Applied Count", type: "number" },
-  { name: "balanceCount", label: "Balance Count", type: "number" },
-  {
-    name: "applyByStudent",
-    label: "Apply By Student",
-    type: "select",
-    options: ["yes", "no"],
-  },
-  { name: "eventCode", label: "Event Code", type: "text" },
-  { name: "eventName", label: "Event Name", type: "text" },
-  { name: "eventOrganizer", label: "Event Organizer", type: "text" },
-  { name: "webLink", label: "Web Link", type: "url" },
-  { name: "eventCategory", label: "Event Category", type: "text" },
-  {
-    name: "status",
-    label: "Status",
-    type: "select",
-    options: ["Active", "Inactive", "Draft", "Closed"],
-  },
-  { name: "startDate", label: "Start Date", type: "date" },
-  { name: "endDate", label: "End Date", type: "date" },
-  { name: "durationDays", label: "Duration (days)", type: "number" },
-  { name: "eventLocation", label: "Event Location", type: "text" },
-  { name: "eventLevel", label: "Event Level", type: "text" },
-  { name: "state", label: "State", type: "text" },
-  { name: "country", label: "Country", type: "text" },
-  {
-    name: "withinBit",
-    label: "With-In BIT",
-    type: "select",
-    options: ["yes", "no"],
-  },
-  {
-    name: "relatedToSpecialLab",
-    label: "Related to Special Lab",
-    type: "select",
-    options: ["yes", "no"],
-  },
-  { name: "department", label: "Department", type: "text" },
-  { name: "competitionName", label: "Competition Name", type: "text" },
-  {
-    name: "totalLevelOfCompetition",
-    label: "Total Level Of Competition",
-    type: "text",
-  },
-  {
-    name: "eligibleForRewards",
-    label: "Eligible for Rewards",
-    type: "select",
-    options: ["yes", "no"],
-  },
-  { name: "winnerRewards", label: "Winner Rewards", type: "text" },
-  { name: "createdDate", label: "Created Date", type: "datetime-local" },
-  { name: "updatedDate", label: "Updated Date", type: "datetime-local" },
-] as const;
+const tabs: { key: TabKey; label: string }[] = [
+  { key: 'all', label: 'All Events' },
+  { key: 'registered', label: 'My Registered' },
+  { key: 'completed', label: 'Completed' },
+]
 
-type EventFormData = typeof initialFormData;
+const cardImages = ['/placeholder.jpg', '/placeholder-user.jpg', '/placeholder-logo.png']
 
-const parseNumber = (value: string): number => {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : NaN;
-};
+const formatEventDate = (startDate: string | null, endDate: string | null) => {
+  if (!startDate && !endDate) return 'Date TBA'
 
-const toBoolean = (value: string): boolean => value === "yes";
-
-const pickRandom = <T,>(values: readonly T[]): T => values[Math.floor(Math.random() * values.length)];
-
-const toDateInputValue = (date: Date) => date.toISOString().slice(0, 10);
-
-const toDateTimeLocalValue = (date: Date) => {
-  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-  return local.toISOString().slice(0, 16);
-};
-
-const calculateBalanceCount = (maximumCount: string, appliedCount: string): string => {
-  const max = parseNumber(maximumCount || "0");
-  const applied = parseNumber(appliedCount || "0");
-  if (!Number.isFinite(max) || !Number.isFinite(applied)) {
-    return "";
-  }
-  return String(Math.max(0, max - applied));
-};
-
-const calculateDurationDays = (startDate: string, endDate: string): string => {
-  if (!startDate || !endDate) {
-    return "";
+  const format = (value: string | null) => {
+    if (!value) return ''
+    const date = new Date(value)
+    if (Number.isNaN(date.getTime())) return value
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
   }
 
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end < start) {
-    return "";
+  const start = format(startDate)
+  const end = format(endDate)
+
+  if (start && end) return `${start.toUpperCase()} - ${end.toUpperCase()}`
+  return (start || end).toUpperCase()
+}
+
+const getDeliveryMode = (event: UiEvent) => {
+  const values = [event.eventLocation, event.state, event.country, event.webLink].filter(Boolean).join(' ').toLowerCase()
+  if (values.includes('online') || values.includes('zoom') || values.includes('meet') || values.includes('virtual')) {
+    return 'ONLINE'
   }
+  return 'OFFLINE'
+}
 
-  const dayMs = 24 * 60 * 60 * 1000;
-  return String(Math.round((end.getTime() - start.getTime()) / dayMs));
-};
+const isClosed = (event: UiEvent) => {
+  const normalized = event.status.toLowerCase()
+  return ['not-active', 'inactive', 'closed', 'completed'].includes(normalized)
+}
 
-const generateFakeEventFormData = (): EventFormData => {
-  const themes = ["AI Innovation", "Robotics", "Cyber Security", "Data Science", "Cloud Engineering"] as const;
-  const categories = ["Technical Symposium", "Hackathon", "Workshop", "Competition"] as const;
-  const levels = ["State Level", "National Level", "Institution Level"] as const;
-  const cities = ["Chennai", "Bengaluru", "Hyderabad", "Coimbatore"] as const;
-  const departments = ["Computer Science", "Information Technology", "Electronics", "Mechanical"] as const;
-  const organizers = [
-    "Department of Computer Science",
-    "Innovation Cell",
-    "Technical Forum",
-    "Placement and Training Cell",
-  ] as const;
-  const states = ["Tamil Nadu", "Karnataka", "Telangana"] as const;
-  const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() + Math.floor(Math.random() * 10) + 1);
-  const end = new Date(start);
-  end.setDate(start.getDate() + Math.floor(Math.random() * 4) + 1);
-  const theme = pickRandom(themes);
-  const year = start.getFullYear();
-  const serial = String(Math.floor(Math.random() * 900) + 100);
-  const maximumCount = String(150 + Math.floor(Math.random() * 150));
-  const appliedCount = String(20 + Math.floor(Math.random() * 70));
-  const eventLevel = pickRandom(levels);
-  const eventCategory = pickRandom(categories);
-  const department = pickRandom(departments);
-  const city = pickRandom(cities);
-  const state = pickRandom(states);
+const isActiveStatus = (event: UiEvent) => {
+  const normalized = event.status.trim().toLowerCase()
+  return normalized === 'active'
+}
 
-  return {
-    maximumCount,
-    appliedCount,
-    balanceCount: calculateBalanceCount(maximumCount, appliedCount),
-    applyByStudent: "yes",
-    eventCode: `${theme.slice(0, 2).toUpperCase()}-${year}-${serial}`,
-    eventName: `${theme} Summit ${year}`,
-    eventOrganizer: pickRandom(organizers),
-    webLink: `https://events.example.com/${theme.toLowerCase().replace(/\s+/g, "-")}-${serial}`,
-    eventCategory,
-    status: "Active",
-    startDate: toDateInputValue(start),
-    endDate: toDateInputValue(end),
-    durationDays: calculateDurationDays(toDateInputValue(start), toDateInputValue(end)),
-    eventLocation: city,
-    eventLevel,
-    state,
-    country: "India",
-    withinBit: "no",
-    relatedToSpecialLab: "no",
-    department,
-    competitionName: `${theme} Challenge`,
-    totalLevelOfCompetition: eventLevel,
-    eligibleForRewards: "yes",
-    winnerRewards: "₹50,000 + Internship Opportunity",
-    createdDate: toDateTimeLocalValue(now),
-    updatedDate: toDateTimeLocalValue(now),
-  };
-};
+const isCompleted = (event: UiEvent) => {
+  if (isClosed(event)) return true
+  if (!event.endDate) return false
+  const endDate = new Date(event.endDate)
+  return !Number.isNaN(endDate.getTime()) && endDate.getTime() < Date.now()
+}
 
-const formatEventDate = (startDate: string | null, endDate: string | null): string => {
-  if (!startDate && !endDate) {
-    return "DATE TBA";
-  }
+const getCardImage = (event: UiEvent) => {
+  const idx = Math.abs(Number(event.id || 0)) % cardImages.length
+  return cardImages[idx]
+}
 
-  const toShort = (value: string | null): string => {
-    if (!value) {
-      return "";
-    }
+const toInputDate = (value: string | null | undefined) => {
+  if (!value) return ''
+  const parsed = new Date(value)
+  if (Number.isNaN(parsed.getTime())) return ''
+  return parsed.toISOString().slice(0, 10)
+}
 
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) {
-      return value;
-    }
+const formatDeadline = (value: string | null) => {
+  if (!value) return 'TBA'
+  const parsed = new Date(value)
+  if (Number.isNaN(parsed.getTime())) return 'TBA'
+  return parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
 
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "2-digit",
-      year: "numeric",
-    });
-  };
+const buildActivityEventLabel = (event: UiEvent) => {
+  return `Event Name : ${event.eventName} - Event Code : ${event.eventCode || 'N/A'} - Event Category : ${event.eventCategory || 'N/A'} - Organizer : ${event.eventOrganizer || 'N/A'} - Start Date : ${toInputDate(event.startDate) || 'N/A'} - End Date : ${toInputDate(event.endDate) || 'N/A'} - Balance Count : ${Math.max(0, event.balanceCount ?? 0)}`
+}
 
-  const start = toShort(startDate);
-  const end = toShort(endDate);
+const buildRegistrationDefaults = (event: UiEvent, studentName = 'Student Name'): RegistrationFormData => ({
+  student: studentName,
+  eventCategory: '',
+  activityEvent: buildActivityEventLabel(event),
+  fromDate: toInputDate(event.startDate),
+  toDate: toInputDate(event.endDate || event.startDate),
+  modeOfParticipation: getDeliveryMode(event) === 'ONLINE' ? 'Online' : 'Offline',
+  iqacVerification: 'Initiated',
+})
 
-  if (start && end) {
-    return `${start} - ${end}`;
-  }
+const getAboutText = (event: UiEvent) => {
+  const organizer = event.eventOrganizer || 'the organizing institution'
+  return `${event.eventName} is designed to provide practical exposure through structured sessions, hands-on tasks, and guided mentorship by ${organizer}.`
+}
 
-  return start || end || "DATE TBA";
-};
+const getSeatsProgressTone = (seatsLeft: number, totalSeats: number) => {
+  const ratio = totalSeats <= 0 ? 0 : seatsLeft / totalSeats
+  if (ratio > 0.5) return 'bg-emerald-500'
+  if (ratio > 0.2) return 'bg-amber-500'
+  return 'bg-rose-500'
+}
 
-const mapEventToCardProps = (event: EventMasterRecord) => {
-  const totalSeats = event.maximumCount > 0 ? event.maximumCount : Math.max(event.appliedCount + event.balanceCount, 1);
-  const seatsLeft = Math.max(0, event.balanceCount);
-  const tags = [event.eventLevel, event.eventCategory, event.department, event.competitionName].filter(
-    (tag): tag is string => Boolean(tag && tag.trim())
-  );
-
-  return {
-    id: event.id,
-    title: event.eventName,
-    date: formatEventDate(event.startDate, event.endDate),
-    location: event.eventLocation || event.state || event.country || "Location TBA",
-    category: event.eventCategory || event.eventLevel || "General",
-    maximumCount: event.maximumCount,
-    appliedCount: event.appliedCount,
-    balanceCount: event.balanceCount,
-    applyByStudent: event.applyByStudent,
-    eventCode: event.eventCode,
-    eventOrganizer: event.eventOrganizer || undefined,
-    webLink: event.webLink || undefined,
-    startDate: event.startDate,
-    endDate: event.endDate,
-    durationDays: event.durationDays,
-    eventLevel: event.eventLevel || undefined,
-    state: event.state || undefined,
-    country: event.country || undefined,
-    withinBit: event.withinBit,
-    relatedToSpecialLab: event.relatedToSpecialLab,
-    department: event.department || undefined,
-    competitionName: event.competitionName || undefined,
-    totalLevelOfCompetition: event.totalLevelOfCompetition || undefined,
-    eligibleForRewards: event.eligibleForRewards,
-    winnerRewards: event.winnerRewards || undefined,
-    createdDate: event.createdDate,
-    updatedDate: event.updatedDate,
-    tags: tags.length > 0 ? tags.slice(0, 4) : [event.status],
-    seatsLeft,
-    totalSeats,
-    status: event.status,
-    isRegistered: event.appliedCount > 0,
-    image:
-      "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80",
-  };
-};
-
-const getIsCompleted = (event: { status?: string; date: string }) => {
-  const normalizedStatus = event.status?.toLowerCase();
-  if (normalizedStatus && ["closed", "inactive", "completed"].includes(normalizedStatus)) {
-    return true;
-  }
-
-  const dateRange = event.date.split(" - ");
-  const endDateString = dateRange.length === 2 ? dateRange[1] : dateRange[0];
-  const endDate = new Date(endDateString);
-
-  if (Number.isNaN(endDate.getTime())) {
-    return false;
-  }
-
-  return endDate.getTime() < Date.now();
-};
-
-
-
-export default function Page() {
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [formData, setFormData] = useState<EventFormData>(initialFormData);
-  const [events, setEvents] = useState<EventCardProps[]>(activityMasterEvents);
-  const [activeTab, setActiveTab] = useState<TabKey>("all");
-  const [isLoading, setIsLoading] = useState(true);
-  const [fetchError, setFetchError] = useState<string | null>(null);
-  const [saveError, setSaveError] = useState<string | null>(null);
-  const [selectedEventKey, setSelectedEventKey] = useState<number | string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-
-  const loadEvents = async () => {
-    try {
-      setIsLoading(true);
-      setFetchError(null);
-      const response = await apiClient.getEvents();
-      const mapped = response.events.map(mapEventToCardProps);
-      setEvents(mapped.length > 0 ? mapped : activityMasterEvents);
-    } catch (error) {
-      setFetchError("Could not load events from backend. Showing fallback data.");
-      setEvents(activityMasterEvents);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadEvents();
-  }, []);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => {
-      const next = { ...prev, [name]: value };
-      if (name === "maximumCount" || name === "appliedCount") {
-        next.balanceCount = calculateBalanceCount(next.maximumCount, next.appliedCount);
-      }
-      if (name === "startDate" || name === "endDate") {
-        next.durationDays = calculateDurationDays(next.startDate, next.endDate);
-      }
-      if (name === "eligibleForRewards" && value === "no") {
-        next.winnerRewards = "";
-      }
-      return next;
-    });
-  };
-
-  const createPayloadFromForm = (data: EventFormData): CreateEventPayload | null => {
-    const maximumCount = parseNumber(data.maximumCount);
-    const appliedCount = data.appliedCount ? parseNumber(data.appliedCount) : 0;
-    const balanceCount = data.balanceCount ? parseNumber(data.balanceCount) : maximumCount - appliedCount;
-
-    if (!data.eventCode.trim() || !data.eventName.trim()) {
-      setSaveError("Event code and event name are required.");
-      return null;
-    }
-    if (!Number.isFinite(maximumCount) || maximumCount <= 0) {
-      setSaveError("Maximum count must be greater than 0.");
-      return null;
-    }
-    if (!Number.isFinite(appliedCount) || appliedCount < 0) {
-      setSaveError("Applied count must be 0 or more.");
-      return null;
-    }
-    if (!Number.isFinite(balanceCount) || balanceCount < 0) {
-      setSaveError("Balance count must be 0 or more.");
-      return null;
-    }
-    if (appliedCount + balanceCount > maximumCount) {
-      setSaveError("Applied count + balance count cannot exceed maximum count.");
-      return null;
-    }
-    if (data.startDate && data.endDate && new Date(data.endDate) < new Date(data.startDate)) {
-      setSaveError("End date cannot be before start date.");
-      return null;
-    }
-
-    return {
-      maximumCount,
-      appliedCount,
-      balanceCount,
-      applyByStudent: toBoolean(data.applyByStudent),
-      eventCode: data.eventCode,
-      eventName: data.eventName,
-      eventOrganizer: data.eventOrganizer || null,
-      webLink: data.webLink || null,
-      eventCategory: data.eventCategory || null,
-      status: data.status,
-      startDate: data.startDate || null,
-      endDate: data.endDate || null,
-      durationDays: data.durationDays ? parseNumber(data.durationDays) : null,
-      eventLocation: data.eventLocation || null,
-      eventLevel: data.eventLevel || null,
-      state: data.state || null,
-      country: data.country || null,
-      withinBit: toBoolean(data.withinBit),
-      relatedToSpecialLab: toBoolean(data.relatedToSpecialLab),
-      department: data.department || null,
-      competitionName: data.competitionName || null,
-      totalLevelOfCompetition: data.totalLevelOfCompetition || null,
-      eligibleForRewards: toBoolean(data.eligibleForRewards),
-      winnerRewards: data.winnerRewards || null,
-    };
-  };
-
-  const addEventCardLocally = (payload: CreateEventPayload, sourceForm: EventFormData) => {
-    const fallbackCreatedDate = sourceForm.createdDate || new Date().toISOString();
-    const fallbackUpdatedDate = sourceForm.updatedDate || fallbackCreatedDate;
-    const createdCard: EventCardProps = {
-      id: Date.now(),
-      title: payload.eventName,
-      date: formatEventDate(payload.startDate ?? null, payload.endDate ?? null),
-      location: payload.eventLocation || payload.state || payload.country || "Location TBA",
-      category: payload.eventCategory || payload.eventLevel || "General",
-      maximumCount: payload.maximumCount,
-      appliedCount: payload.appliedCount,
-      balanceCount: payload.balanceCount,
-      applyByStudent: payload.applyByStudent,
-      eventCode: payload.eventCode,
-      eventOrganizer: payload.eventOrganizer || undefined,
-      webLink: payload.webLink || undefined,
-      startDate: payload.startDate ?? null,
-      endDate: payload.endDate ?? null,
-      durationDays: payload.durationDays ?? null,
-      eventLevel: payload.eventLevel || undefined,
-      state: payload.state || undefined,
-      country: payload.country || undefined,
-      withinBit: payload.withinBit,
-      relatedToSpecialLab: payload.relatedToSpecialLab,
-      department: payload.department || undefined,
-      competitionName: payload.competitionName || undefined,
-      totalLevelOfCompetition: payload.totalLevelOfCompetition || undefined,
-      eligibleForRewards: payload.eligibleForRewards,
-      winnerRewards: payload.winnerRewards || undefined,
-      createdDate: fallbackCreatedDate,
-      updatedDate: fallbackUpdatedDate,
-      tags: [payload.eventLevel, payload.eventCategory, payload.department, payload.competitionName].filter(
-        (tag): tag is string => Boolean(tag && tag.trim())
-      ),
-      seatsLeft: payload.balanceCount,
-      totalSeats: payload.maximumCount,
-      image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80",
-      status: payload.status,
-      isRegistered: payload.appliedCount > 0,
-    };
-
-    if (createdCard.tags.length === 0) {
-      createdCard.tags = [payload.status];
-    }
-
-    setEvents((prev) => [createdCard, ...prev]);
-  };
-
-  const submitCreateEvent = async (data: EventFormData) => {
-    setSaveError(null);
-    const payload = createPayloadFromForm(data);
-    if (!payload) {
-      return;
-    }
-
-    setIsSaving(true);
-    addEventCardLocally(payload, data);
-    setIsCreateModalOpen(false);
-    setFormData(initialFormData);
-
-    try {
-      await apiClient.createEvent(payload);
-    } catch (error) {
-      setFetchError("Event added in UI. Backend sync failed for this event.");
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleCreateEvent = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    await submitCreateEvent(formData);
-  };
-
-  const handleAutoGenerateAndSubmit = async () => {
-    const fakeData = generateFakeEventFormData();
-    setFormData(fakeData);
-    await submitCreateEvent(fakeData);
-  };
-
-  const handleRegisterSuccess = (eventKey: number | string) => {
-    setEvents((prev) =>
-      prev.map((event) => {
-        const currentKey = event.id ?? event.title;
-        if (currentKey !== eventKey) {
-          return event;
-        }
-
-        return {
-          ...event,
-          isRegistered: true,
-          seatsLeft: Math.max(0, event.seatsLeft - 1),
-        };
-      })
-    );
-  };
-
-  const filteredEvents = events.filter((event) => {
-    if (activeTab === "all") {
-      return true;
-    }
-    if (activeTab === "registered") {
-      return Boolean(event.isRegistered);
-    }
-
-    return getIsCompleted(event);
-  });
-
-  const selectedEvent = selectedEventKey
-    ? events.find((event) => (event.id ?? event.title) === selectedEventKey) ?? null
-    : null;
+function EventCard({
+  event,
+  onOpenDetails,
+}: {
+  event: UiEvent
+  onOpenDetails: (event: UiEvent) => void
+}) {
+  const seatsLeft = Math.max(0, event.balanceCount ?? 0)
+  const closed = isClosed(event)
+  const imageUrl = getCardImage(event)
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto">
-      <div className="space-y-6 sm:space-y-8">
-        {!selectedEvent && (
-          <>
-            <header className="flex flex-wrap items-start justify-between gap-4">
-              <div className="space-y-2">
-                <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Events</h1>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setSaveError(null);
-                  setIsCreateModalOpen(true);
-                }}
-                className="btn-primary"
-              >
-                Create Event
-              </button>
-            </header>
-
-            <nav className="overflow-x-auto border-b border-slate-200">
-              <ul className="flex w-max items-center gap-6 pb-2">
-                {topTabs.map((tab) => (
-                  <li key={tab.label}>
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab(tab.key)}
-                      className={`inline-flex items-center gap-1 border-b-2 px-0.5 pb-2 text-sm font-medium transition ${
-                        activeTab === tab.key
-                          ? "border-indigo-600 text-indigo-700"
-                          : "border-transparent text-slate-500 hover:text-indigo-700"
-                      }`}
-                    >
-                      {tab.label}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          </>
-        )}
-
-        {selectedEvent ? (
-          <Card
-            {...selectedEvent}
-            mode="details"
-            onBack={() => setSelectedEventKey(null)}
-            onRegisterSuccess={handleRegisterSuccess}
-          />
-        ) : (
-          <section className="space-y-4">
-
-            {fetchError && (
-              <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
-                {fetchError}
-              </p>
-            )}
-
-            {isLoading && <p className="text-sm text-slate-500">Loading events...</p>}
-
-            {!isLoading && filteredEvents.length === 0 ? (
-              <p className="rounded-md border border-slate-200 bg-white px-3 py-4 text-sm text-slate-600">
-                No events found for this tab.
-              </p>
-            ) : (
-              <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                {filteredEvents.map((event, index) => (
-                  <Card
-                    key={`${event.id ?? event.title}-${index}`}
-                    {...event}
-                    onRegisterSuccess={handleRegisterSuccess}
-                    onOpenDetails={(eventKey) => setSelectedEventKey(eventKey)}
-                  />
-                ))}
-              </div>
-            )}
-          </section>
-        )}
-
-        {isCreateModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-            <div className="max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
-              <div className="sticky top-0 flex items-center justify-between border-b border-slate-200 bg-white px-6 py-4">
-                <div>
-                  <h2 className="text-xl font-bold text-slate-900">Create Event</h2>
-                  <p className="text-sm text-slate-500">Fill in event master details</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSaveError(null);
-                    setIsCreateModalOpen(false);
-                  }}
-                  className="text-slate-500 hover:text-slate-700"
-                >
-                  ✕
-                </button>
-              </div>
-
-              <form onSubmit={handleCreateEvent} className="space-y-6 p-6">
-                {saveError && (
-                  <p className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
-                    {saveError}
-                  </p>
-                )}
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                  {formFields.map((field) => (
-                    <div key={field.name}>
-                      <label className="mb-2 block text-sm font-medium text-slate-700">
-                        {field.label}
-                      </label>
-                      {field.type === "select" ? (
-                        <select
-                          name={field.name}
-                          value={formData[field.name]}
-                          onChange={handleInputChange}
-                          className="input-base"
-                        >
-                          {field.options?.map((option) => (
-                            <option key={option} value={option}>
-                              {option}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        <input
-                          type={field.type}
-                          name={field.name}
-                          value={formData[field.name]}
-                          onChange={handleInputChange}
-                          readOnly={field.name === "balanceCount" || field.name === "durationDays"}
-                          className={`input-base ${
-                            field.name === "balanceCount" || field.name === "durationDays" ? "bg-slate-100" : "bg-white"
-                          }`}
-                          placeholder={`Enter ${field.label}`}
-                        />
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex flex-wrap items-center justify-end gap-3 border-t border-slate-200 pt-4">
-                  <button
-                    type="button"
-                    onClick={handleAutoGenerateAndSubmit}
-                    disabled={isSaving}
-                    className="btn-outline disabled:cursor-not-allowed disabled:opacity-70"
-                  >
-                    Auto Generate & Submit
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSaveError(null);
-                      setIsCreateModalOpen(false);
-                    }}
-                    className="btn-outline"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isSaving}
-                    className="btn-primary"
-                  >
-                    {isSaving ? "Saving..." : "Save Event"}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+    <article
+      role="button"
+      tabIndex={0}
+      onClick={() => onOpenDetails(event)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onOpenDetails(event)
+        }
+      }}
+      className={`group overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${
+        closed ? 'border-slate-200 opacity-65 grayscale-[0.2]' : 'border-slate-200'
+      }`}
+    >
+      <div className="relative h-40 w-full overflow-hidden">
+        <img
+          // src={imageUrl}
+          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRxBmFlWhIf--GRoU5qIlQ44AUFg9-opDFC7w&s"
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          loading="lazy"
+        />
+        <span className="absolute right-2.5 top-2.5 rounded-md bg-slate-900/90 px-2.5 py-1 text-xs font-semibold text-white">
+          {event.eventCategory || 'General'}
+        </span>
       </div>
+
+      <div className="p-5">
+        <h3 className="line-clamp-2 text-2xl font-semibold leading-tight text-slate-900">{event.eventName}</h3>
+        <p className="mt-2 text-sm font-medium text-slate-600">Seats left: {seatsLeft}</p>
+
+        
+      </div>
+    </article>
+  )
+}
+
+export default function Page() {
+  const { isStudent, isAdmin, isVerification } = useRoles()
+  const user = useAuthStore((state) => state.user)
+  const [events, setEvents] = useState<UiEvent[]>([])
+  const [activeTab, setActiveTab] = useState<TabKey>('all')
+  const [search, setSearch] = useState('')
+  const [category, setCategory] = useState('all')
+  const [level, setLevel] = useState('all')
+  const [delivery, setDelivery] = useState<DeliveryFilter>('all')
+  const [selectedEvent, setSelectedEvent] = useState<UiEvent | null>(null)
+  const [registrationForm, setRegistrationForm] = useState<RegistrationFormData | null>(null)
+  const [registrationSubmitted, setRegistrationSubmitted] = useState(false)
+  const [registrationSubmitting, setRegistrationSubmitting] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [usingFallback, setUsingFallback] = useState(false)
+
+  const deferredSearch = useDeferredValue(search)
+
+  useEffect(() => {
+    let isMounted = true
+
+    const loadEvents = async () => {
+      try {
+        setLoading(true)
+        setErrorMessage(null)
+        setUsingFallback(false)
+        const response = await apiClient.getEvents({ sort: 'desc' })
+
+        if (!isMounted) return
+        setEvents(response.events)
+        setUsingFallback(false)
+        if (response.events.length === 0) {
+          setErrorMessage('No events found in the database.')
+        }
+      } catch (error) {
+        if (!isMounted) return
+        console.warn('Events could not be loaded from backend at this time.')
+        setEvents([])
+        setUsingFallback(false)
+        setErrorMessage('Could not load events from backend.')
+      } finally {
+        if (isMounted) setLoading(false)
+      }
+    }
+
+    loadEvents()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  const canCreate = isAdmin()
+
+  const categoryOptions = useMemo(() => {
+    const items = Array.from(new Set(events.map((event) => event.eventCategory).filter((value): value is string => Boolean(value))))
+    return ['all', ...items]
+  }, [events])
+
+  const levelOptions = useMemo(() => {
+    const items = Array.from(new Set(events.map((event) => event.eventLevel).filter((value): value is string => Boolean(value))))
+    return ['all', ...items]
+  }, [events])
+
+  const filteredEvents = useMemo(() => {
+    let data = [...events]
+
+    if (isStudent()) {
+      data = data.filter((event) => isActiveStatus(event))
+    }
+
+    if (activeTab === 'registered') {
+      data = data.filter((event) => event.appliedCount > 0)
+    }
+
+    if (activeTab === 'completed') {
+      data = data.filter((event) => isCompleted(event))
+    }
+
+    if (category !== 'all') {
+      data = data.filter((event) => (event.eventCategory || 'Uncategorized') === category)
+    }
+
+    if (level !== 'all') {
+      data = data.filter((event) => (event.eventLevel || 'Unspecified') === level)
+    }
+
+    if (delivery !== 'all') {
+      data = data.filter((event) => getDeliveryMode(event) === delivery)
+    }
+
+    const q = deferredSearch.trim().toLowerCase()
+    if (q) {
+      data = data.filter((event) => {
+        return [event.eventName, event.eventCode, event.eventOrganizer, event.state, event.eventLocation]
+          .filter(Boolean)
+          .some((value) => String(value).toLowerCase().includes(q))
+      })
+    }
+
+    return data
+  }, [activeTab, category, deferredSearch, delivery, events, isStudent(), level])
+
+  const counts = useMemo(
+    () => ({
+      all: isStudent() ? events.filter((event) => isActiveStatus(event)).length : events.length,
+      registered: (isStudent() ? events.filter((event) => isActiveStatus(event)) : events).filter((event) => event.appliedCount > 0).length,
+      completed: (isStudent() ? events.filter((event) => isActiveStatus(event)) : events).filter((event) => isCompleted(event)).length,
+    }),
+    [events, isStudent()]
+  )
+
+  const activeCount = filteredEvents.filter((event) => isActiveStatus(event)).length
+
+  const openEventDetails = (event: UiEvent) => {
+    setSelectedEvent(event)
+    setRegistrationForm(buildRegistrationDefaults(event, user?.name || 'Student Name'))
+    setRegistrationSubmitted(false)
+  }
+
+  const closeEventDetails = () => {
+    setSelectedEvent(null)
+    setRegistrationForm(null)
+    setRegistrationSubmitted(false)
+  }
+
+  const handleQuickRegister = async () => {
+    if (!selectedEvent || !registrationForm) return
+
+    try {
+      setRegistrationSubmitting(true)
+      setErrorMessage(null)
+      await apiClient.registerForEvent({
+        eventId: selectedEvent.id,
+        studentName: registrationForm.student,
+        studentDepartment: null,
+        eventCategory: registrationForm.eventCategory || selectedEvent.eventCategory || null,
+        activityEvent: registrationForm.activityEvent,
+        fromDate: registrationForm.fromDate || null,
+        toDate: registrationForm.toDate || null,
+        modeOfParticipation: registrationForm.modeOfParticipation || null,
+        iqacVerification: registrationForm.iqacVerification || 'Initiated',
+      })
+
+      setRegistrationSubmitted(true)
+
+      setEvents((prev) =>
+        prev.map((item) =>
+          item.id === selectedEvent.id
+            ? {
+                ...item,
+                appliedCount: item.appliedCount + 1,
+                balanceCount: Math.max(0, item.balanceCount - 1),
+              }
+            : item,
+        ),
+      )
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to register for the event.'
+      setErrorMessage(message)
+    } finally {
+      setRegistrationSubmitting(false)
+    }
+  }
+
+  return (
+    <div className={`${dmSans.className} mx-auto max-w-[1480px] bg-[#F4F6F8] p-4 sm:p-6 lg:p-8`}>
+      <div className="mb-6 rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+        
+
+        <div className="flex flex-wrap gap-3">
+          {canCreate ? (
+            <Link href="/students/create-event" className="btn-primary">
+              Create Event
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          ) : null}
+          {isVerification() ? (
+            <Link href="/students/verification-panel" className="btn-outline">
+              Verification Panel
+            </Link>
+          ) : null}
+        </div>
+      </div>
+      </div>
+
+      {errorMessage ? <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 shadow-sm">{errorMessage}</div> : null}
+
+      {selectedEvent && registrationForm ? (
+        <section>
+          <button
+            type="button"
+            onClick={closeEventDetails}
+            className="mb-4 inline-flex items-center gap-2 rounded-[14px] border border-[#E5E9EF] bg-white px-4 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </button>
+
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-5">
+            <section className="space-y-5 overflow-y-auto lg:col-span-3 lg:max-h-[calc(100vh-190px)] lg:pr-1">
+              <div className="rounded-[14px] border border-[#E5E9EF] bg-white p-6">
+                <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                  {selectedEvent.eventCategory || 'Competition'}
+                </span>
+                <h1 className="mt-3 text-3xl font-bold text-slate-900">{selectedEvent.eventName}</h1>
+                <p className="mt-2 text-3xl text-slate-500">{selectedEvent.department || 'II Year Only'}</p>
+
+                <div className="mt-4 grid grid-cols-1 gap-3 text-slate-800 sm:grid-cols-2">
+                  <p className="flex items-center gap-2 text-xl">
+                    <CalendarDays className="h-4 w-4 text-slate-500" />
+                    {formatEventDate(selectedEvent.startDate, selectedEvent.endDate)}
+                  </p>
+                  <p className="flex items-center gap-2 text-xl">
+                    <MapPin className="h-4 w-4 text-slate-500" />
+                    {selectedEvent.eventOrganizer || selectedEvent.eventLocation || 'Tech Innovation Institute'}
+                  </p>
+                </div>
+
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                {[
+                  {
+                    icon: CalendarDays,
+                    label: 'Start Date',
+                    value: toInputDate(selectedEvent.startDate) ? new Date(selectedEvent.startDate as string).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'TBA',
+                  },
+                  {
+                    icon: Clock3,
+                    label: 'End Date',
+                    value: toInputDate(selectedEvent.endDate) ? new Date(selectedEvent.endDate as string).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'TBA',
+                  },
+                  {
+                    icon: MapPin,
+                    label: 'Mode',
+                    value: getDeliveryMode(selectedEvent),
+                  },
+                  {
+                    icon: MapPin,
+                    label: 'State',
+                    value: selectedEvent.state || 'All India',
+                  },
+                ].map((item) => {
+                  const Icon = item.icon
+                  return (
+                    <div key={item.label} className="rounded-[14px] border border-[#E5E9EF] bg-white p-4">
+                      <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <p className="text-xs font-medium text-slate-500">{item.label}</p>
+                      <p className="mt-1 text-2xl font-semibold text-slate-900">{item.value}</p>
+                    </div>
+                  )
+                })}
+              </div>
+
+              <div className="rounded-[14px] border border-[#E5E9EF] bg-white p-6">
+                <h3 className="text-4xl font-bold text-slate-900">About This Event</h3>
+                <p className="mt-4 text-xl leading-10 text-slate-500">{getAboutText(selectedEvent)}</p>
+              </div>
+            </section>
+
+            <aside className="space-y-5 lg:sticky lg:top-6 lg:col-span-2 lg:self-start">
+              <div className="rounded-[14px] border border-[#E5E9EF] bg-white p-5">
+                <div className="flex items-start justify-between">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-700">
+                    <Building2 className="h-5 w-5" />
+                  </div>
+                  <div className="text-right">
+                    <p className="text-5xl font-bold text-orange-500">{Math.max(0, selectedEvent.balanceCount ?? 0)}</p>
+                    <p className="text-lg text-slate-500">Seats Remaining</p>
+                  </div>
+                </div>
+                <div className="mt-4 h-2 w-full rounded-full bg-slate-200">
+                  <div
+                    className={`h-2 rounded-full ${getSeatsProgressTone(
+                      Math.max(0, selectedEvent.balanceCount ?? 0),
+                      Math.max(1, selectedEvent.maximumCount || 1),
+                    )}`}
+                    style={{
+                      width: `${Math.round(
+                        (Math.max(0, selectedEvent.balanceCount ?? 0) / Math.max(1, selectedEvent.maximumCount || 1)) * 100,
+                      )}%`,
+                    }}
+                  />
+                </div>
+                <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
+                  <span>{Math.max(0, selectedEvent.appliedCount ?? 0)} registered</span>
+                  <span>{Math.max(1, selectedEvent.maximumCount || 1)} total capacity</span>
+                </div>
+              </div>
+
+              <div className="rounded-[14px] border border-[#E5E9EF] bg-white p-5">
+              {!registrationSubmitted ? (
+                <div className="space-y-3">
+                  <h3 className="text-2xl font-semibold text-slate-900">Register for this Event</h3>
+                  <p className="text-lg text-slate-500">Secure your spot before it's too late</p>
+
+
+                  <a
+                    href={selectedEvent.webLink || '#'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`inline-flex w-full items-center justify-center rounded-[14px] border border-slate-300 bg-white px-4 py-3 text-base font-semibold text-slate-800 transition hover:bg-slate-50 ${!selectedEvent.webLink ? 'pointer-events-none opacity-50' : ''}`}
+                  >
+                    Open Event Website
+                  </a>
+
+                  <button
+                    type="button"
+                    disabled={registrationSubmitting || Math.max(0, selectedEvent.balanceCount ?? 0) === 0}
+                    onClick={handleQuickRegister}
+                    className="w-full rounded-[14px] bg-[#0F172A] px-4 py-3 text-xl font-semibold text-white transition hover:bg-[#1E293B] disabled:cursor-not-allowed disabled:bg-slate-400"
+                  >
+                    {registrationSubmitting ? 'Registering...' : Math.max(0, selectedEvent.balanceCount ?? 0) === 0 ? 'No Seats Left' : 'Register'}
+                  </button>
+                </div>
+              ) : (
+                <div className="rounded-[14px] border border-emerald-200 bg-emerald-50 p-5 text-center">
+                  <CheckCircle2 className="mx-auto h-11 w-11 text-emerald-600" />
+                  <h4 className="mt-3 text-xl font-semibold text-emerald-900">Registration Submitted!</h4>
+                  <p className="mt-1 text-sm text-emerald-700">Your application is under review.</p>
+                  <span className="mt-3 inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
+                    Status: Pending Approval
+                  </span>
+                </div>
+              )}
+
+              <div className="mt-4 border-t border-slate-200 pt-4 text-sm text-slate-700">
+                <p className="text-right text-slate-500">Deadline: {formatDeadline(selectedEvent.endDate || selectedEvent.startDate)}</p>
+              </div>
+              </div>
+            </aside>
+          </div>
+        </section>
+      ) : (
+      <>
+      <div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+        <div className="flex flex-wrap gap-2 overflow-x-auto">
+          {tabs.map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => setActiveTab(tab.key)}
+              className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
+                activeTab === tab.key ? 'bg-slate-900 text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+              }`}
+            >
+              {tab.label}
+              <span className="ml-2 text-xs opacity-70">({counts[tab.key]})</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="grid w-full gap-3 sm:grid-cols-2 xl:max-w-4xl xl:grid-cols-4">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search event name or code"
+              className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm text-slate-700 outline-none transition focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100"
+            />
+          </div>
+
+          <select value={category} onChange={(e) => setCategory(e.target.value)} className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100">
+            {categoryOptions.map((item) => (
+              <option key={item} value={item}>
+                {item === 'all' ? 'All Categories' : item}
+              </option>
+            ))}
+          </select>
+
+          <select value={level} onChange={(e) => setLevel(e.target.value)} className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100">
+            {levelOptions.map((item) => (
+              <option key={item} value={item}>
+                {item === 'all' ? 'All Levels' : item}
+              </option>
+            ))}
+          </select>
+
+          <select value={delivery} onChange={(e) => setDelivery(e.target.value as DeliveryFilter)} className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100">
+            <option value="all">Online / Offline</option>
+            <option value="ONLINE">ONLINE</option>
+            <option value="OFFLINE">OFFLINE</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
+        <span>{filteredEvents.length} event{filteredEvents.length === 1 ? '' : 's'} shown</span>
+        {usingFallback ? <span>Showing fallback data</span> : <span>Data loaded from backend</span>}
+      </div>
+
+      {loading ? (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div key={index} className="animate-pulse rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="h-3 w-28 rounded bg-slate-200" />
+              <div className="mt-4 h-8 w-4/5 rounded bg-slate-200" />
+              <div className="mt-3 h-4 w-2/3 rounded bg-slate-200" />
+              <div className="mt-2 h-4 w-1/2 rounded bg-slate-200" />
+              <div className="mt-4 h-5 w-full rounded bg-slate-100" />
+              <div className="mt-4 h-10 w-36 rounded-xl bg-slate-200" />
+            </div>
+          ))}
+        </div>
+      ) : filteredEvents.length === 0 ? (
+        <div className="rounded-3xl border border-slate-200 bg-white p-10 text-center shadow-sm">
+          <Filter className="mx-auto h-10 w-10 text-slate-300" />
+          <h2 className="mt-4 text-lg font-semibold text-slate-900">No events found</h2>
+          <p className="mt-2 text-sm text-slate-500">Try adjusting the filters or search term.</p>
+        </div>
+      ) : (
+        <>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {filteredEvents.map((event) => (
+            <EventCard key={event.id} event={event} onOpenDetails={openEventDetails} />
+          ))}
+        </div>
+        </>
+      )}
+
+      {/* {!loading && activeCount > 0 ? (
+        <div className="mt-6 rounded-2xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-800">
+          Active events are emphasized across the dashboard. Full or closed cards are dimmed and their action buttons are disabled.
+        </div>
+      ) : null} */}
+      </>
+      )}
     </div>
-  );
+  )
 }

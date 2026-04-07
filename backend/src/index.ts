@@ -12,6 +12,7 @@ import internshipTrackerRoutes from './routes/internshipTracker.routes';
 import internshipReportRoutes from './routes/internshipReport.routes';
 import studentsRoutes from './routes/students.routes';
 import eventsRoutes from './routes/events.routes';
+import registrationRoutes from './routes/registration.routes';
 import { verifyMysqlConnection } from './database/mysql';
 
 dotenv.config();
@@ -56,6 +57,7 @@ app.use('/api/internship-report', internshipReportRoutes);
 app.use('/api/students', studentsRoutes);
 app.use('/api/industries', industriesRoutes);
 app.use('/api/events', eventsRoutes);
+app.use('/api/registrations', registrationRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

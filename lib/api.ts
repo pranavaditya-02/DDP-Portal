@@ -58,6 +58,80 @@ export interface CreateEventPayload {
   winnerRewards?: string | null;
 }
 
+export interface EventRegistrationRecord {
+  id: number;
+  eventId: number;
+  studentId: number | null;
+  studentName: string;
+  studentEmail: string | null;
+  studentDepartment: string | null;
+  eventCategory: string | null;
+  activityEvent: string | null;
+  fromDate: string | null;
+  toDate: string | null;
+  modeOfParticipation: string | null;
+  iqacVerification: string;
+  status: 'pending' | 'approved' | 'rejected';
+  rejectionReason: string | null;
+  verifiedBy: number | null;
+  verifiedAt: string | null;
+  createdDate: string;
+  updatedDate: string;
+  eventName: string;
+  eventCode: string;
+  eventOrganizer: string | null;
+  eventLevel: string | null;
+}
+
+export interface CreateRegistrationPayload {
+  eventId: number;
+  studentName: string;
+  studentDepartment?: string | null;
+  eventCategory?: string | null;
+  activityEvent?: string | null;
+  fromDate?: string | null;
+  toDate?: string | null;
+  modeOfParticipation?: string | null;
+  iqacVerification?: string | null;
+}
+
+export interface EventRegistrationRecord {
+  id: number;
+  eventId: number;
+  studentId: number | null;
+  studentName: string;
+  studentEmail: string | null;
+  studentDepartment: string | null;
+  eventCategory: string | null;
+  activityEvent: string | null;
+  fromDate: string | null;
+  toDate: string | null;
+  modeOfParticipation: string | null;
+  iqacVerification: string;
+  status: 'pending' | 'approved' | 'rejected';
+  rejectionReason: string | null;
+  verifiedBy: number | null;
+  verifiedAt: string | null;
+  createdDate: string;
+  updatedDate: string;
+  eventName: string;
+  eventCode: string;
+  eventOrganizer: string | null;
+  eventLevel: string | null;
+}
+
+export interface CreateRegistrationPayload {
+  eventId: number;
+  studentName: string;
+  studentDepartment?: string | null;
+  eventCategory?: string | null;
+  activityEvent?: string | null;
+  fromDate?: string | null;
+  toDate?: string | null;
+  modeOfParticipation?: string | null;
+  iqacVerification?: string | null;
+}
+
 const DEFAULT_API_URL = 'http://localhost:5000/api';
 
 function normalizeApiUrl(rawUrl?: string) {
@@ -341,13 +415,78 @@ export const apiClient = {
     return response.data;
   },
 
-  getEvents: async (): Promise<{ events: EventMasterRecord[] }> => {
-    const response = await client.get('/events');
-    return response.data;
+  getEvents: async (params?: { sort?: 'asc' | 'desc' }): Promise<{ events: EventMasterRecord[] }> => {
+    const searchParams = new URLSearchParams();
+    const token = useAuthStore.getState().token;
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    if (params?.sort) {
+      searchParams.set('sort', params.sort);
+    }
+
+    const response = await fetch(`/api/events${searchParams.toString() ? `?${searchParams.toString()}` : ''}`, {
+      method: 'GET',
+      headers,
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      const errorPayload = await response.json().catch(() => null);
+      throw new Error(errorPayload?.error || `Failed to load events (${response.status})`);
+    }
+
+    return response.json();
   },
 
   createEvent: async (data: CreateEventPayload): Promise<{ message: string; event: EventMasterRecord }> => {
-    const response = await client.post('/events', data);
+    const token = useAuthStore.getState().token;
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    const response = await fetch('/api/events', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorPayload = await response.json().catch(() => null);
+      throw new Error(errorPayload?.error || `Failed to create event (${response.status})`);
+    }
+
+    return response.json();
+  },
+
+  registerForEvent: async (data: CreateRegistrationPayload): Promise<{ message: string; registration: EventRegistrationRecord }> => {
+    const response = await client.post('/registrations', data);
+    return response.data;
+  },
+
+  getVerificationRegistrations: async (status?: 'pending' | 'approved' | 'rejected'): Promise<{ registrations: EventRegistrationRecord[] }> => {
+    const response = await client.get('/registrations/verification', {
+      params: { status },
+    });
+    return response.data;
+  },
+
+  approveRegistration: async (registrationId: number): Promise<{ message: string; registration: EventRegistrationRecord }> => {
+    const response = await client.post(`/registrations/${registrationId}/approve`);
+    return response.data;
+  },
+
+  rejectRegistration: async (registrationId: number, reason: string): Promise<{ message: string; registration: EventRegistrationRecord }> => {
+    const response = await client.post(`/registrations/${registrationId}/reject`, { reason });
     return response.data;
   },
 };

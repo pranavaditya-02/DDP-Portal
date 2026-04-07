@@ -65,7 +65,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const router = useRouter();
   const pathname = usePathname();
   const { user, logout } = useAuthStore();
-  const { isFaculty, isHod, isDean, isStudent, isVerification, isMaintenance } =
+  const {
+    isFaculty,
+    isHod,
+    isDean,
+    isStudent,
+    isVerification,
+    isMaintenance,
+    isAdmin,
+  } =
     useRoles();
   const [profileOpen, setProfileOpen] = useState(false);
   const [activityExpanded, setActivityExpanded] = useState(false);
@@ -108,6 +116,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
           icon: FileText,
           show: isStudent(),
         },
+        {
+          label: "Activity Master",
+          href: "/student/activity/master",
+          icon: Clipboard,
+          show: isStudent(),
+        },
+        {
+          label: "Activity Logger",
+          href: "/student/activity/logger",
+          icon: PlusCircle,
+          show: isStudent(),
+        },
+        {
+          label: "Create Event",
+          href: "/student/activity/create-event",
+          icon: Calendar,
+          show: isAdmin(),
+        },
+        {
+          label: "My Registrations",
+          href: "/student/activity/my-registrations",
+          icon: ClipboardCheck,
+          show: isStudent(),
+        },
+        
         ...studentNavItems.map((item) => ({
           label: item.label,
           href: `/student/${item.slug}`,
@@ -188,6 +221,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
           icon: ShieldCheck,
           show: isVerification(),
           badge: 7,
+        },
+        {
+          label: "Verification Panel",
+          href: "/verification-panel",
+          icon: ShieldCheck,
+          show: isVerification(),
         },
         {
           label: "User Management",
