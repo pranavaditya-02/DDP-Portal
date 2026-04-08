@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Search, PlusCircle } from "lucide-react";
+import { Search, PlusCircle, Filter, ChevronDown, ChevronRight, ChevronUp } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import { useRoles } from "@/hooks/useRoles";
 
@@ -15,7 +15,8 @@ interface InternshipTracker {
   end_date: string;
   aim_objectives_link?: string | null;
   offer_letter_link?: string | null;
-  iqac_verification: 'initiated' | 'inprogress' | 'completed';
+  iqac_verification: 'initiated' | 'approved' | 'declined';
+  reject_reason?: string | null;
 }
 
 const BACKEND_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/api$/, '');
@@ -35,14 +36,106 @@ const getPeriodLabel = (startDate: string, endDate: string) => {
   return label;
 };
 
+type TrackerSortKey = "student_name" | "industry_name" | "start_date";
+type SortDirection = "asc" | "desc" | null;
+
 export default function Page() {
   const [trackers, setTrackers] = useState<InternshipTracker[]>([]);
   const [query, setQuery] = useState("");
+  const [filterIndustry, setFilterIndustry] = useState("");
+  const [filterStartDateFrom, setFilterStartDateFrom] = useState("");
+  const [filterStartDateTo, setFilterStartDateTo] = useState("");
+  const [filterEndDateFrom, setFilterEndDateFrom] = useState("");
+  const [filterEndDateTo, setFilterEndDateTo] = useState("");
+  const [filterOfferLetter, setFilterOfferLetter] = useState("");
+  const [filterIqacStatus, setFilterIqacStatus] = useState("");
+  const [sortKey, setSortKey] = useState<TrackerSortKey | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
+  const [perPage, setPerPage] = useState(10);
+  const [showFilters, setShowFilters] = useState(false);
+
+  const computeSortIcon = (column: TrackerSortKey) => {
+    if (sortKey !== column) return null;
+    return sortDirection === "asc" ? (
+      <ChevronUp className="ml-1 inline-block h-3 w-3 text-slate-400" />
+    ) : (
+      <ChevronDown className="ml-1 inline-block h-3 w-3 text-slate-400" />
+    );
+  };
+
+  const handleSort = (column: TrackerSortKey) => {
+    if (sortKey !== column) {
+      setSortKey(column);
+      setSortDirection("asc");
+      return;
+    }
+
+    if (sortDirection === "asc") {
+      setSortDirection("desc");
+      return;
+    }
+
+    setSortKey(null);
+    setSortDirection(null);
+  };
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<number | null>(null);
+  const [selectedTracker, setSelectedTracker] = useState<InternshipTracker | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
+  const [isConfirmingReject, setIsConfirmingReject] = useState(false);
+  const [sectionOpen, setSectionOpen] = useState<{
+    initiated: boolean;
+    approved: boolean;
+    declined: boolean;
+  }>({ initiated: true, approved: true, declined: true });
   const roleUtils = useRoles();
   const isVerification = roleUtils.isVerification();
+
+  const normalizeErrorMessage = (error: unknown): string => {
+    if (!error) return 'An unknown error occurred.';
+
+    if (typeof error === 'string') {
+      return error;
+    }
+
+    if (error instanceof Error) {
+      return error.message;
+    }
+
+    if (typeof error === 'object' && error !== null) {
+      const anyError = error as any;
+
+      if (typeof anyError === 'object' && 'response' in anyError && anyError.response) {
+        const responseError = anyError.response.data?.error;
+        if (typeof responseError === 'string') {
+          return responseError;
+        }
+        if (Array.isArray(responseError)) {
+          return responseError.map((item) => {
+            if (typeof item === 'string') return item;
+            if (typeof item === 'object' && item?.message) return String(item.message);
+            return JSON.stringify(item);
+          }).join('; ');
+        }
+        if (typeof responseError === 'object' && responseError !== null) {
+          return JSON.stringify(responseError);
+        }
+      }
+
+      if (Array.isArray(anyError)) {
+        return anyError.map((item) => (typeof item === 'string' ? item : JSON.stringify(item))).join('; ');
+      }
+
+      if (typeof anyError.message === 'string') {
+        return anyError.message;
+      }
+
+      return JSON.stringify(anyError);
+    }
+
+    return String(error);
+  };
 
   useEffect(() => {
     const loadTrackers = async () => {
@@ -52,7 +145,7 @@ export default function Page() {
         setTrackers(response?.trackers || []);
       } catch (loadError: any) {
         console.error('Failed to load trackers:', loadError);
-        setError(loadError?.response?.data?.error || loadError?.message || 'Failed to load internship trackers.');
+        setError(normalizeErrorMessage(loadError) || 'Failed to load internship trackers.');
       } finally {
         setLoading(false);
       }
@@ -61,38 +154,110 @@ export default function Page() {
     loadTrackers();
   }, []);
 
+  const availableIndustries = useMemo(
+    () => [...new Set(trackers.map((item) => item.industry_name).filter(Boolean))].sort(),
+    [trackers],
+  );
+
   const filteredTrackers = useMemo(() => {
+    let data = trackers;
     const normalized = query.trim().toLowerCase();
-    if (!normalized) return trackers;
 
-    return trackers.filter((item) =>
-      item.student_name.toLowerCase().includes(normalized) ||
-      item.student_roll_no?.toLowerCase().includes(normalized) ||
-      item.industry_name.toLowerCase().includes(normalized) ||
-      item.iqac_verification.toLowerCase().includes(normalized)
-    );
-  }, [query, trackers]);
+    if (normalized) {
+      data = data.filter((item) =>
+        item.id.toString().includes(normalized) ||
+        item.student_name.toLowerCase().includes(normalized) ||
+        item.student_roll_no?.toLowerCase().includes(normalized) ||
+        item.industry_name.toLowerCase().includes(normalized) ||
+        item.iqac_verification.toLowerCase().includes(normalized) ||
+        item.offer_letter_link?.toLowerCase().includes(normalized),
+      );
+    }
 
-  const getNextVerificationStatus = (status: InternshipTracker['iqac_verification']) => {
-    if (status === 'initiated') return 'inprogress';
-    if (status === 'inprogress') return 'completed';
-    return null;
+    if (filterIndustry) {
+      data = data.filter((item) => item.industry_name === filterIndustry);
+    }
+
+    if (filterStartDateFrom) {
+      data = data.filter((item) => item.start_date >= filterStartDateFrom);
+    }
+
+    if (filterStartDateTo) {
+      data = data.filter((item) => item.start_date <= filterStartDateTo);
+    }
+
+    if (filterEndDateFrom) {
+      data = data.filter((item) => item.end_date >= filterEndDateFrom);
+    }
+
+    if (filterEndDateTo) {
+      data = data.filter((item) => item.end_date <= filterEndDateTo);
+    }
+
+    if (filterOfferLetter.trim()) {
+      const normalizedOfferLetter = filterOfferLetter.trim().toLowerCase();
+      data = data.filter((item) =>
+        item.offer_letter_link?.toLowerCase().includes(normalizedOfferLetter),
+      );
+    }
+
+    if (filterIqacStatus) {
+      data = data.filter((item) => item.iqac_verification === filterIqacStatus);
+    }
+
+    if (!sortKey || !sortDirection) {
+      return data;
+    }
+
+    return [...data].sort((a, b) => {
+      const getValue = (item: InternshipTracker) => {
+        if (sortKey === "start_date") return item.start_date;
+        return String(item[sortKey] ?? "").toLowerCase();
+      };
+
+      const valueA = getValue(a);
+      const valueB = getValue(b);
+
+      if (valueA < valueB) return sortDirection === "asc" ? -1 : 1;
+      if (valueA > valueB) return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [query, trackers, filterIndustry, filterStartDateFrom, filterStartDateTo, filterEndDateFrom, filterEndDateTo, filterOfferLetter, filterIqacStatus, sortKey, sortDirection]);
+
+  const visibleTrackers = useMemo(
+    () => filteredTrackers.slice(0, perPage),
+    [filteredTrackers, perPage],
+  );
+
+  const groupedTrackers = useMemo(() => ({
+    initiated: visibleTrackers.filter((item) => item.iqac_verification === 'initiated'),
+    approved: visibleTrackers.filter((item) => item.iqac_verification === 'approved'),
+    declined: visibleTrackers.filter((item) => item.iqac_verification === 'declined'),
+  }), [visibleTrackers]);
+
+  const toggleSection = (section: keyof typeof sectionOpen) => {
+    setSectionOpen((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
-  const handleUpdateStatus = async (tracker: InternshipTracker) => {
-    const nextStatus = getNextVerificationStatus(tracker.iqac_verification);
-    if (!nextStatus) return;
-
+  const handleUpdateStatus = async (
+    tracker: InternshipTracker,
+    iqac_verification: InternshipTracker['iqac_verification'],
+    reject_reason?: string,
+  ) => {
     try {
+      setError(null);
       setUpdatingId(tracker.id);
-      const response = await apiClient.updateInternshipTrackerIqac(tracker.id, nextStatus);
+      const response = await apiClient.updateInternshipTrackerIqac(tracker.id, iqac_verification, reject_reason);
       const updatedTracker = response?.tracker;
       if (updatedTracker) {
         setTrackers((prev) => prev.map((item) => item.id === tracker.id ? updatedTracker : item));
+        setSelectedTracker(updatedTracker);
       }
+      setRejectReason('');
+      setIsConfirmingReject(false);
     } catch (updateError: any) {
       console.error('Failed to update IQAC status:', updateError);
-      setError(updateError?.response?.data?.error || updateError?.message || 'Failed to update IQAC status.');
+      setError(normalizeErrorMessage(updateError) || 'Failed to update IQAC status.');
     } finally {
       setUpdatingId(null);
     }
@@ -124,12 +289,152 @@ export default function Page() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search internship trackers..."
+              placeholder="Search student, roll, industry or IQAC..."
               className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-200 focus:border-blue-500"
             />
           </div>
-          <span className="text-xs text-slate-400">{filteredTrackers.length} items</span>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowFilters((prev) => !prev)}
+              className="inline-flex items-center gap-2 rounded border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-700 hover:border-slate-400"
+            >
+              <Filter className="w-4 h-4" />
+              Filters
+            </button>
+            <span className="text-xs text-slate-400">{filteredTrackers.length} items</span>
+          </div>
         </div>
+
+        {showFilters && (
+          <div className="border-b border-slate-200 bg-slate-50 p-4">
+            <div className="grid gap-4 lg:grid-cols-4">
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Industry
+                </label>
+                <select
+                  value={filterIndustry}
+                  onChange={(e) => setFilterIndustry(e.target.value)}
+                  className="input-base w-full"
+                >
+                  <option value="">All industries</option>
+                  {availableIndustries.map((industry) => (
+                    <option key={industry} value={industry}>
+                      {industry}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Start date from
+                </label>
+                <input
+                  type="date"
+                  value={filterStartDateFrom}
+                  onChange={(e) => setFilterStartDateFrom(e.target.value)}
+                  className="input-base w-full"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Start date to
+                </label>
+                <input
+                  type="date"
+                  value={filterStartDateTo}
+                  onChange={(e) => setFilterStartDateTo(e.target.value)}
+                  className="input-base w-full"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  End date from
+                </label>
+                <input
+                  type="date"
+                  value={filterEndDateFrom}
+                  onChange={(e) => setFilterEndDateFrom(e.target.value)}
+                  className="input-base w-full"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  End date to
+                </label>
+                <input
+                  type="date"
+                  value={filterEndDateTo}
+                  onChange={(e) => setFilterEndDateTo(e.target.value)}
+                  className="input-base w-full"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Offer letter name
+                </label>
+                <input
+                  value={filterOfferLetter}
+                  onChange={(e) => setFilterOfferLetter(e.target.value)}
+                  placeholder="Search file name"
+                  className="input-base w-full"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  IQAC verification
+                </label>
+                <select
+                  value={filterIqacStatus}
+                  onChange={(e) => setFilterIqacStatus(e.target.value)}
+                  className="input-base w-full"
+                >
+                  <option value="">All statuses</option>
+                  <option value="initiated">Initiated</option>
+                  <option value="approved">Approved</option>
+                  <option value="declined">Declined</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Per page
+                </label>
+                <select
+                  value={perPage}
+                  onChange={(e) => setPerPage(Number(e.target.value))}
+                  className="input-base w-full"
+                >
+                  {[10, 20, 50, 100].map((value) => (
+                    <option key={value} value={value}>
+                      {value}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setFilterIndustry("");
+                  setFilterStartDateFrom("");
+                  setFilterStartDateTo("");
+                  setFilterEndDateFrom("");
+                  setFilterEndDateTo("");
+                  setFilterOfferLetter("");
+                  setFilterIqacStatus("");
+                }}
+                className="btn-outline px-3 py-2"
+              >
+                Clear filters
+              </button>
+              <span className="text-xs text-slate-500">
+                Showing {visibleTrackers.length} of {filteredTrackers.length} filtered results
+              </span>
+            </div>
+          </div>
+        )}
 
         {loading ? (
           <div className="p-10 text-center text-slate-500">Loading internship trackers...</div>
@@ -146,75 +451,247 @@ export default function Page() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-200 text-sm">
-              <thead className="bg-slate-50 text-slate-700">
-                <tr>
-                  <th className="px-4 py-3 text-left">Student</th>
-                  <th className="px-4 py-3 text-left">Industry</th>
-                  <th className="px-4 py-3 text-left">Period</th>
-                  <th className="px-4 py-3 text-left">IQAC</th>
-                  <th className="px-4 py-3 text-left">Documents</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200 bg-white">
-                {filteredTrackers.map((tracker) => (
-                  <tr key={tracker.id}>
-                    <td className="px-4 py-3">
-                      <div className="font-medium text-slate-900">{tracker.student_name}</div>
-                      <div className="text-xs text-slate-500">{tracker.student_roll_no}</div>
-                    </td>
-                    <td className="px-4 py-3">{tracker.industry_name}</td>
-                    <td className="px-4 py-3">
-                      <div>{formatShortDate(tracker.start_date)} → {formatShortDate(tracker.end_date)}</div>
-                      <div className="text-xs text-slate-500">({getPeriodLabel(tracker.start_date, tracker.end_date)})</div>
-                    </td>
-                                  <td className="px-4 py-3">
-                      <div className="capitalize">{tracker.iqac_verification.replace('inprogress', 'In Progress')}</div>
-                      {isVerification && getNextVerificationStatus(tracker.iqac_verification) && (
-                        <button
-                          type="button"
-                          className="mt-2 inline-flex items-center rounded bg-emerald-600 px-2 py-1 text-xs font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-emerald-400"
-                          onClick={() => handleUpdateStatus(tracker)}
-                          disabled={updatingId === tracker.id}
-                        >
-                          {updatingId === tracker.id
-                            ? 'Updating...'
-                            : `Mark ${getNextVerificationStatus(tracker.iqac_verification) === 'inprogress' ? 'In Progress' : 'Completed'}`}
-                        </button>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 space-y-1">
-                      {tracker.aim_objectives_link ? (
-                        <a
-                          href={`${BACKEND_BASE}${tracker.aim_objectives_link}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-blue-600 hover:underline"
-                        >
-                          Aim/Objective&nbsp;&nbsp;&nbsp;
-                        </a>
+          <div className="space-y-4">
+            {(['initiated', 'approved', 'declined'] as const).map((status) => {
+              const items = groupedTrackers[status];
+              const title = status === 'initiated' ? 'Initiated' : status === 'approved' ? 'Approved' : 'Declined';
+
+              return (
+                <div key={status} className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+                  <button
+                    type="button"
+                    onClick={() => toggleSection(status)}
+                    className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left text-sm font-semibold text-slate-900 hover:bg-slate-100"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-sm bg-slate-200 text-slate-600">
+                        {sectionOpen[status] ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+                      </span>
+                      <span>{title}</span>
+                      <span className="rounded-full bg-slate-200 px-2 py-0.5 text-xs font-medium text-slate-600">{items.length}</span>
+                    </div>
+                    <span className="text-xs text-slate-500">{sectionOpen[status] ? 'Hide' : 'Show'}</span>
+                  </button>
+
+                  {sectionOpen[status] && (
+                    <div className="overflow-x-auto bg-white px-4 pb-4">
+                      {items.length === 0 ? (
+                        <div className="px-4 py-5 text-sm text-slate-500">No {title.toLowerCase()} trackers.</div>
                       ) : (
-                        <span className="text-slate-400">No file</span>
+                        <table className="min-w-full divide-y divide-slate-200 text-sm">
+                          <thead className="bg-slate-50 text-slate-700">
+                            <tr>
+                              <th className="px-4 py-3 text-left">
+                                <button type="button" className="inline-flex items-center gap-1 font-medium" onClick={() => handleSort("student_name")}>ID{computeSortIcon("student_name")}</button>
+                              </th>
+                              <th className="px-4 py-3 text-left">
+                                <button type="button" className="inline-flex items-center gap-1 font-medium" onClick={() => handleSort("industry_name")}>Industry{computeSortIcon("industry_name")}</button>
+                              </th>
+                              <th className="px-4 py-3 text-left">
+                                <button type="button" className="inline-flex items-center gap-1 font-medium" onClick={() => handleSort("start_date")}>Period{computeSortIcon("start_date")}</button>
+                              </th>
+                              <th className="px-4 py-3 text-left">Documents</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-200 bg-white">
+                            {items.map((tracker) => (
+                              <tr
+                                key={tracker.id}
+                                className="hover:bg-slate-50 cursor-pointer"
+                                onClick={() => setSelectedTracker(tracker)}
+                              >
+                                <td className="px-4 py-3 text-slate-700">{tracker.id}</td>
+                                <td className="px-4 py-3">
+                                  <div className="font-medium text-slate-900">{tracker.student_name}</div>
+                                  <div className="text-xs text-slate-500">{tracker.student_roll_no}</div>
+                                </td>
+                                <td className="px-4 py-3">{tracker.industry_name}</td>
+                                <td className="px-4 py-3">
+                                  <div>{formatShortDate(tracker.start_date)} → {formatShortDate(tracker.end_date)}</div>
+                                  <div className="text-xs text-slate-500">({getPeriodLabel(tracker.start_date, tracker.end_date)})</div>
+                                </td>
+                                <td className="px-4 py-3 space-y-1">
+                                  {tracker.aim_objectives_link ? (
+                                    <a
+                                      href={`${BACKEND_BASE}${tracker.aim_objectives_link}`}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="text-blue-600 hover:underline"
+                                    >
+                                      Aim/Objective&nbsp;&nbsp;
+                                    </a>
+                                  ) : (
+                                    <span className="text-slate-400">No file</span>
+                                  )}
+                                  {tracker.offer_letter_link ? (
+                                    <a
+                                      href={`${BACKEND_BASE}${tracker.offer_letter_link}`}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="text-blue-600 hover:underline"
+                                    >
+                                      Offer Letter
+                                    </a>
+                                  ) : null}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
                       )}
-                      {tracker.offer_letter_link ? (
-                        <a
-                          href={`${BACKEND_BASE}${tracker.offer_letter_link}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-blue-600 hover:underline"
-                        >
-                          Offer-Letter
-                        </a>
-                      ) : null}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
+
+      {selectedTracker && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm p-4" onClick={() => { setSelectedTracker(null); setIsConfirmingReject(false); setRejectReason(''); }}>
+          <div className="w-full max-w-2xl overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-slate-200" onClick={(event) => event.stopPropagation()}>
+            <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-5">
+              <div>
+                <h2 className="text-xl font-semibold text-slate-900">Internship Request Details</h2>
+                <p className="text-sm text-slate-500">Review the request and approve or reject it.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => { setSelectedTracker(null); setIsConfirmingReject(false); setRejectReason(''); }}
+                className="rounded-full border border-slate-200 bg-slate-100 px-3 py-2 text-slate-700 hover:bg-slate-200"
+              >
+                Close
+              </button>
+            </div>
+            <div className="space-y-4 px-6 py-6">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-slate-500">Request ID</div>
+                  <div className="mt-1 font-medium text-slate-900">{selectedTracker.id}</div>
+                </div>
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-slate-500">Student</div>
+                  <div className="mt-1 font-medium text-slate-900">{selectedTracker.student_name}</div>
+                  <div className="text-sm text-slate-500">{selectedTracker.student_roll_no}</div>
+                </div>
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-slate-500">Industry</div>
+                  <div className="mt-1 font-medium text-slate-900">{selectedTracker.industry_name}</div>
+                </div>
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-slate-500">Period</div>
+                  <div className="mt-1 font-medium text-slate-900">
+                    {formatShortDate(selectedTracker.start_date)} → {formatShortDate(selectedTracker.end_date)}
+                  </div>
+                  <div className="text-sm text-slate-500">{getPeriodLabel(selectedTracker.start_date, selectedTracker.end_date)}</div>
+                </div>
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-slate-500">IQAC status</div>
+                  <div className="mt-1 inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-sm font-medium capitalize text-slate-700">
+                    {selectedTracker.iqac_verification}
+                  </div>
+                  {selectedTracker.reject_reason ? (
+                    <div className="mt-3 rounded-2xl border border-rose-200 bg-rose-50 p-3">
+                      <div className="text-xs uppercase tracking-wide text-rose-600">Reject reason</div>
+                      <div className="mt-1 text-sm text-rose-800">{selectedTracker.reject_reason}</div>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <div className="text-xs uppercase tracking-wide text-slate-500">Aim / Objective</div>
+                  {selectedTracker.aim_objectives_link ? (
+                    <a
+                      href={`${BACKEND_BASE}${selectedTracker.aim_objectives_link}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-2 block text-sm font-medium text-blue-600 hover:underline"
+                    >
+                      View Aim / Objective
+                    </a>
+                  ) : (
+                    <div className="mt-2 text-sm text-slate-500">No document uploaded.</div>
+                  )}
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <div className="text-xs uppercase tracking-wide text-slate-500">Offer Letter</div>
+                  {selectedTracker.offer_letter_link ? (
+                    <a
+                      href={`${BACKEND_BASE}${selectedTracker.offer_letter_link}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-2 block text-sm font-medium text-blue-600 hover:underline"
+                    >
+                      View Offer Letter
+                    </a>
+                  ) : (
+                    <div className="mt-2 text-sm text-slate-500">No document uploaded.</div>
+                  )}
+                </div>
+              </div>
+
+              {isVerification && (
+                <div className="space-y-4">
+                  {isConfirmingReject ? (
+                    <div className="space-y-3 rounded-2xl border border-rose-200 bg-rose-50 p-4">
+                      <label className="block text-xs font-semibold uppercase tracking-wide text-rose-700">Reject reason</label>
+                      <textarea
+                        rows={4}
+                        value={rejectReason}
+                        onChange={(e) => setRejectReason(e.target.value)}
+                        className="w-full rounded-xl border border-rose-200 bg-white p-3 text-sm text-slate-700 focus:border-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-100"
+                        placeholder="Please explain why this internship tracker is rejected."
+                      />
+                      <div className="flex flex-wrap gap-3 sm:justify-end">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsConfirmingReject(false);
+                            setRejectReason('');
+                          }}
+                          className="inline-flex justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-100"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateStatus(selectedTracker, 'declined', rejectReason.trim())}
+                          disabled={updatingId === selectedTracker.id || !rejectReason.trim()}
+                          className="inline-flex justify-center rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-70"
+                        >
+                          {updatingId === selectedTracker.id ? 'Processing...' : 'Confirm Reject'}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+                      <button
+                        type="button"
+                        onClick={() => setIsConfirmingReject(true)}
+                        disabled={updatingId === selectedTracker.id}
+                        className="inline-flex justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-70"
+                      >
+                        {updatingId === selectedTracker.id ? 'Processing...' : 'Reject'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleUpdateStatus(selectedTracker, 'approved')}
+                        disabled={updatingId === selectedTracker.id}
+                        className="inline-flex justify-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70"
+                      >
+                        {updatingId === selectedTracker.id ? 'Processing...' : 'Approve'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

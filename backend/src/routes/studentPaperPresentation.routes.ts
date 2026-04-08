@@ -68,7 +68,7 @@ const upload = multer({
  * Create a new paper presentation record with file uploads
  */
 router.post(
-  '/student-paper-presentations',
+  '/',
   authenticateToken,
   upload.fields([
     { name: 'imageProof', maxCount: 1 },
@@ -150,7 +150,7 @@ router.post(
  * GET /api/student-paper-presentations
  * Get all paper presentation records for the current user with optional filters and pagination
  */
-router.get('/student-paper-presentations', optionalAuthenticate, async (req: AuthRequest, res: Response) => {
+router.get('/', optionalAuthenticate, async (req: AuthRequest, res: Response) => {
   try {
     const filters = {
       createdBy: req.user?.id ? String(req.user.id) : undefined, // Only filter by user if authenticated
@@ -182,7 +182,7 @@ router.get('/student-paper-presentations', optionalAuthenticate, async (req: Aut
  * GET /api/student-paper-presentations/:id
  * Get a single paper presentation record
  */
-router.get('/student-paper-presentations/:id', async (req: Request, res: Response) => {
+router.get('/:id', async (req: Request, res: Response) => {
   try {
     const idParam = typeof req.params.id === 'string' ? req.params.id : (req.params.id as any as string);
     const record = await studentPaperPresentationService.getPresentationById(parseInt(idParam));
@@ -212,7 +212,7 @@ router.get('/student-paper-presentations/:id', async (req: Request, res: Respons
  * Update a paper presentation record
  */
 router.put(
-  '/student-paper-presentations/:id',
+  '/:id',
   upload.fields([
     { name: 'imageProof', maxCount: 1 },
     { name: 'abstractProof', maxCount: 1 },
@@ -268,7 +268,7 @@ router.put(
  * PUT /api/student-paper-presentations/:id/iqac-status
  * Update IQAC verification status
  */
-router.put('/student-paper-presentations/:id/iqac-status', async (req: Request, res: Response) => {
+router.put('/:id/iqac-status', async (req: Request, res: Response) => {
   try {
     const idParam = typeof req.params.id === 'string' ? req.params.id : (req.params.id as any as string);
     const { iqacVerification } = req.body;
@@ -301,7 +301,7 @@ router.put('/student-paper-presentations/:id/iqac-status', async (req: Request, 
  * DELETE /api/student-paper-presentations/:id
  * Delete a paper presentation record
  */
-router.delete('/student-paper-presentations/:id', async (req: Request, res: Response) => {
+router.delete('/:id', async (req: Request, res: Response) => {
   try {
     const idParam = typeof req.params.id === 'string' ? req.params.id : (req.params.id as any as string);
 

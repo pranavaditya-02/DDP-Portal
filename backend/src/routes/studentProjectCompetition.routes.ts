@@ -68,7 +68,7 @@ const upload = multer({
  * Create a new project competition record with file uploads
  */
 router.post(
-  '/student-project-competitions',
+  '/',
   authenticateToken,
   upload.fields([
     { name: 'imageProof', maxCount: 1 },
@@ -166,7 +166,7 @@ router.post(
  * Get all project competition records with optional filters and pagination
  */
 router.get(
-  '/student-project-competitions',
+  '/',
   authenticateToken,
   async (req: AuthRequest, res: Response) => {
     try {
@@ -201,7 +201,7 @@ router.get(
  * Get a specific project competition record
  */
 router.get(
-  '/student-project-competitions/:id',
+  '/:id',
   authenticateToken,
   async (req: AuthRequest, res: Response) => {
     try {
@@ -234,7 +234,7 @@ router.get(
  * Update a project competition record
  */
 router.put(
-  '/student-project-competitions/:id',
+  '/:id',
   authenticateToken,
   async (req: AuthRequest, res: Response) => {
     try {
@@ -271,7 +271,7 @@ router.put(
  * Update IQAC verification status
  */
 router.put(
-  '/student-project-competitions/:id/iqac-status',
+  '/:id/iqac-status',
   authenticateToken,
   async (req: AuthRequest, res: Response) => {
     try {
@@ -318,7 +318,7 @@ router.put(
  * Delete a project competition record
  */
 router.delete(
-  '/student-project-competitions/:id',
+  '/:id',
   authenticateToken,
   async (req: AuthRequest, res: Response) => {
     try {

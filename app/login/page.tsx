@@ -21,7 +21,7 @@ const DEMO_ACCOUNTS = [
 
 function getPostLoginRoute(roles: string[] = []) {
   if (roles.includes('dean')) return '/college'
-  if (roles.includes('student')) return '/student/dashboard'
+  if (roles.includes('student')) return '/students'
   return '/dashboard'
 }
 

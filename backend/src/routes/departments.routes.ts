@@ -8,7 +8,7 @@ const router = Router();
  * GET /api/departments
  * Fetch all departments
  */
-router.get('/departments', async (req: Request, res: Response) => {
+router.get('/', async (req: Request, res: Response) => {
   try {
     const departments = await departmentsService.getAllDepartments();
     res.status(200).json({
@@ -28,7 +28,7 @@ router.get('/departments', async (req: Request, res: Response) => {
  * GET /api/departments/:id
  * Fetch a single department by ID
  */
-router.get('/departments/:id', async (req: Request, res: Response) => {
+router.get('/:id', async (req: Request, res: Response) => {
   try {
     const idParam = typeof req.params.id === 'string' ? req.params.id : (req.params.id as any as string);
     const department = await departmentsService.getDepartmentById(parseInt(idParam));

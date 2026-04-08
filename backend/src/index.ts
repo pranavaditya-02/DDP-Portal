@@ -9,13 +9,19 @@ import authRoutes from './routes/auth.routes';
 import activityRoutes from './routes/activity.routes';
 import importRoutes from './routes/import.routes';
 import internshipTrackerRoutes from './routes/internshipTracker.routes';
+import internshipReportRoutes from './routes/internshipReport.routes';
+import studentsRoutes from './routes/students.routes';
 import eventsRoutes from './routes/events.routes';
 import paperPresentationRoutes from './routes/paperPresentation.routes';
 import studentPaperPresentationRoutes from './routes/studentPaperPresentation.routes';
 import studentProjectCompetitionRoutes from './routes/studentProjectCompetition.routes';
+import studentTechnicalBodyMembershipRoutes from './routes/studentTechnicalBodyMembership.routes';
+import studentNonTechnicalRoutes from './routes/studentNonTechnical.routes';
 import departmentsRoutes from './routes/departments.routes';
+import clubsRoutes from './routes/clubs.routes';
 import verifiedStudentsRoutes from './routes/verifiedStudents.routes';
 import sdgRoutes from './routes/sdg.routes';
+import registrationRoutes from './routes/registration.routes';
 import { verifyMysqlConnection } from './database/mysql';
 
 dotenv.config();
@@ -56,14 +62,20 @@ app.use('/api/auth', authRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/import', importRoutes);
 app.use('/api/internship-tracker', internshipTrackerRoutes);
+app.use('/api/internship-report', internshipReportRoutes);
+app.use('/api/students', studentsRoutes);
 app.use('/api/industries', industriesRoutes);
 app.use('/api/events', eventsRoutes);
 app.use('/api/paper-presentations', paperPresentationRoutes);
-app.use('/api', studentPaperPresentationRoutes);
-app.use('/api', studentProjectCompetitionRoutes);
-app.use('/api', departmentsRoutes);
-app.use('/api', verifiedStudentsRoutes);
-app.use('/api', sdgRoutes);
+app.use('/api/student-paper-presentations', studentPaperPresentationRoutes);
+app.use('/api/student-project-competitions', studentProjectCompetitionRoutes);
+app.use('/api/student-technical-body-memberships', studentTechnicalBodyMembershipRoutes);
+app.use('/api/student-non-technical', studentNonTechnicalRoutes);
+app.use('/api/departments', departmentsRoutes);
+app.use('/api/clubs', clubsRoutes);
+app.use('/api/verified-students', verifiedStudentsRoutes);
+app.use('/api/sdgs', sdgRoutes);
+app.use('/api/registrations', registrationRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

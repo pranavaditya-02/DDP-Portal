@@ -199,16 +199,10 @@ export default function ProjectCompetitionSubmitPage() {
 
         // Load verified students for current user
         const studentRes = await apiClient.get("/verified-students");
-        const students = studentRes?.students || [];
-
-        // Add hardcoded test student for testing
-        const testStudent: VerifiedStudent = {
-          id: 999,
-          studentId: "TEST001",
-          studentName: "Test Student",
-          studentEmail: "test@example.com",
-        };
-        setVerifiedStudents([testStudent, ...students]);
+        
+        // Handle array directly or wrapped in object
+        const students = Array.isArray(studentRes) ? studentRes : studentRes?.students || [];
+        setVerifiedStudents(students);
 
         // Load SDG goals
         const sdgRes = await apiClient.get("/sdgs");
@@ -216,14 +210,6 @@ export default function ProjectCompetitionSubmitPage() {
         setSDGGoals(sdgData);
       } catch (err) {
         console.error("Failed to load form data:", err);
-        // Add test student even if API fails
-        const testStudent: VerifiedStudent = {
-          id: 999,
-          studentId: "TEST001",
-          studentName: "Test Student",
-          studentEmail: "test@example.com",
-        };
-        setVerifiedStudents([testStudent]);
       } finally {
         setDepartmentsLoading(false);
         setStudentsLoading(false);
@@ -440,7 +426,7 @@ export default function ProjectCompetitionSubmitPage() {
               <h2 className="text-lg font-semibold text-slate-900">Competition Details</h2>
             </div>
 
-            <div>
+            {/* <div>
               <label className="block font-medium text-slate-700 mb-2">
                 Competition Type <span className="text-red-500">*</span>
               </label>
@@ -468,7 +454,7 @@ export default function ProjectCompetitionSubmitPage() {
                   <span className="text-slate-700">International</span>
                 </label>
               </div>
-            </div>
+            </div> */}
 
             {/* Student Selection */}
             <div>
@@ -609,6 +595,7 @@ export default function ProjectCompetitionSubmitPage() {
                       backgroundSize: '20px',
                     }}
                   >
+                    <option value="">-- Select --</option>
                     <option value="no">No</option>
                     <option value="yes">Yes</option>
                   </select>
@@ -712,6 +699,7 @@ export default function ProjectCompetitionSubmitPage() {
                     backgroundSize: '20px',
                   }}
                 >
+                  <option value="">-- Select Status --</option>
                   <option value="participated">Participated</option>
                   <option value="winner">Winner</option>
                   <option value="runner">Runner</option>
@@ -904,11 +892,11 @@ export default function ProjectCompetitionSubmitPage() {
                   backgroundSize: '20px',
                 }}
               >
+                <option value="">-- Select Status --</option>
                 <option value="initiated">Initiated</option>
                 <option value="processing">Approved</option>
                 <option value="completed">Rejected</option>
               </select>
-              <p className="text-xs text-slate-500 mt-2">Default status is "Initiated"</p>
             </div>
 
             {/* Conditional Remarks Field for Rejection */}

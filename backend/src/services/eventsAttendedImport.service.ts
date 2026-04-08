@@ -1,5 +1,9 @@
-import type { PoolConnection, ResultSetHeader, RowDataPacket } from 'mysql2/promise';
-import getMysqlPool from '../database/mysql';
+import type {
+  PoolConnection,
+  ResultSetHeader,
+  RowDataPacket,
+} from "mysql2/promise";
+import getMysqlPool from "../database/mysql";
 
 interface CsvRow {
   [key: string]: string;
@@ -30,40 +34,44 @@ interface LookupMaps {
 }
 
 const EXPECTED_HEADERS = [
-  'BIP ID',
-  'Faculty ID',
-  'Task ID',
-  'Special Lab Involved',
-  'Special Lab Id',
-  'Event Type',
-  'If Others Please Specify',
-  'Event Level',
-  'Event Title',
-  'Event Organizer',
-  'event Mode',
-  'Event Location',
-  'Start Date',
-  'End Date',
-  'Event Duration',
-  'Organizer Type',
-  'Industry',
-  'Other Organizer Name',
-  'Type of Sponsorship',
-  'Name of the Funding Agency If Others',
-  'Amount in Rs.',
-  'IQAC Verification',
-  'Apex Proof',
-  'certificate_proof',
+  "BIP ID",
+  "Faculty ID",
+  "Task ID",
+  "Special Lab Involved",
+  "Special Lab Id",
+  "Event Type",
+  "If Others Please Specify",
+  "Event Level",
+  "Event Title",
+  "Event Organizer",
+  "event Mode",
+  "Event Location",
+  "Start Date",
+  "End Date",
+  "Event Duration",
+  "Organizer Type",
+  "Industry",
+  "Other Organizer Name",
+  "Type of Sponsorship",
+  "Name of the Funding Agency If Others",
+  "Amount in Rs.",
+  "IQAC Verification",
+  "Apex Proof",
+  "certificate_proof",
 ] as const;
 
 const normalizeKey = (value: string): string => value.trim().toLowerCase();
 
 const normalizeLookupToken = (value: string): string =>
-  normalizeKey(value).replace(/[\s-]+/g, '_');
+  normalizeKey(value).replace(/[\s-]+/g, "_");
 
-const normalizeSpecialLabCode = (value: string): string => value.trim().toUpperCase();
+const normalizeSpecialLabCode = (value: string): string =>
+  value.trim().toUpperCase();
 
-const getLookupId = (map: Map<string, number>, label: string): number | null => {
+const getLookupId = (
+  map: Map<string, number>,
+  label: string,
+): number | null => {
   const direct = map.get(normalizeKey(label));
   if (direct) {
     return direct;
@@ -73,7 +81,7 @@ const getLookupId = (map: Map<string, number>, label: string): number | null => 
 };
 
 const parseCsvText = (content: string): CsvRow[] => {
-  const source = content.replace(/^\uFEFF/, '');
+  const source = content.replace(/^\uFEFF/, "");
   const lines = source
     .split(/\r?\n/)
     .map((line) => line.trimEnd())
@@ -92,7 +100,7 @@ const parseCsvText = (content: string): CsvRow[] => {
     const values = parseDelimitedLine(lines[i], delimiter);
     const row: CsvRow = {};
     for (let j = 0; j < headers.length; j += 1) {
-      row[headers[j]] = values[j] ?? '';
+      row[headers[j]] = values[j] ?? "";
     }
     rows.push(row);
   }
@@ -101,8 +109,8 @@ const parseCsvText = (content: string): CsvRow[] => {
 };
 
 const detectDelimiter = (headerLine: string): string => {
-  const delimiters = ['\t', ',', ';'];
-  let selected = ',';
+  const delimiters = ["\t", ",", ";"];
+  let selected = ",";
   let count = -1;
 
   for (const delimiter of delimiters) {
@@ -118,7 +126,7 @@ const detectDelimiter = (headerLine: string): string => {
 
 const parseDelimitedLine = (line: string, delimiter: string): string[] => {
   const values: string[] = [];
-  let current = '';
+  let current = "";
   let inQuotes = false;
 
   for (let i = 0; i < line.length; i += 1) {
@@ -136,7 +144,7 @@ const parseDelimitedLine = (line: string, delimiter: string): string[] => {
 
     if (!inQuotes && ch === delimiter) {
       values.push(current.trim());
-      current = '';
+      current = "";
       continue;
     }
 
@@ -167,7 +175,7 @@ const toDateSql = (value: string): string | null => {
 };
 
 const toNumber = (value: string): number | null => {
-  const clean = value.trim().replace(/,/g, '');
+  const clean = value.trim().replace(/,/g, "");
   if (!clean) {
     return null;
   }
@@ -183,7 +191,7 @@ const cleanText = (value: string): string | null => {
   }
 
   const upper = clean.toUpperCase();
-  if (upper === 'NIL' || upper === 'NULL') {
+  if (upper === "NIL" || upper === "NULL") {
     return null;
   }
 
@@ -192,14 +200,16 @@ const cleanText = (value: string): string | null => {
 
 const ensureHeaders = (rows: CsvRow[]): void => {
   if (rows.length === 0) {
-    throw new Error('CSV is empty or has only a header row.');
+    throw new Error("CSV is empty or has only a header row.");
   }
 
   const available = new Set(Object.keys(rows[0]).map(normalizeKey));
-  const missing = EXPECTED_HEADERS.filter((header) => !available.has(normalizeKey(header)));
+  const missing = EXPECTED_HEADERS.filter(
+    (header) => !available.has(normalizeKey(header)),
+  );
 
   if (missing.length > 0) {
-    throw new Error(`CSV is missing required headers: ${missing.join(', ')}`);
+    throw new Error(`CSV is missing required headers: ${missing.join(", ")}`);
   }
 };
 
@@ -232,7 +242,7 @@ const ensureDocType = async (
   }
 
   const [insertResult] = await connection.execute<ResultSetHeader>(
-    'INSERT INTO ref_doc_type (label) VALUES (?)',
+    "INSERT INTO ref_doc_type (label) VALUES (?)",
     [label],
   );
 
@@ -242,14 +252,16 @@ const ensureDocType = async (
   return { id, inserted: true };
 };
 
-const loadIndustryMap = async (connection: PoolConnection): Promise<Map<string, number>> => {
+const loadIndustryMap = async (
+  connection: PoolConnection,
+): Promise<Map<string, number>> => {
   const [rows] = await connection.query<RowDataPacket[]>(
-    'SELECT id, industry_name FROM industries',
+    "SELECT id, industry FROM internship_industries",
   );
 
   const map = new Map<string, number>();
   for (const row of rows) {
-    map.set(normalizeKey(String(row.industry_name)), Number(row.id));
+    map.set(normalizeKey(String(row.industry)), Number(row.id));
   }
   return map;
 };
@@ -258,7 +270,7 @@ const loadSpecialLabCodeMap = async (
   connection: PoolConnection,
 ): Promise<{ byCode: Map<string, number>; ids: Set<number> }> => {
   const [rows] = await connection.query<RowDataPacket[]>(
-    'SELECT id, code FROM special_lab',
+    "SELECT id, code FROM special_lab",
   );
 
   const byCode = new Map<string, number>();
@@ -267,7 +279,7 @@ const loadSpecialLabCodeMap = async (
     const id = Number(row.id);
     ids.add(id);
 
-    const code = String(row.code ?? '').trim();
+    const code = String(row.code ?? "").trim();
     if (code) {
       byCode.set(normalizeSpecialLabCode(code), id);
     }
@@ -276,8 +288,12 @@ const loadSpecialLabCodeMap = async (
   return { byCode, ids };
 };
 
-const loadFacultyIds = async (connection: PoolConnection): Promise<Set<string>> => {
-  const [rows] = await connection.query<RowDataPacket[]>('SELECT id FROM faculty');
+const loadFacultyIds = async (
+  connection: PoolConnection,
+): Promise<Set<string>> => {
+  const [rows] = await connection.query<RowDataPacket[]>(
+    "SELECT id FROM faculty",
+  );
   const ids = new Set<string>();
   for (const row of rows) {
     ids.add(String(row.id).trim().toUpperCase());
@@ -297,7 +313,7 @@ const getOrCreateIndustry = async (
   }
 
   const [result] = await connection.execute<ResultSetHeader>(
-    'INSERT INTO industries (industry_name) VALUES (?)',
+    "INSERT INTO internship_industries (industry) VALUES (?)",
     [industryName],
   );
 
@@ -326,7 +342,7 @@ const getOrCreateSubmission = async (
       ) VALUES (?, ?, 'events_attended', ?, ?, NOW(), NOW())`,
       [
         taskId,
-        bipId ? `Migrated from BIP ID ${bipId}` : 'Migrated from CSV import',
+        bipId ? `Migrated from BIP ID ${bipId}` : "Migrated from CSV import",
         facultyId,
         iqacId,
       ],
@@ -335,7 +351,7 @@ const getOrCreateSubmission = async (
     return { id: Number(insertResult.insertId), inserted: true };
   } catch (error) {
     const sqlError = error as { code?: string };
-    if (sqlError.code === 'ER_DUP_ENTRY' && taskId) {
+    if (sqlError.code === "ER_DUP_ENTRY" && taskId) {
       const [fallbackResult] = await connection.execute<ResultSetHeader>(
         `INSERT INTO submissions (
           task_id,
@@ -347,7 +363,7 @@ const getOrCreateSubmission = async (
           updated_at
         ) VALUES (NULL, ?, 'events_attended', ?, ?, NOW(), NOW())`,
         [
-          bipId ? `Migrated from BIP ID ${bipId}` : 'Migrated from CSV import',
+          bipId ? `Migrated from BIP ID ${bipId}` : "Migrated from CSV import",
           facultyId,
           iqacId,
         ],
@@ -370,7 +386,7 @@ const getOrCreateDocument = async (
   filePath: string,
 ): Promise<{ id: number; inserted: boolean }> => {
   const [existing] = await connection.execute<RowDataPacket[]>(
-    'SELECT id FROM documents WHERE doc_type_id = ? AND file_path = ? LIMIT 1',
+    "SELECT id FROM documents WHERE doc_type_id = ? AND file_path = ? LIMIT 1",
     [docTypeId, filePath],
   );
 
@@ -379,7 +395,7 @@ const getOrCreateDocument = async (
   }
 
   const [insertResult] = await connection.execute<ResultSetHeader>(
-    'INSERT INTO documents (doc_type_id, file_path, uploaded_at) VALUES (?, ?, NOW())',
+    "INSERT INTO documents (doc_type_id, file_path, uploaded_at) VALUES (?, ?, NOW())",
     [docTypeId, filePath],
   );
 
@@ -414,32 +430,47 @@ export class EventsAttendedImportService {
             specialLabIds: specialLabData.ids,
           };
         })()),
-        iqacStatus: await loadLookupMap(connection, 'ref_iqac_status'),
-        eventType: await loadLookupMap(connection, 'ref_event_type_attended'),
-        eventLevel: await loadLookupMap(connection, 'ref_event_level'),
-        eventMode: await loadLookupMap(connection, 'ref_event_mode'),
-        organizerType: await loadLookupMap(connection, 'ref_organizer_type'),
-        sponsorshipType: await loadLookupMap(connection, 'ref_sponsorship_type'),
-        docType: await loadLookupMap(connection, 'ref_doc_type'),
+        iqacStatus: await loadLookupMap(connection, "ref_iqac_status"),
+        eventType: await loadLookupMap(connection, "ref_event_type_attended"),
+        eventLevel: await loadLookupMap(connection, "ref_event_level"),
+        eventMode: await loadLookupMap(connection, "ref_event_mode"),
+        organizerType: await loadLookupMap(connection, "ref_organizer_type"),
+        sponsorshipType: await loadLookupMap(
+          connection,
+          "ref_sponsorship_type",
+        ),
+        docType: await loadLookupMap(connection, "ref_doc_type"),
         industries: await loadIndustryMap(connection),
         facultyIds: await loadFacultyIds(connection),
       };
 
-      const apexDocType = await ensureDocType(connection, lookups, 'apex_proof');
-      const certificateDocType = await ensureDocType(connection, lookups, 'certificate_proof');
+      const apexDocType = await ensureDocType(
+        connection,
+        lookups,
+        "apex_proof",
+      );
+      const certificateDocType = await ensureDocType(
+        connection,
+        lookups,
+        "certificate_proof",
+      );
 
       if (apexDocType.inserted) {
-        summary.warnings.push('ref_doc_type missing apex_proof; created automatically.');
+        summary.warnings.push(
+          "ref_doc_type missing apex_proof; created automatically.",
+        );
       }
       if (certificateDocType.inserted) {
-        summary.warnings.push('ref_doc_type missing certificate_proof; created automatically.');
+        summary.warnings.push(
+          "ref_doc_type missing certificate_proof; created automatically.",
+        );
       }
 
       for (const row of rows) {
         summary.processedRows += 1;
 
-        const taskId = cleanText(row['Task ID'] ?? '') ?? null;
-        const facultyIdRaw = cleanText(row['Faculty ID'] ?? '');
+        const taskId = cleanText(row["Task ID"] ?? "") ?? null;
+        const facultyIdRaw = cleanText(row["Faculty ID"] ?? "");
         let facultyId: string | null = null;
         if (facultyIdRaw) {
           const normalizedFacultyId = facultyIdRaw.trim().toUpperCase();
@@ -456,7 +487,7 @@ export class EventsAttendedImportService {
           );
         }
 
-        const iqacLabel = normalizeKey(row['IQAC Verification'] ?? '');
+        const iqacLabel = normalizeKey(row["IQAC Verification"] ?? "");
         const iqacId = lookups.iqacStatus.get(iqacLabel) ?? null;
 
         const submission = await getOrCreateSubmission(
@@ -464,19 +495,25 @@ export class EventsAttendedImportService {
           taskId,
           facultyId,
           iqacId,
-          cleanText(row['BIP ID'] ?? ''),
+          cleanText(row["BIP ID"] ?? ""),
         );
         if (submission.inserted) {
           summary.insertedSubmissions += 1;
         }
         if (submission.warning) {
-          summary.warnings.push(`Row ${summary.processedRows}: ${submission.warning}`);
+          summary.warnings.push(
+            `Row ${summary.processedRows}: ${submission.warning}`,
+          );
         }
 
-        const industryName = cleanText(row['Industry'] ?? '');
+        const industryName = cleanText(row["Industry"] ?? "");
         let industryId: number | null = null;
         if (industryName) {
-          const industry = await getOrCreateIndustry(connection, lookups, industryName);
+          const industry = await getOrCreateIndustry(
+            connection,
+            lookups,
+            industryName,
+          );
           industryId = industry.id;
           if (industry.inserted) {
             summary.insertedIndustries += 1;
@@ -484,9 +521,13 @@ export class EventsAttendedImportService {
         }
 
         let apexProofId: number | null = null;
-        const apexProofUrl = cleanText(row['Apex Proof'] ?? '');
+        const apexProofUrl = cleanText(row["Apex Proof"] ?? "");
         if (apexProofUrl) {
-          const doc = await getOrCreateDocument(connection, apexDocType.id, apexProofUrl);
+          const doc = await getOrCreateDocument(
+            connection,
+            apexDocType.id,
+            apexProofUrl,
+          );
           apexProofId = doc.id;
           if (doc.inserted) {
             summary.insertedDocuments += 1;
@@ -494,17 +535,22 @@ export class EventsAttendedImportService {
         }
 
         let certificateProofId: number | null = null;
-        const certificateProofUrl = cleanText(row['certificate_proof'] ?? '');
+        const certificateProofUrl = cleanText(row["certificate_proof"] ?? "");
         if (certificateProofUrl) {
-          const doc = await getOrCreateDocument(connection, certificateDocType.id, certificateProofUrl);
+          const doc = await getOrCreateDocument(
+            connection,
+            certificateDocType.id,
+            certificateProofUrl,
+          );
           certificateProofId = doc.id;
           if (doc.inserted) {
             summary.insertedDocuments += 1;
           }
         }
 
-        const specialLabInvolved = normalizeKey(row['Special Lab Involved'] ?? '') === 'yes' ? 1 : 0;
-        const specialLabCodeOrId = cleanText(row['Special Lab Id'] ?? '');
+        const specialLabInvolved =
+          normalizeKey(row["Special Lab Involved"] ?? "") === "yes" ? 1 : 0;
+        const specialLabCodeOrId = cleanText(row["Special Lab Id"] ?? "");
         let specialLabId: number | null = null;
         if (specialLabInvolved === 1 && specialLabCodeOrId) {
           const specialLabNumericId = toNumber(specialLabCodeOrId);
@@ -515,7 +561,9 @@ export class EventsAttendedImportService {
             }
           } else {
             specialLabId =
-              lookups.specialLabByCode.get(normalizeSpecialLabCode(specialLabCodeOrId)) ?? null;
+              lookups.specialLabByCode.get(
+                normalizeSpecialLabCode(specialLabCodeOrId),
+              ) ?? null;
           }
 
           if (specialLabId === null) {
@@ -531,24 +579,48 @@ export class EventsAttendedImportService {
           );
         }
 
-        const eventTypeId = getLookupId(lookups.eventType, row['Event Type'] ?? '');
-        const eventLevelId = getLookupId(lookups.eventLevel, row['Event Level'] ?? '');
-        const eventModeId = getLookupId(lookups.eventMode, row['event Mode'] ?? '');
-        const organizerTypeId = getLookupId(lookups.organizerType, row['Organizer Type'] ?? '');
-        const sponsorshipTypeId = getLookupId(lookups.sponsorshipType, row['Type of Sponsorship'] ?? '');
-        const outcome = cleanText(row['Outcome'] ?? row['Claimed For'] ?? '');
+        const eventTypeId = getLookupId(
+          lookups.eventType,
+          row["Event Type"] ?? "",
+        );
+        const eventLevelId = getLookupId(
+          lookups.eventLevel,
+          row["Event Level"] ?? "",
+        );
+        const eventModeId = getLookupId(
+          lookups.eventMode,
+          row["event Mode"] ?? "",
+        );
+        const organizerTypeId = getLookupId(
+          lookups.organizerType,
+          row["Organizer Type"] ?? "",
+        );
+        const sponsorshipTypeId = getLookupId(
+          lookups.sponsorshipType,
+          row["Type of Sponsorship"] ?? "",
+        );
+        const outcome = cleanText(row["Outcome"] ?? row["Claimed For"] ?? "");
         const ifOutcomeOthers = cleanText(
-          row['If Outcome Others'] ?? row['If outcome others'] ?? row['If Outcome Others Please Specify'] ?? '',
+          row["If Outcome Others"] ??
+            row["If outcome others"] ??
+            row["If Outcome Others Please Specify"] ??
+            "",
         );
 
         if (!eventTypeId) {
-          summary.warnings.push(`Row ${summary.processedRows}: Event Type not found -> ${row['Event Type']}`);
+          summary.warnings.push(
+            `Row ${summary.processedRows}: Event Type not found -> ${row["Event Type"]}`,
+          );
         }
         if (!eventLevelId) {
-          summary.warnings.push(`Row ${summary.processedRows}: Event Level not found -> ${row['Event Level']}`);
+          summary.warnings.push(
+            `Row ${summary.processedRows}: Event Level not found -> ${row["Event Level"]}`,
+          );
         }
         if (!eventModeId) {
-          summary.warnings.push(`Row ${summary.processedRows}: Event Mode not found -> ${row['event Mode']}`);
+          summary.warnings.push(
+            `Row ${summary.processedRows}: Event Mode not found -> ${row["event Mode"]}`,
+          );
         }
 
         await connection.execute(
@@ -607,22 +679,22 @@ export class EventsAttendedImportService {
             specialLabInvolved,
             specialLabId,
             eventTypeId,
-            cleanText(row['If Others Please Specify'] ?? ''),
-            cleanText(row['Event Title'] ?? ''),
+            cleanText(row["If Others Please Specify"] ?? ""),
+            cleanText(row["Event Title"] ?? ""),
             organizerTypeId,
             industryId,
             eventLevelId,
-            cleanText(row['Event Title'] ?? ''),
-            cleanText(row['Event Organizer'] ?? ''),
+            cleanText(row["Event Title"] ?? ""),
+            cleanText(row["Event Organizer"] ?? ""),
             eventModeId,
-            cleanText(row['Event Location'] ?? ''),
-            toDateSql(row['Start Date'] ?? ''),
-            toDateSql(row['End Date'] ?? ''),
-            toNumber(row['Event Duration'] ?? ''),
-            cleanText(row['Other Organizer Name'] ?? ''),
+            cleanText(row["Event Location"] ?? ""),
+            toDateSql(row["Start Date"] ?? ""),
+            toDateSql(row["End Date"] ?? ""),
+            toNumber(row["Event Duration"] ?? ""),
+            cleanText(row["Other Organizer Name"] ?? ""),
             sponsorshipTypeId,
-            cleanText(row['Name of the Funding Agency If Others'] ?? ''),
-            toNumber(row['Amount in Rs.'] ?? ''),
+            cleanText(row["Name of the Funding Agency If Others"] ?? ""),
+            toNumber(row["Amount in Rs."] ?? ""),
             outcome,
             ifOutcomeOthers,
             apexProofId,

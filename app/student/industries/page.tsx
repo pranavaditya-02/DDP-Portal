@@ -3,9 +3,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { apiClient } from "@/lib/api";
 import toast from "react-hot-toast";
-import { Plus, Pencil, Trash2, Search } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, ChevronDown, ChevronUp } from "lucide-react";
 
-interface Industry {
+interface InternshipIndustry {
   id: number;
   industry: string;
   address: string;
@@ -15,10 +15,17 @@ interface Industry {
   updated_at: string;
 }
 
+type IndustrySortKey = "industry" | "address" | "website_link" | "active_now" | "created_at";
+
+type SortDirection = "asc" | "desc" | null;
+
 export default function IndustriesPage() {
-  const [industries, setIndustries] = useState<Industry[]>([]);
+  const [industries, setIndustries] = useState<InternshipIndustry[]>([]);
+  const [originalIndustries, setOriginalIndustries] = useState<InternshipIndustry[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
+  const [sortKey, setSortKey] = useState<IndustrySortKey | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const [industry, setIndustry] = useState("");
   const [address, setAddress] = useState("");
   const [website, setWebsite] = useState("");
@@ -28,14 +35,19 @@ export default function IndustriesPage() {
   const [showForm, setShowForm] = useState(false);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [selectedIndustryIds, setSelectedIndustryIds] = useState<number[]>([]);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   const fetchIndustries = async () => {
     setLoading(true);
     try {
       const response = await apiClient.getIndustries();
-      setIndustries(response.industries || []);
+      const fetchedIndustries = response.industries || [];
+      setIndustries(fetchedIndustries);
+      setOriginalIndustries(fetchedIndustries);
+      setSelectedIndustryIds([]);
     } catch (error) {
-      toast.error("Failed to load industries.");
+      toast.error("Failed to load internship industries.");
       console.error(error);
     } finally {
       setLoading(false);
@@ -46,15 +58,63 @@ export default function IndustriesPage() {
     fetchIndustries();
   }, []);
 
+  const computeSortIcon = (column: IndustrySortKey) => {
+    if (sortKey !== column) return null;
+    return sortDirection === "asc" ? (
+      <ChevronUp className="ml-2 inline-block h-3 w-3 text-slate-400" />
+    ) : (
+      <ChevronDown className="ml-2 inline-block h-3 w-3 text-slate-400" />
+    );
+  };
+
+  const handleSort = (column: IndustrySortKey) => {
+    if (sortKey !== column) {
+      setSortKey(column);
+      setSortDirection("asc");
+      return;
+    }
+
+    if (sortDirection === "asc") {
+      setSortDirection("desc");
+      return;
+    }
+
+    setSortKey(null);
+    setSortDirection(null);
+  };
+
   const filteredIndustries = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return industries;
-    return industries.filter((item) =>
-      item.industry.toLowerCase().includes(q) ||
-      item.address.toLowerCase().includes(q) ||
-      item.website_link.toLowerCase().includes(q)
-    );
-  }, [industries, search]);
+    const baseIndustries = sortKey ? industries : originalIndustries;
+    let result = baseIndustries;
+
+    if (q) {
+      result = result.filter(
+        (item) =>
+          item.industry.toLowerCase().includes(q) ||
+          item.address.toLowerCase().includes(q) ||
+          item.website_link.toLowerCase().includes(q),
+      );
+    }
+
+    if (!sortKey || !sortDirection) {
+      return result;
+    }
+
+    return [...result].sort((a, b) => {
+      const getValue = (item: InternshipIndustry) => {
+        if (sortKey === "active_now") return item.active_now ? "active" : "inactive";
+        return String(item[sortKey] ?? "").toLowerCase();
+      };
+
+      const valueA = getValue(a);
+      const valueB = getValue(b);
+
+      if (valueA < valueB) return sortDirection === "asc" ? -1 : 1;
+      if (valueA > valueB) return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [originalIndustries, industries, search, sortKey, sortDirection]);
 
   const resetForm = (hideForm = true) => {
     setIndustry("");
@@ -83,7 +143,7 @@ export default function IndustriesPage() {
           website_link: website.trim(),
           active_now: activeNow,
         });
-        toast.success("Industry updated successfully.");
+        toast.success("Internship industry updated successfully.");
       } else {
         await apiClient.createIndustry({
           industry: industry.trim(),
@@ -91,7 +151,7 @@ export default function IndustriesPage() {
           website_link: website.trim(),
           active_now: activeNow,
         });
-        toast.success("Industry added successfully.");
+        toast.success("Internship industry added successfully.");
       }
       await fetchIndustries();
       resetForm();
@@ -103,7 +163,7 @@ export default function IndustriesPage() {
     }
   };
 
-  const handleEdit = (item: Industry) => {
+  const handleEdit = (item: InternshipIndustry) => {
     setEditingId(item.id);
     setIndustry(item.industry);
     setAddress(item.address);
@@ -114,26 +174,95 @@ export default function IndustriesPage() {
   };
 
   const handleDelete = async (id: number) => {
-    const confirmed = window.confirm("Delete this industry? This action cannot be undone.");
+    const confirmed = window.confirm(
+      "Delete this industry? This action cannot be undone.",
+    );
     if (!confirmed) return;
     try {
       await apiClient.deleteIndustry(id);
-      toast.success("Industry deleted.");
+      toast.success("Internship industry deleted.");
       setIndustries((prev) => prev.filter((c) => c.id !== id));
+      setOriginalIndustries((prev) => prev.filter((c) => c.id !== id));
+      setSelectedIndustryIds((prev) => prev.filter((selectedId) => selectedId !== id));
     } catch (error) {
       toast.error("Failed to delete industry.");
       console.error(error);
     }
   };
 
-  const handleToggleActive = async (item: Industry) => {
+  const handleBulkDelete = async () => {
+    if (selectedIndustryIds.length === 0) return;
+
+    const confirmed = window.confirm(
+      `Delete ${selectedIndustryIds.length} selected industry${selectedIndustryIds.length > 1 ? 'ies' : ''}? This action cannot be undone.`,
+    );
+    if (!confirmed) return;
+
+    setBulkDeleting(true);
     try {
-      await apiClient.updateIndustry(item.id, { active_now: !item.active_now });
-      toast.success(`${item.active_now ? 'Deactivated' : 'Activated'} industry successfully.`);
+      const results = await Promise.allSettled(
+        selectedIndustryIds.map((id) => apiClient.deleteIndustry(id)),
+      );
+      const failedCount = results.filter((result) => result.status === 'rejected').length;
+
+      setIndustries((prev) => prev.filter((industry) => !selectedIndustryIds.includes(industry.id)));
+      setSelectedIndustryIds([]);
+
+      if (failedCount > 0) {
+        toast.error(`${failedCount} selected industry could not be deleted.`);
+      } else {
+        toast.success('Selected industries deleted successfully.');
+      }
+    } catch (error) {
+      toast.error('Failed to delete selected industries.');
+      console.error(error);
+    } finally {
+      setBulkDeleting(false);
+    }
+  };
+
+  const toggleIndustrySelection = (id: number) => {
+    setSelectedIndustryIds((prev) =>
+      prev.includes(id) ? prev.filter((selectedId) => selectedId !== id) : [...prev, id],
+    );
+  };
+
+  const filteredIndustryIds = useMemo(
+    () => filteredIndustries.map((item) => item.id),
+    [filteredIndustries],
+  );
+
+  const allSelected = filteredIndustryIds.length > 0 && filteredIndustryIds.every((id) => selectedIndustryIds.includes(id));
+
+  const toggleSelectAll = () => {
+    if (allSelected) {
+      setSelectedIndustryIds([]);
+    } else {
+      setSelectedIndustryIds(filteredIndustryIds);
+    }
+  };
+
+  const handleToggleActive = async (item: InternshipIndustry) => {
+    try {
+      await apiClient.updateIndustry(item.id, {
+        active_now: !item.active_now,
+      });
+      toast.success(
+        `${item.active_now ? "Deactivated" : "Activated"} internship industry successfully.`,
+      );
       setIndustries((prev) =>
         prev.map((industryItem) =>
-          industryItem.id === item.id ? { ...industryItem, active_now: !industryItem.active_now } : industryItem
-        )
+          industryItem.id === item.id
+            ? { ...industryItem, active_now: !industryItem.active_now }
+            : industryItem,
+        ),
+      );
+      setOriginalIndustries((prev) =>
+        prev.map((industryItem) =>
+          industryItem.id === item.id
+            ? { ...industryItem, active_now: !industryItem.active_now }
+            : industryItem,
+        ),
       );
     } catch (error) {
       toast.error("Failed to update industry status.");
@@ -143,18 +272,53 @@ export default function IndustriesPage() {
 
   const downloadTemplate = () => {
     const csv = [
-      ['industry', 'address', 'website_link', 'active_now'],
-      ['Information Technology', '123 Main St, City', 'https://example.com', 'true'],
-      ['Finance', '456 Market Rd, City', 'https://finance.example.com', 'true'],
+      ["industry", "address", "website_link", "active_now"],
+      [
+        "Information Technology",
+        "123 Main St, City",
+        "https://example.com",
+        "true",
+      ],
+      ["Finance", "456 Market Rd, City", "https://finance.example.com", "true"],
     ]
-      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
-      .join('\n');
+      .map((row) =>
+        row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","),
+      )
+      .join("\n");
 
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.download = 'industries-template.csv';
+    link.download = "industries-template.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadIndustriesExport = () => {
+    const csvRows = [
+      ["industry", "address", "website_link", "active_now"],
+      ...industries.map((item) => [
+        item.industry,
+        item.address,
+        item.website_link,
+        item.active_now ? "true" : "false",
+      ]),
+    ];
+
+    const csv = csvRows
+      .map((row) =>
+        row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","),
+      )
+      .join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "industries-export.csv";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -168,18 +332,18 @@ export default function IndustriesPage() {
 
   const handleImport = async () => {
     if (!uploadFile) {
-      toast.error('Please choose a CSV template to upload.');
+      toast.error("Please choose a CSV template to upload.");
       return;
     }
 
     setUploading(true);
     try {
       const response = await apiClient.importIndustriesCsv(uploadFile);
-      toast.success(response?.message || 'Industries imported successfully.');
+      toast.success(response?.message || "Industries imported successfully.");
       setUploadFile(null);
       await fetchIndustries();
     } catch (error) {
-      toast.error('Failed to import industries.');
+      toast.error("Failed to import internship industries.");
       console.error(error);
     } finally {
       setUploading(false);
@@ -192,117 +356,144 @@ export default function IndustriesPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div>
             <h1 className="text-2xl font-bold text-slate-900">Industries</h1>
-            <p className="text-sm text-slate-600">Manage company industry details and active status.</p>
+            <p className="text-sm text-slate-600">
+              Manage company industry details and active status.
+            </p>
           </div>
-          <button
-            onClick={() => {
-              resetForm(false);
-              setShowForm(true);
-              document.getElementById('industryInput')?.focus();
-            }}
-            className="btn-primary w-fit"
-          >
-            <Plus size={16} />
-            Add Industry
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={downloadIndustriesExport}
+              className="btn-outline"
+              disabled={industries.length === 0}
+            >
+              Export industries
+            </button>
+            <button
+              onClick={() => {
+                resetForm(false);
+                setShowForm(true);
+                document.getElementById("industryInput")?.focus();
+              }}
+              className="btn-primary w-fit"
+            >
+              <Plus size={16} />
+              Add Industry
+            </button>
+          </div>
         </div>
 
         {showForm && (
           <form onSubmit={handleSubmit} className="card-base p-5 mb-6">
-          <div className="grid gap-4 md:grid-cols-3">
-            <div>
-              <label className="block text-sm font-medium text-slate-700">Industry *</label>
-              <input
-                id="industryInput"
-                value={industry}
-                onChange={(e) => setIndustry(e.target.value)}
-                className="input-base"
-                placeholder="e.g., Information Technology"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700">Address *</label>
-              <input
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                className="input-base"
-                placeholder="Company office address"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700">Website Link *</label>
-              <input
-                value={website}
-                onChange={(e) => setWebsite(e.target.value)}
-                className="input-base"
-                placeholder="https://..."
-              />
-            </div>
-          </div>
-
-          <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <label className="flex items-center gap-2 text-sm text-slate-700">
-              <input
-                type="checkbox"
-                checked={activeNow}
-                onChange={(e) => setActiveNow(e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-              />
-              Active now
-            </label>
-            <div className="flex items-center justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => resetForm()}
-                className="btn-outline"
-                disabled={submitting}
-              >
-                Cancel
-              </button>
-              <button type="submit" className="btn-primary" disabled={submitting}>
-                {editingId ? 'Update Industry' : 'Create Industry'}
-              </button>
-            </div>
-          </div>
-
-          <div className="mt-6 border-t border-slate-200 pt-5">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <button
-                type="button"
-                onClick={downloadTemplate}
-                className="btn-outline"
-              >
-                Download template
-              </button>
-
-              <label className="flex w-full cursor-pointer items-center gap-3 rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 transition hover:border-slate-300 sm:max-w-md">
+            <div className="grid gap-4 md:grid-cols-3">
+              <div>
+                <label className="block text-sm font-medium text-slate-700">
+                  Industry *
+                </label>
                 <input
-                  type="file"
-                  accept=".csv,text/csv"
-                  onChange={handleFileChange}
-                  className="hidden"
+                  id="industryInput"
+                  value={industry}
+                  onChange={(e) => setIndustry(e.target.value)}
+                  className="input-base"
+                  placeholder="e.g., Information Technology"
                 />
-                <span>{uploadFile ? uploadFile.name : 'Choose industry CSV template'}</span>
-              </label>
-
-              <button
-                type="button"
-                onClick={handleImport}
-                className="btn-primary"
-                disabled={!uploadFile || uploading}
-              >
-                {uploading ? 'Importing...' : 'Import industries'}
-              </button>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">
+                  Address *
+                </label>
+                <input
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  className="input-base"
+                  placeholder="Company office address"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">
+                  Website Link *
+                </label>
+                <input
+                  value={website}
+                  onChange={(e) => setWebsite(e.target.value)}
+                  className="input-base"
+                  placeholder="https://..."
+                />
+              </div>
             </div>
-            <p className="mt-2 text-sm text-slate-500">
-              Download the template, fill industry details in CSV format, then upload it here to bulk add industries.
-            </p>
-          </div>
-        </form>
+
+            <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <label className="flex items-center gap-2 text-sm text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={activeNow}
+                  onChange={(e) => setActiveNow(e.target.checked)}
+                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                />
+                Active now
+              </label>
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => resetForm()}
+                  className="btn-outline"
+                  disabled={submitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn-primary"
+                  disabled={submitting}
+                >
+                  {editingId ? "Update Industry" : "Create Industry"}
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-6 border-t border-slate-200 pt-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <button
+                  type="button"
+                  onClick={downloadTemplate}
+                  className="btn-outline"
+                >
+                  Download template
+                </button>
+
+                <label className="flex w-full cursor-pointer items-center gap-3 rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 transition hover:border-slate-300 sm:max-w-md">
+                  <input
+                    type="file"
+                    accept=".csv,text/csv"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                  <span>
+                    {uploadFile
+                      ? uploadFile.name
+                      : "Choose industry CSV template"}
+                  </span>
+                </label>
+
+                <button
+                  type="button"
+                  onClick={handleImport}
+                  className="btn-primary"
+                  disabled={!uploadFile || uploading}
+                >
+                  {uploading ? "Importing..." : "Import industries"}
+                </button>
+              </div>
+              <p className="mt-2 text-sm text-slate-500">
+                Download the template, fill industry details in CSV format, then
+                upload it here to bulk add industries.
+              </p>
+            </div>
+          </form>
         )}
 
         <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Search size={16} className="text-slate-400" />
             <input
               value={search}
@@ -311,46 +502,147 @@ export default function IndustriesPage() {
               className="rounded-full border border-slate-200 px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-200"
             />
           </div>
-          <p className="text-sm text-slate-500">{filteredIndustries.length} entries found</p>
+          <div className="flex flex-wrap items-center gap-2">
+            {selectedIndustryIds.length > 0 && (
+              <button
+                type="button"
+                onClick={handleBulkDelete}
+                disabled={bulkDeleting}
+                className="btn-outline flex items-center gap-2"
+              >
+                <Trash2 size={16} />
+                {bulkDeleting ? 'Deleting...' : `Delete ${selectedIndustryIds.length}`}
+              </button>
+            )}
+            <p className="text-sm text-slate-500">
+              {filteredIndustries.length} entries found
+            </p>
+          </div>
         </div>
 
         <div className="overflow-x-auto border border-slate-200 rounded-xl bg-white shadow-sm">
           <table className="w-full text-sm border-collapse">
             <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th className="px-4 py-3 text-left font-medium text-slate-500">Industry</th>
-                <th className="px-4 py-3 text-left font-medium text-slate-500">Address</th>
-                <th className="px-4 py-3 text-left font-medium text-slate-500">Website</th>
-                <th className="px-4 py-3 text-left font-medium text-slate-500">Status</th>
-                <th className="px-4 py-3 text-left font-medium text-slate-500">Created</th>
-                <th className="px-4 py-3 text-left font-medium text-slate-500">Actions</th>
+                <th className="px-4 py-3 text-left font-medium text-slate-500">
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    onChange={toggleSelectAll}
+                    className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                  />
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-slate-500">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("industry")}
+                    className="inline-flex items-center gap-1 text-left font-medium text-slate-500"
+                  >
+                    Industry
+                    {computeSortIcon("industry")}
+                  </button>
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-slate-500">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("address")}
+                    className="inline-flex items-center gap-1 text-left font-medium text-slate-500"
+                  >
+                    Address
+                    {computeSortIcon("address")}
+                  </button>
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-slate-500">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("website_link")}
+                    className="inline-flex items-center gap-1 text-left font-medium text-slate-500"
+                  >
+                    Website
+                    {computeSortIcon("website_link")}
+                  </button>
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-slate-500">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("active_now")}
+                    className="inline-flex items-center gap-1 text-left font-medium text-slate-500"
+                  >
+                    Status
+                    {computeSortIcon("active_now")}
+                  </button>
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-slate-500">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("created_at")}
+                    className="inline-flex items-center gap-1 text-left font-medium text-slate-500"
+                  >
+                    Created
+                    {computeSortIcon("created_at")}
+                  </button>
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-slate-500">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-slate-500">Loading...</td>
+                  <td
+                    colSpan={7}
+                    className="px-4 py-8 text-center text-slate-500"
+                  >
+                    Loading...
+                  </td>
                 </tr>
               ) : filteredIndustries.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-slate-500">No industries found.</td>
+                  <td
+                    colSpan={7}
+                    className="px-4 py-8 text-center text-slate-500"
+                  >
+                    No industries found.
+                  </td>
                 </tr>
               ) : (
                 filteredIndustries.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-4 py-3 text-slate-700 whitespace-nowrap">{item.industry}</td>
-                    <td className="px-4 py-3 text-slate-700">{item.address}</td>
-                    <td className="px-4 py-3 text-blue-600 underline truncate max-w-[250px]">
-                      <a href={item.website_link} target="_blank" rel="noreferrer">
+                  <tr
+                    key={item.id}
+                    className="hover:bg-slate-50 transition-colors"
+                  >
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <input
+                        type="checkbox"
+                        checked={selectedIndustryIds.includes(item.id)}
+                        onChange={() => toggleIndustrySelection(item.id)}
+                        className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                      />
+                    </td>
+                    <td className="px-3 py-3 text-slate-700 whitespace-nowrap">
+                      {item.industry}
+                    </td>
+                    <td className="px-3 py-3 text-slate-700">{item.address}</td>
+                    <td className="px-3 py-3 text-blue-600 underline truncate max-w-[250px]">
+                      <a
+                        href={item.website_link}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
                         {item.website_link}
                       </a>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${item.active_now ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-700'}`}>
-                        {item.active_now ? 'Active' : 'Inactive'}
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${item.active_now ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-700"}`}
+                      >
+                        {item.active_now ? "Active" : "Inactive"}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-slate-500 whitespace-nowrap">{new Date(item.created_at).toLocaleDateString()}</td>
+                    <td className="px-4 py-3 text-slate-500 whitespace-nowrap">
+                      {new Date(item.created_at).toLocaleDateString()}
+                    </td>
                     <td className="px-4 py-3 whitespace-nowrap flex flex-wrap items-center gap-2">
                       <button
                         onClick={() => handleEdit(item)}
@@ -361,10 +653,10 @@ export default function IndustriesPage() {
                       </button>
                       <button
                         onClick={() => handleToggleActive(item)}
-                        className={`p-2 rounded transition-colors ${item.active_now ? 'text-orange-600 hover:text-orange-800' : 'text-green-600 hover:text-green-800'}`}
-                        title={item.active_now ? 'Deactivate' : 'Activate'}
+                        className={`p-2 rounded transition-colors ${item.active_now ? "text-orange-600 hover:text-orange-800" : "text-green-600 hover:text-green-800"}`}
+                        title={item.active_now ? "Deactivate" : "Activate"}
                       >
-                        {item.active_now ? 'Deactivate' : 'Activate'}
+                        {item.active_now ? "Deactivate" : "Activate"}
                       </button>
                       <button
                         onClick={() => handleDelete(item.id)}

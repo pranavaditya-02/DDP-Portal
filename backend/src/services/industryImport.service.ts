@@ -139,7 +139,7 @@ export class IndustryImportService {
         }
 
         await connection.query<OkPacket>(
-          'INSERT INTO industries (industry, address, website_link, active_now) VALUES (?, ?, ?, ?)',
+          'INSERT INTO internship_industries (industry, address, website_link, active_now) VALUES (?, ?, ?, ?)',
           [industry, address, website, activeNow ? 1 : 0],
         );
 

@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { logger } from '../utils/logger';
+import getMysqlPool from '../database/mysql';
 
 const router = Router();
 
@@ -12,21 +13,29 @@ export interface VerifiedStudent {
 
 /**
  * GET /api/verified-students
- * Fetch all verified students for the current user
- * TODO: Implement actual logic to fetch students based on authenticated user
+ * Fetch all dummy students for selection in forms
  */
-router.get('/verified-students', async (req: Request, res: Response) => {
+router.get('/', async (req: Request, res: Response) => {
   try {
-    // TODO: Get authenticated user from request
-    // TODO: Query database for verified students linked to this user
+    const connection = await getMysqlPool().getConnection();
+    try {
+      const [rows] = await connection.execute(`
+        SELECT id, student_id as studentId, student_name as studentName, student_email as studentEmail 
+        FROM dummy_students 
+        ORDER BY student_name ASC
+      `);
 
-    // For now, return empty array - frontend will use test student
-    const students: VerifiedStudent[] = [];
+      const students = (rows as any[]).map((row) => ({
+        id: row.id,
+        studentId: row.studentId,
+        studentName: row.studentName,
+        studentEmail: row.studentEmail,
+      }));
 
-    res.status(200).json({
-      success: true,
-      students: students,
-    });
+      res.status(200).json(students);
+    } finally {
+      connection.release();
+    }
   } catch (error: any) {
     logger.error('Error fetching verified students:', error);
     res.status(500).json({

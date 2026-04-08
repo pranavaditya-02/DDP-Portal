@@ -81,12 +81,27 @@ function DetailsModal({
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity"
+        className={`fixed inset-0 bg-black z-[9998] pointer-events-auto ${
+          isOpen ? "animate-in fade-in duration-200 ease-out" : "animate-out fade-out duration-200 ease-in"
+        }`}
+        style={{
+          opacity: isOpen ? 0.5 : 0,
+          transition: "opacity 200ms ease-out",
+        }}
         onClick={onClose}
       />
 
       {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+      <div
+        className={`fixed inset-0 z-[9999] flex items-center justify-center p-4 pointer-events-none ${
+          isOpen ? "animate-in fade-in zoom-in duration-300 ease-out" : "animate-out fade-out zoom-out duration-200 ease-in"
+        }`}
+        style={{
+          opacity: isOpen ? 1 : 0,
+          transform: isOpen ? "scale(1)" : "scale(0.95)",
+          transition: "all 300ms ease-out",
+        }}
+      >
         <div
           className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto pointer-events-auto"
           onClick={(e) => e.stopPropagation()}

@@ -8,7 +8,7 @@ const router = Router();
  * GET /api/sdgs
  * Fetch all SDG goals
  */
-router.get('/sdgs', async (req: Request, res: Response) => {
+router.get('/', async (req: Request, res: Response) => {
   try {
     const sdgs = await sdgService.getAllSDGs();
     res.status(200).json({
@@ -28,7 +28,7 @@ router.get('/sdgs', async (req: Request, res: Response) => {
  * GET /api/sdgs/:id
  * Fetch a single SDG goal by ID
  */
-router.get('/sdgs/:id', async (req: Request, res: Response) => {
+router.get('/:id', async (req: Request, res: Response) => {
   try {
     const idParam = typeof req.params.id === 'string' ? req.params.id : (req.params.id as any as string);
     const sdg = await sdgService.getSDGById(parseInt(idParam));

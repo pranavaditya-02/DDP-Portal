@@ -38,6 +38,21 @@ export const Navigation: React.FC = () => {
       show: isStudent(),
     },
     {
+      label: 'Student Workflow',
+      href: '/students',
+      show: isStudent(),
+    },
+    {
+      label: 'Activity Master',
+      href: '/students/activity-master',
+      show: isStudent(),
+    },
+    {
+      label: 'Activity Logger',
+      href: '/students/activity-logger',
+      show: isStudent(),
+    },
+    {
       label: 'My Activities',
       href: '/activities',
       show: isFaculty() && !isDean(),

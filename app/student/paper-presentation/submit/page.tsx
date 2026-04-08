@@ -184,17 +184,9 @@ export default function PaperPresentationSubmitPage() {
         // Load verified students for current user
         const studentRes = await apiClient.get("/verified-students");
         
-        // setVerifiedStudents
-        const students = studentRes?.students || [];
-
-        // Add hardcoded test student for testing (REMOVE AFTER VERIFICATION)
-        const testStudent: VerifiedStudent = {
-          id: 999,
-          studentId: "TEST001",
-          studentName: "Test Student",
-          studentEmail: "test@example.com",
-        };
-        setVerifiedStudents([testStudent, ...students]);
+        // Handle array directly or wrapped in object
+        const students = Array.isArray(studentRes) ? studentRes : studentRes?.students || [];
+        setVerifiedStudents(students);
 
         // Load SDG goals
         const sdgRes = await apiClient.get("/sdgs");
@@ -204,14 +196,6 @@ export default function PaperPresentationSubmitPage() {
         setSDGGoals(sdgData);
       } catch (err) {
         console.error("Failed to load form data:", err);
-        // Add test student even if API fails
-        const testStudent: VerifiedStudent = {
-          id: 999,
-          studentId: "TEST001",
-          studentName: "Test Student",
-          studentEmail: "test@example.com",
-        };
-        setVerifiedStudents([testStudent]);
       } finally {
         setDepartmentsLoading(false);
         setStudentsLoading(false);
@@ -514,6 +498,7 @@ export default function PaperPresentationSubmitPage() {
                       backgroundSize: '20px',
                     }}
                   >
+                    <option value="">-- Select --</option>
                     <option value="no">No</option>
                     <option value="yes">Yes</option>
                   </select>
@@ -617,6 +602,7 @@ export default function PaperPresentationSubmitPage() {
                     backgroundSize: '20px',
                   }}
                 >
+                  <option value="">-- Select Status --</option>
                   <option value="participated">Participated</option>
                   <option value="winner">Winner</option>
                 </select>
@@ -815,11 +801,11 @@ export default function PaperPresentationSubmitPage() {
                   backgroundSize: '20px',
                 }}
               >
+                <option value="">-- Select Status --</option>
                 <option value="initiated">Initiated</option>
                 <option value="processing">Approved</option>
                 <option value="completed">Rejected</option>
               </select>
-              <p className="text-xs text-slate-500 mt-2">Default status is "Initiated"</p>
             </div>
 
             {/* Conditional Remarks Field for Rejection */}
