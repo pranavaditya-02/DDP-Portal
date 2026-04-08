@@ -412,6 +412,88 @@ class RegistrationService {
     }
     return updated;
   }
+
+  async getRegistrationsByEventId(eventId: number, status?: 'pending' | 'approved' | 'rejected'): Promise<RegistrationRecord[]> {
+    const where = status ? 'WHERE er.event_id = ? AND er.status = ?' : 'WHERE er.event_id = ?';
+    const params = status ? [eventId, status] : [eventId];
+
+    const [rows] = await getMysqlPool().query<RegistrationRow[]>(
+      `SELECT
+        er.id,
+        er.event_id,
+        er.student_id,
+        er.student_name,
+        er.student_email,
+        er.student_department,
+        er.event_category,
+        er.activity_event,
+        er.from_date,
+        er.to_date,
+        er.mode_of_participation,
+        er.iqac_verification,
+        er.status,
+        er.rejection_reason,
+        er.verified_by,
+        er.verified_at,
+        er.created_date,
+        er.updated_date,
+        em.event_name,
+        em.event_code,
+        em.event_organizer,
+        em.event_level
+      FROM event_registrations er
+      INNER JOIN event_master em ON em.id = er.event_id
+      ${where}
+      ORDER BY
+        CASE er.status
+          WHEN 'pending' THEN 0
+          WHEN 'approved' THEN 1
+          ELSE 2
+        END ASC,
+        er.created_date DESC`,
+      params,
+    );
+
+    return rows.map(mapRow);
+  }
+
+  async getRegistrationsByStudentId(studentId: number, status?: 'pending' | 'approved' | 'rejected'): Promise<RegistrationRecord[]> {
+    const where = status ? 'WHERE er.student_id = ? AND er.status = ?' : 'WHERE er.student_id = ?';
+    const params = status ? [studentId, status] : [studentId];
+
+    const [rows] = await getMysqlPool().query<RegistrationRow[]>(
+      `SELECT
+        er.id,
+        er.event_id,
+        er.student_id,
+        er.student_name,
+        er.student_email,
+        er.student_department,
+        er.event_category,
+        er.activity_event,
+        er.from_date,
+        er.to_date,
+        er.mode_of_participation,
+        er.iqac_verification,
+        er.status,
+        er.rejection_reason,
+        er.verified_by,
+        er.verified_at,
+        er.created_date,
+        er.updated_date,
+        em.event_name,
+        em.event_code,
+        em.event_organizer,
+        em.event_level
+      FROM event_registrations er
+      INNER JOIN event_master em ON em.id = er.event_id
+      ${where}
+      ORDER BY er.created_date DESC`,
+      params,
+    );
+
+    return rows.map(mapRow);
+  }
 }
 
 export default new RegistrationService();

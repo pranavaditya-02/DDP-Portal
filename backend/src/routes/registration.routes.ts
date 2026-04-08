@@ -77,6 +77,23 @@ router.post('/', authenticateToken, async (req: AuthRequest, res) => {
   }
 });
 
+router.get('/my', authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const query = listQuerySchema.parse(req.query);
+    const registrations = await registrationService.getRegistrationsByStudentId(req.user.id, query.status);
+    return res.json({ registrations });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: error.errors });
+    }
+
+  }
+});
+
 router.get('/verification', authenticateToken, requireRole('verification', 'maintenance'), async (req, res) => {
   try {
     const query = listQuerySchema.parse(req.query);
@@ -146,6 +163,26 @@ router.post('/:registrationId/reject', authenticateToken, requireRole('verificat
 
     logger.error('Error rejecting registration:', error);
     return res.status(500).json({ error: 'Failed to reject registration' });
+  }
+});
+
+router.get('/by-event/:eventId', authenticateToken, async (req, res) => {
+  try {
+    const query = listQuerySchema.parse(req.query);
+    const eventId = Number(req.params.eventId);
+    if (!Number.isFinite(eventId) || eventId <= 0) {
+      return res.status(400).json({ error: 'Invalid event id' });
+    }
+
+    const registrations = await registrationService.getRegistrationsByEventId(eventId, query.status);
+    return res.json({ registrations });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: error.errors });
+    }
+
+    logger.error('Error loading event registrations:', error);
+    return res.status(500).json({ error: 'Failed to fetch event registrations' });
   }
 });
 

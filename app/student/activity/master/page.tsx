@@ -14,7 +14,7 @@ import {
   Search,
 } from 'lucide-react'
 import { DM_Sans } from 'next/font/google'
-import { apiClient, type EventMasterRecord } from '@/lib/api'
+import { apiClient, type EventMasterRecord, type EventRegistrationRecord } from '@/lib/api'
 import { useRoles } from '@/hooks/useRoles'
 import { useAuthStore } from '@/lib/store'
 
@@ -171,7 +171,23 @@ function EventCard({
         <h3 className="line-clamp-2 text-2xl font-semibold leading-tight text-slate-900">{event.eventName}</h3>
         <p className="mt-2 text-sm font-medium text-slate-600">Seats left: {seatsLeft}</p>
 
-        
+        <div className="mt-2 h-2 w-full rounded-full bg-slate-200">
+          <div
+            className={`h-2 rounded-full ${getSeatsProgressTone(
+              Math.max(0, event.balanceCount ?? 0),
+              Math.max(1, event.maximumCount || 1),
+            )}`}
+            style={{
+              width: `${Math.round(
+                (Math.max(0, event.appliedCount ?? 0) / Math.max(1, event.maximumCount || 1)) * 100,
+              )}%`,
+            }}
+          />
+        </div>
+        <div className="mt-2 flex items-center justify-between text-xs text-slate-600">
+          <span>{Math.max(0, event.appliedCount ?? 0)} registered</span>
+          <span>{Math.max(1, event.maximumCount || 1)} total seats</span>
+        </div>
       </div>
     </article>
   )
@@ -181,6 +197,7 @@ export default function Page() {
   const { isStudent, isAdmin, isVerification } = useRoles()
   const user = useAuthStore((state) => state.user)
   const [events, setEvents] = useState<UiEvent[]>([])
+  const [myRegistrations, setMyRegistrations] = useState<EventRegistrationRecord[]>([])
   const [activeTab, setActiveTab] = useState<TabKey>('all')
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('all')
@@ -204,12 +221,19 @@ export default function Page() {
         setLoading(true)
         setErrorMessage(null)
         setUsingFallback(false)
-        const response = await apiClient.getEvents({ sort: 'desc' })
+        const token = useAuthStore.getState().token
+        const isDemoSession = !token || token.startsWith('demo-')
+
+        const [eventsResponse, myRegistrationsResponse] = await Promise.all([
+          apiClient.getEvents({ sort: 'desc' }),
+          isStudent() && !isDemoSession ? apiClient.getMyRegistrations().catch(() => ({ registrations: [] })) : Promise.resolve({ registrations: [] }),
+        ])
 
         if (!isMounted) return
-        setEvents(response.events)
+        setEvents(eventsResponse.events)
+        setMyRegistrations(myRegistrationsResponse.registrations)
         setUsingFallback(false)
-        if (response.events.length === 0) {
+        if (eventsResponse.events.length === 0) {
           setErrorMessage('No events found in the database.')
         }
       } catch (error) {
@@ -244,13 +268,20 @@ export default function Page() {
 
   const filteredEvents = useMemo(() => {
     let data = [...events]
+    const myRegisteredEventIds = new Set(
+      myRegistrations.map((registration) => registration.eventId),
+    )
 
     if (isStudent()) {
       data = data.filter((event) => isActiveStatus(event))
     }
 
+    if (isStudent() && activeTab === 'all') {
+      data = data.filter((event) => !myRegisteredEventIds.has(event.id))
+    }
+
     if (activeTab === 'registered') {
-      data = data.filter((event) => event.appliedCount > 0)
+      data = data.filter((event) => myRegisteredEventIds.has(event.id))
     }
 
     if (activeTab === 'completed') {
@@ -279,18 +310,26 @@ export default function Page() {
     }
 
     return data
-  }, [activeTab, category, deferredSearch, delivery, events, isStudent(), level])
+  }, [activeTab, category, deferredSearch, delivery, events, isStudent(), level, myRegistrations])
 
   const counts = useMemo(
-    () => ({
-      all: isStudent() ? events.filter((event) => isActiveStatus(event)).length : events.length,
-      registered: (isStudent() ? events.filter((event) => isActiveStatus(event)) : events).filter((event) => event.appliedCount > 0).length,
-      completed: (isStudent() ? events.filter((event) => isActiveStatus(event)) : events).filter((event) => isCompleted(event)).length,
-    }),
-    [events, isStudent()]
+    () => {
+      const myRegisteredEventIds = new Set(
+        myRegistrations.map((registration) => registration.eventId),
+      )
+
+      const baseEvents = isStudent() ? events.filter((event) => isActiveStatus(event)) : events
+      return {
+        all: isStudent() ? baseEvents.filter((event) => !myRegisteredEventIds.has(event.id)).length : baseEvents.length,
+        registered: isStudent() ? baseEvents.filter((event) => myRegisteredEventIds.has(event.id)).length : baseEvents.filter((event) => event.appliedCount > 0).length,
+        completed: baseEvents.filter((event) => isCompleted(event)).length,
+      }
+    },
+    [events, isStudent(), myRegistrations]
   )
 
   const activeCount = filteredEvents.filter((event) => isActiveStatus(event)).length
+  const isEventAlreadyRegistered = selectedEvent ? myRegistrations.some((item) => item.eventId === selectedEvent.id) : false
 
   const openEventDetails = (event: UiEvent) => {
     setSelectedEvent(event)
@@ -310,19 +349,60 @@ export default function Page() {
     try {
       setRegistrationSubmitting(true)
       setErrorMessage(null)
-      await apiClient.registerForEvent({
-        eventId: selectedEvent.id,
-        studentName: registrationForm.student,
-        studentDepartment: null,
-        eventCategory: registrationForm.eventCategory || selectedEvent.eventCategory || null,
-        activityEvent: registrationForm.activityEvent,
-        fromDate: registrationForm.fromDate || null,
-        toDate: registrationForm.toDate || null,
-        modeOfParticipation: registrationForm.modeOfParticipation || null,
-        iqacVerification: registrationForm.iqacVerification || 'Initiated',
-      })
+      const token = useAuthStore.getState().token
+      const isDemoSession = !token || token.startsWith('demo-')
+      let createdRegistration: EventRegistrationRecord | null = null
+
+      if (!isDemoSession) {
+        const response = await apiClient.registerForEvent({
+          eventId: selectedEvent.id,
+          studentName: registrationForm.student,
+          studentDepartment: null,
+          eventCategory: registrationForm.eventCategory || selectedEvent.eventCategory || null,
+          activityEvent: registrationForm.activityEvent,
+          fromDate: registrationForm.fromDate || null,
+          toDate: registrationForm.toDate || null,
+          modeOfParticipation: registrationForm.modeOfParticipation || null,
+          iqacVerification: registrationForm.iqacVerification || 'Initiated',
+        })
+        createdRegistration = response.registration
+      } else {
+        createdRegistration = {
+          id: Date.now(),
+          eventId: selectedEvent.id,
+          studentId: null,
+          studentName: registrationForm.student,
+          studentEmail: null,
+          studentDepartment: null,
+          eventCategory: registrationForm.eventCategory || selectedEvent.eventCategory || null,
+          activityEvent: registrationForm.activityEvent,
+          fromDate: registrationForm.fromDate || null,
+          toDate: registrationForm.toDate || null,
+          modeOfParticipation: registrationForm.modeOfParticipation || null,
+          iqacVerification: 'Initiated',
+          status: 'pending',
+          rejectionReason: null,
+          verifiedBy: null,
+          verifiedAt: null,
+          createdDate: new Date().toISOString(),
+          updatedDate: new Date().toISOString(),
+          eventName: selectedEvent.eventName,
+          eventCode: selectedEvent.eventCode,
+          eventOrganizer: selectedEvent.eventOrganizer,
+          eventLevel: selectedEvent.eventLevel,
+        }
+      }
 
       setRegistrationSubmitted(true)
+      if (createdRegistration) {
+        setMyRegistrations((prev) => [createdRegistration as EventRegistrationRecord, ...prev.filter((item) => item.id !== createdRegistration.id)])
+      }
+
+      const updatedEvent = {
+        ...selectedEvent,
+        appliedCount: selectedEvent.appliedCount + 1,
+        balanceCount: Math.max(0, selectedEvent.balanceCount - 1),
+      }
 
       setEvents((prev) =>
         prev.map((item) =>
@@ -335,6 +415,10 @@ export default function Page() {
             : item,
         ),
       )
+
+      setSelectedEvent(null)
+      setRegistrationForm(null)
+      setActiveTab('registered')
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to register for the event.'
       setErrorMessage(message)
@@ -345,7 +429,7 @@ export default function Page() {
 
   return (
     <div className={`${dmSans.className} mx-auto max-w-[1480px] bg-[#F4F6F8] p-4 sm:p-6 lg:p-8`}>
-      <div className="mb-6 rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
+      <div>
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         
 
@@ -379,81 +463,103 @@ export default function Page() {
           </button>
 
           <div className="grid grid-cols-1 gap-5 lg:grid-cols-5">
-            <section className="space-y-5 overflow-y-auto lg:col-span-3 lg:max-h-[calc(100vh-190px)] lg:pr-1">
-              <div className="rounded-[14px] border border-[#E5E9EF] bg-white p-6">
-                <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
-                  {selectedEvent.eventCategory || 'Competition'}
-                </span>
-                <h1 className="mt-3 text-3xl font-bold text-slate-900">{selectedEvent.eventName}</h1>
-                <p className="mt-2 text-3xl text-slate-500">{selectedEvent.department || 'II Year Only'}</p>
-
-                <div className="mt-4 grid grid-cols-1 gap-3 text-slate-800 sm:grid-cols-2">
-                  <p className="flex items-center gap-2 text-xl">
-                    <CalendarDays className="h-4 w-4 text-slate-500" />
-                    {formatEventDate(selectedEvent.startDate, selectedEvent.endDate)}
-                  </p>
-                  <p className="flex items-center gap-2 text-xl">
-                    <MapPin className="h-4 w-4 text-slate-500" />
-                    {selectedEvent.eventOrganizer || selectedEvent.eventLocation || 'Tech Innovation Institute'}
-                  </p>
+            <section className="space-y-5 lg:col-span-3">
+              <div className="rounded-[16px] border border-[#E5E9EF] bg-gradient-to-br from-white via-slate-50 to-slate-100 p-6 shadow-sm">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex rounded-md border border-slate-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-700">
+                    {selectedEvent.eventCategory || 'Competition'}
+                  </span>
+                  <span className="inline-flex rounded-md border border-slate-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-700">
+                    {selectedEvent.eventCode || 'No Code'}
+                  </span>
                 </div>
 
+                <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-900">{selectedEvent.eventName}</h1>
+                <p className="mt-2 text-sm font-medium uppercase tracking-wide text-slate-500">
+                  {selectedEvent.eventOrganizer || selectedEvent.eventLocation || 'Organizer TBA'}
+                </p>
+
+                <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div className="rounded-xl border border-slate-200 bg-white p-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Event Duration</p>
+                    <p className="mt-1 flex items-center gap-2 text-sm font-semibold text-slate-900">
+                      <CalendarDays className="h-4 w-4 text-slate-500" />
+                      {formatEventDate(selectedEvent.startDate, selectedEvent.endDate)}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500">{selectedEvent.durationDays ? `${selectedEvent.durationDays} day(s)` : 'Duration TBA'}</p>
+                  </div>
+                  <div className="rounded-xl border border-slate-200 bg-white p-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Location</p>
+                    <p className="mt-1 flex items-center gap-2 text-sm font-semibold text-slate-900">
+                      <MapPin className="h-4 w-4 text-slate-500" />
+                      {getDeliveryMode(selectedEvent)} - {selectedEvent.eventLevel || 'General'}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500">{selectedEvent.state || selectedEvent.country || 'All Regions'}</p>
+                  </div>
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 {[
                   {
-                    icon: CalendarDays,
-                    label: 'Start Date',
-                    value: toInputDate(selectedEvent.startDate) ? new Date(selectedEvent.startDate as string).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'TBA',
+                    icon: Building2,
+                    label: 'Within BIT',
+                    value: selectedEvent.withinBit ? 'Yes' : 'No',
+                    tone: 'bg-blue-50 border-blue-100',
                   },
                   {
                     icon: Clock3,
-                    label: 'End Date',
-                    value: toInputDate(selectedEvent.endDate) ? new Date(selectedEvent.endDate as string).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'TBA',
+                    label: 'Special Lab',
+                    value: selectedEvent.relatedToSpecialLab ? 'Yes' : 'N/A',
+                    tone: 'bg-violet-50 border-violet-100',
                   },
                   {
                     icon: MapPin,
-                    label: 'Mode',
-                    value: getDeliveryMode(selectedEvent),
-                  },
-                  {
-                    icon: MapPin,
-                    label: 'State',
-                    value: selectedEvent.state || 'All India',
+                    label: 'Department',
+                    value: selectedEvent.department || 'All Departments',
+                    tone: 'bg-emerald-50 border-emerald-100',
                   },
                 ].map((item) => {
                   const Icon = item.icon
                   return (
-                    <div key={item.label} className="rounded-[14px] border border-[#E5E9EF] bg-white p-4">
-                      <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
+                    <div key={item.label} className={`rounded-[14px] border p-4 ${item.tone}`}>
+                      <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-lg bg-white text-slate-700 shadow-sm">
                         <Icon className="h-4 w-4" />
                       </div>
-                      <p className="text-xs font-medium text-slate-500">{item.label}</p>
-                      <p className="mt-1 text-2xl font-semibold text-slate-900">{item.value}</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">{item.label}</p>
+                      <p className="mt-1 text-sm font-semibold text-slate-900">{item.value}</p>
                     </div>
                   )
                 })}
               </div>
 
               <div className="rounded-[14px] border border-[#E5E9EF] bg-white p-6">
-                <h3 className="text-4xl font-bold text-slate-900">About This Event</h3>
-                <p className="mt-4 text-xl leading-10 text-slate-500">{getAboutText(selectedEvent)}</p>
+                <h3 className="text-3xl font-bold text-slate-900">About This Event</h3>
+                <p className="mt-4 text-lg leading-9 text-slate-600">{getAboutText(selectedEvent)}</p>
               </div>
             </section>
 
             <aside className="space-y-5 lg:sticky lg:top-6 lg:col-span-2 lg:self-start">
-              <div className="rounded-[14px] border border-[#E5E9EF] bg-white p-5">
+              <div className="rounded-[16px] border border-orange-100 bg-gradient-to-br from-orange-50 to-white p-5">
                 <div className="flex items-start justify-between">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-700">
-                    <Building2 className="h-5 w-5" />
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="rounded-full bg-slate-900 px-2 py-0.5 text-[10px] font-semibold text-white">Active</span>
+                      {!isClosed(selectedEvent) ? (
+                        <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">Registration Open</span>
+                      ) : (
+                        <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-semibold text-rose-800">Registration Closed</span>
+                      )}
+                    </div>
                   </div>
                   <div className="text-right">
                     <p className="text-5xl font-bold text-orange-500">{Math.max(0, selectedEvent.balanceCount ?? 0)}</p>
-                    <p className="text-lg text-slate-500">Seats Remaining</p>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Seats Left</p>
                   </div>
                 </div>
-                <div className="mt-4 h-2 w-full rounded-full bg-slate-200">
+
+                <p className="mt-4 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Registration Progress</p>
+                <div className="mt-2 h-2 w-full rounded-full bg-slate-200">
                   <div
                     className={`h-2 rounded-full ${getSeatsProgressTone(
                       Math.max(0, selectedEvent.balanceCount ?? 0),
@@ -461,56 +567,65 @@ export default function Page() {
                     )}`}
                     style={{
                       width: `${Math.round(
-                        (Math.max(0, selectedEvent.balanceCount ?? 0) / Math.max(1, selectedEvent.maximumCount || 1)) * 100,
+                        (Math.max(0, selectedEvent.appliedCount ?? 0) / Math.max(1, selectedEvent.maximumCount || 1)) * 100,
                       )}%`,
                     }}
                   />
                 </div>
-                <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
+                <div className="mt-2 flex items-center justify-between text-xs text-slate-600">
                   <span>{Math.max(0, selectedEvent.appliedCount ?? 0)} registered</span>
-                  <span>{Math.max(1, selectedEvent.maximumCount || 1)} total capacity</span>
+                  <span>{Math.max(1, selectedEvent.maximumCount || 1)} total seats</span>
                 </div>
               </div>
 
               <div className="rounded-[14px] border border-[#E5E9EF] bg-white p-5">
-              {!registrationSubmitted ? (
-                <div className="space-y-3">
-                  <h3 className="text-2xl font-semibold text-slate-900">Register for this Event</h3>
-                  <p className="text-lg text-slate-500">Secure your spot before it's too late</p>
+                {!registrationSubmitted ? (
+                  <div className="space-y-3">
+                    <h3 className="text-2xl font-semibold text-slate-900">Event Actions</h3>
+                    <p className="text-sm text-slate-500">{isEventAlreadyRegistered ? 'You are already registered. Continue with submission.' : 'Register or visit the official event page.'}</p>
 
+                    <a
+                      href={selectedEvent.webLink || '#'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`inline-flex w-full items-center justify-center rounded-[12px] border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 ${!selectedEvent.webLink ? 'pointer-events-none opacity-50' : ''}`}
+                    >
+                      Visit Event Page
+                    </a>
 
-                  <a
-                    href={selectedEvent.webLink || '#'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`inline-flex w-full items-center justify-center rounded-[14px] border border-slate-300 bg-white px-4 py-3 text-base font-semibold text-slate-800 transition hover:bg-slate-50 ${!selectedEvent.webLink ? 'pointer-events-none opacity-50' : ''}`}
-                  >
-                    Open Event Website
-                  </a>
+                    {isEventAlreadyRegistered ? (
+                      <Link
+                        href="/activities/submit"
+                        className="inline-flex w-full items-center justify-center rounded-[12px] bg-[#0F172A] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#1E293B]"
+                      >
+                        Submit
+                      </Link>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={registrationSubmitting || Math.max(0, selectedEvent.balanceCount ?? 0) === 0}
+                        onClick={handleQuickRegister}
+                        className="w-full rounded-[12px] bg-[#0F172A] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#1E293B] disabled:cursor-not-allowed disabled:bg-slate-400"
+                      >
+                        {registrationSubmitting ? 'Registering...' : Math.max(0, selectedEvent.balanceCount ?? 0) === 0 ? 'No Seats Left' : 'Register'}
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="rounded-[14px] border border-emerald-200 bg-emerald-50 p-5 text-center">
+                    <CheckCircle2 className="mx-auto h-11 w-11 text-emerald-600" />
+                    <h4 className="mt-3 text-xl font-semibold text-emerald-900">Registration Submitted!</h4>
+                    <p className="mt-1 text-sm text-emerald-700">Your application is under review.</p>
+                    <span className="mt-3 inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
+                      Status: Pending Approval
+                    </span>
+                  </div>
+                )}
 
-                  <button
-                    type="button"
-                    disabled={registrationSubmitting || Math.max(0, selectedEvent.balanceCount ?? 0) === 0}
-                    onClick={handleQuickRegister}
-                    className="w-full rounded-[14px] bg-[#0F172A] px-4 py-3 text-xl font-semibold text-white transition hover:bg-[#1E293B] disabled:cursor-not-allowed disabled:bg-slate-400"
-                  >
-                    {registrationSubmitting ? 'Registering...' : Math.max(0, selectedEvent.balanceCount ?? 0) === 0 ? 'No Seats Left' : 'Register'}
-                  </button>
+                <div className="mt-4 border-t border-slate-200 pt-4 text-sm text-slate-700">
+                  <p className="text-right text-slate-500">Start Date: {formatDeadline(selectedEvent.startDate)}</p>
+                  <p className="mt-1 text-right text-slate-500">End Date: {formatDeadline(selectedEvent.endDate || selectedEvent.startDate)}</p>
                 </div>
-              ) : (
-                <div className="rounded-[14px] border border-emerald-200 bg-emerald-50 p-5 text-center">
-                  <CheckCircle2 className="mx-auto h-11 w-11 text-emerald-600" />
-                  <h4 className="mt-3 text-xl font-semibold text-emerald-900">Registration Submitted!</h4>
-                  <p className="mt-1 text-sm text-emerald-700">Your application is under review.</p>
-                  <span className="mt-3 inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
-                    Status: Pending Approval
-                  </span>
-                </div>
-              )}
-
-              <div className="mt-4 border-t border-slate-200 pt-4 text-sm text-slate-700">
-                <p className="text-right text-slate-500">Deadline: {formatDeadline(selectedEvent.endDate || selectedEvent.startDate)}</p>
-              </div>
               </div>
             </aside>
           </div>

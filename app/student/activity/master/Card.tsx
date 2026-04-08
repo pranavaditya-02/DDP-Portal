@@ -62,7 +62,6 @@ export const activityMasterEvents: EventCardProps[] = [
     date: "MAR 28, 2026",
     location: "Anna University",
     category: "Technical Symposium",
-    
     seatsLeft: 5,
     totalSeats: 200,
   },
@@ -87,7 +86,6 @@ export const activityMasterEvents: EventCardProps[] = [
     date: "APR 17, 2026",
     location: "T-Hub Hyderabad",
     category: "Pitch Event",
-    
     seatsLeft: 70,
     totalSeats: 150,
   },
@@ -140,6 +138,7 @@ export default function Card({
   updatedDate,
   seatsLeft,
   totalSeats,
+  status,
   isRegistered = false,
   onRegisterSuccess,
   onOpenDetails,
@@ -220,18 +219,14 @@ export default function Card({
   };
 
   const formatDetail = (value: unknown) => {
-    if (value === undefined || value === null || value === "") {
-      return "N/A";
-    }
+    if (value === undefined || value === null || value === "") return "N/A";
     return String(value);
   };
 
   const formatDateTime = (value?: string | null) => {
     if (!value) return "N/A";
     const parsed = new Date(value);
-    if (Number.isNaN(parsed.getTime())) {
-      return value;
-    }
+    if (Number.isNaN(parsed.getTime())) return value;
     return parsed.toLocaleString("en-IN", {
       day: "2-digit",
       month: "short",
@@ -244,6 +239,7 @@ export default function Card({
   const computedAppliedCount = typeof appliedCount === "number" ? appliedCount : Math.max(0, safeTotalSeats - safeSeatsLeft);
   const computedBalanceCount = typeof balanceCount === "number" ? balanceCount : safeSeatsLeft;
   const computedMaximumCount = typeof maximumCount === "number" ? maximumCount : safeTotalSeats;
+
   const detailSections = [
     {
       title: "Overview",
@@ -314,63 +310,45 @@ export default function Card({
           <button
             type="button"
             onClick={onBack}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-300 text-slate-700 transition hover:bg-slate-100"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 transition hover:bg-slate-100"
             aria-label="Go back"
           >
             ←
           </button>
           <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">{title}</h2>
-            <p className="text-sm text-slate-500">View event details and complete registration</p>
+            <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">{title}</h2>
+            <p className="text-sm text-slate-500">Event detail view and registration workflow</p>
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <div className="relative h-56 w-full overflow-hidden">
-            <span className="absolute right-4 top-4 rounded-md bg-slate-900/80 px-2 py-1 text-xs font-medium text-white">
-              {category}
-            </span>
-          </div>
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-5">
+          <section className="space-y-5 lg:col-span-3">
+            <div className="rounded-[16px] border border-[#E5E9EF] bg-gradient-to-br from-white via-slate-50 to-slate-100 p-6 shadow-sm">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex rounded-md border border-slate-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-700">
+                  {formatDetail(category)}
+                </span>
+                <span className="inline-flex rounded-md border border-slate-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-700">
+                  {formatDetail(eventCode)}
+                </span>
+              </div>
 
-          <div className="space-y-5 p-6">
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Event Code</p>
-                <p className="mt-1 text-sm font-semibold text-slate-900">{formatDetail(eventCode)}</p>
-              </div>
-              <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Status</p>
-                <p className="mt-1 text-sm font-semibold text-slate-900">{formatDetail(status)}</p>
-              </div>
-              <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Category</p>
-                <p className="mt-1 text-sm font-semibold text-slate-900">{formatDetail(category)}</p>
-              </div>
-              <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Event Level</p>
-                <p className="mt-1 text-sm font-semibold text-slate-900">{formatDetail(eventLevel)}</p>
+              <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-900">{formatDetail(title)}</h1>
+              <p className="mt-2 text-sm font-medium uppercase tracking-wide text-slate-500">{formatDetail(eventOrganizer)}</p>
+
+              <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="rounded-xl border border-slate-200 bg-white p-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Event Duration</p>
+                  <p className="mt-1 text-sm font-semibold text-slate-900">{formatDetail(date)}</p>
+                  <p className="mt-1 text-xs text-slate-500">{formatDetail(durationDays)} day(s)</p>
+                </div>
+                <div className="rounded-xl border border-slate-200 bg-white p-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Location</p>
+                  <p className="mt-1 text-sm font-semibold text-slate-900">{formatDetail(location)}</p>
+                  <p className="mt-1 text-xs text-slate-500">{formatDetail(state)}, {formatDetail(country)}</p>
+                </div>
               </div>
             </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">Date</p>
-                <p className="text-sm font-medium text-slate-900">{date}</p>
-              </div>
-              <div>
-                <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">Location</p>
-                <p className="text-sm font-medium text-slate-900">{location}</p>
-              </div>
-            </div>
-
-            {eventLevel && (
-              <div>
-                <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">Level</p>
-                <p className="text-sm font-medium text-slate-900">{eventLevel}</p>
-              </div>
-            )}
-
-            
 
             <div className="space-y-4">
               <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-600">Complete Event Details</h3>
@@ -382,7 +360,7 @@ export default function Card({
                       {section.rows.map((row) => (
                         <div key={`${section.title}-${row.label}`} className="grid grid-cols-1 gap-1 rounded-lg bg-white/80 px-3 py-2 sm:grid-cols-[170px_1fr] sm:gap-3">
                           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{row.label}</p>
-                          <p className="text-sm font-medium text-slate-900 break-words sm:text-right">{row.value}</p>
+                          <p className="break-words text-sm font-medium text-slate-900 sm:text-right">{row.value}</p>
                         </div>
                       ))}
                     </div>
@@ -390,36 +368,63 @@ export default function Card({
                 ))}
               </div>
             </div>
+          </section>
 
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-              <div className="mb-3 flex items-center justify-between text-sm text-slate-600">
-                <span>Seats left: {safeSeatsLeft}</span>
-                <span>Total seats: {safeTotalSeats}</span>
+          <aside className="space-y-5 lg:sticky lg:top-6 lg:col-span-2 lg:self-start">
+            <div className="rounded-[16px] border border-orange-100 bg-gradient-to-br from-orange-50 to-white p-5">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="rounded-full bg-slate-900 px-2 py-0.5 text-[10px] font-semibold text-white">{isSoldOut ? "Closed" : "Active"}</span>
+                  {!isSoldOut ? (
+                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">Registration Open</span>
+                  ) : (
+                    <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-semibold text-rose-800">Registration Closed</span>
+                  )}
+                </div>
+                <div className="text-right">
+                  <p className="text-5xl font-bold text-orange-500">{safeSeatsLeft}</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Seats Left</p>
+                </div>
               </div>
-              <div className="h-2 w-full rounded-full bg-slate-200">
-                <div
-                  className={`h-2 rounded-full ${progressColor(seatsRatio)}`}
-                  style={{ width: `${Math.round(seatsRatio * 100)}%` }}
-                />
+
+              <p className="mt-4 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Registration Progress</p>
+              <div className="mt-2 h-2 w-full rounded-full bg-slate-200">
+                <div className={`h-2 rounded-full ${progressColor(seatsRatio)}`} style={{ width: `${Math.round(seatsRatio * 100)}%` }} />
+              </div>
+              <div className="mt-2 flex items-center justify-between text-xs text-slate-600">
+                <span>{computedAppliedCount} registered</span>
+                <span>{computedMaximumCount} total seats</span>
               </div>
             </div>
 
-            <div className="rounded-lg border border-indigo-100 bg-indigo-50 p-4 text-sm text-slate-700">
-              <p className="font-semibold text-slate-900">Registration Information</p>
-              <p className="mt-1">Team size: 2-4 members</p>
-              <p>Fee: ₹500</p>
-              {winnerRewards && <p className="mt-1">Rewards: {winnerRewards}</p>}
-            </div>
+            <div className="rounded-[14px] border border-[#E5E9EF] bg-white p-5">
+              <h3 className="text-2xl font-semibold text-slate-900">Event Actions</h3>
+              <p className="mt-1 text-sm text-slate-500">Register or visit the official event page.</p>
 
-            <button
-              type="button"
-              onClick={() => setShowRegistrationForm(true)}
-              disabled={isSoldOut}
-              className="btn-primary w-full disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {hasRegistered ? "Registered" : safeSeatsLeft <= 0 ? "Sold Out" : "Register Now"}
-            </button>
-          </div>
+              <a
+                href={webLink || "#"}
+                target="_blank"
+                rel="noreferrer"
+                className={`mt-4 inline-flex w-full items-center justify-center rounded-[12px] border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 ${!webLink ? "pointer-events-none opacity-50" : ""}`}
+              >
+                Visit Event Page
+              </a>
+
+              <button
+                type="button"
+                onClick={() => setShowRegistrationForm(true)}
+                disabled={isSoldOut}
+                className="mt-3 w-full rounded-[12px] bg-[#0F172A] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#1E293B] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {hasRegistered ? "Registered" : safeSeatsLeft <= 0 ? "Sold Out" : "Register Now"}
+              </button>
+
+              <div className="mt-4 border-t border-slate-200 pt-4 text-sm text-slate-700">
+                <p className="text-right text-slate-500">Start Date: {formatDateTime(startDate)}</p>
+                <p className="mt-1 text-right text-slate-500">End Date: {formatDateTime(endDate)}</p>
+              </div>
+            </div>
+          </aside>
         </div>
 
         {showRegistrationForm && !hasRegistered && !isSoldOut && (
@@ -435,79 +440,33 @@ export default function Card({
                     <label className="mb-2 block text-sm font-medium text-slate-700">
                       Full Name <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="text"
-                      name="fullName"
-                      value={formData.fullName}
-                      onChange={handleInputChange}
-                      required
-                      className="input-base"
-                      placeholder="Enter your full name"
-                    />
+                    <input type="text" name="fullName" value={formData.fullName} onChange={handleInputChange} required className="input-base" placeholder="Enter your full name" />
                   </div>
                   <div>
                     <label className="mb-2 block text-sm font-medium text-slate-700">
                       Email <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      required
-                      className="input-base"
-                      placeholder="Enter your email address"
-                    />
+                    <input type="email" name="email" value={formData.email} onChange={handleInputChange} required className="input-base" placeholder="Enter your email address" />
                   </div>
                   <div>
                     <label className="mb-2 block text-sm font-medium text-slate-700">
                       Phone Number <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      required
-                      className="input-base"
-                      placeholder="Enter your phone number"
-                    />
+                    <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} required className="input-base" placeholder="Enter your phone number" />
                   </div>
                   <div>
                     <label className="mb-2 block text-sm font-medium text-slate-700">
                       Roll Number <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="text"
-                      name="rollNumber"
-                      value={formData.rollNumber}
-                      onChange={handleInputChange}
-                      required
-                      className="input-base"
-                      placeholder="Enter your roll number"
-                    />
+                    <input type="text" name="rollNumber" value={formData.rollNumber} onChange={handleInputChange} required className="input-base" placeholder="Enter your roll number" />
                   </div>
                   <div>
                     <label className="mb-2 block text-sm font-medium text-slate-700">Department</label>
-                    <input
-                      type="text"
-                      name="department"
-                      value={formData.department}
-                      onChange={handleInputChange}
-                      className="input-base"
-                      placeholder="Enter your department"
-                    />
+                    <input type="text" name="department" value={formData.department} onChange={handleInputChange} className="input-base" placeholder="Enter your department" />
                   </div>
                   <div>
                     <label className="mb-2 block text-sm font-medium text-slate-700">Year</label>
-                    <input
-                      type="text"
-                      name="year"
-                      value={formData.year}
-                      onChange={handleInputChange}
-                      className="input-base"
-                      placeholder="Enter your year"
-                    />
+                    <input type="text" name="year" value={formData.year} onChange={handleInputChange} className="input-base" placeholder="Enter your year" />
                   </div>
                 </div>
               </div>
@@ -518,69 +477,33 @@ export default function Card({
                   <label className="mb-2 block text-sm font-medium text-slate-700">
                     Team Name <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="text"
-                    name="teamName"
-                    value={formData.teamName}
-                    onChange={handleInputChange}
-                    required
-                    className="input-base"
-                    placeholder="Enter your team name"
-                  />
+                  <input type="text" name="teamName" value={formData.teamName} onChange={handleInputChange} required className="input-base" placeholder="Enter your team name" />
                 </div>
                 <div className="space-y-3">
                   <label className="flex items-center gap-3 rounded-lg border border-slate-200 p-3">
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="paid"
-                      checked={formData.paymentMethod === "paid"}
-                      onChange={handleInputChange}
-                      className="h-4 w-4"
-                    />
+                    <input type="radio" name="paymentMethod" value="paid" checked={formData.paymentMethod === "paid"} onChange={handleInputChange} className="h-4 w-4" />
                     <span className="text-sm text-slate-800">Paid</span>
                   </label>
                   <label className="flex items-center gap-3 rounded-lg border-2 border-amber-400 bg-amber-50 p-3">
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="later"
-                      checked={formData.paymentMethod === "later"}
-                      onChange={handleInputChange}
-                      className="h-4 w-4"
-                    />
+                    <input type="radio" name="paymentMethod" value="later" checked={formData.paymentMethod === "later"} onChange={handleInputChange} className="h-4 w-4" />
                     <span className="text-sm text-slate-800">Pay Later</span>
                   </label>
                 </div>
               </div>
 
-              {formError && (
-                <p className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
-                  {formError}
-                </p>
-              )}
+              {formError && <p className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{formError}</p>}
 
               <div className="flex flex-wrap items-center justify-end gap-3 border-t border-slate-200 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowRegistrationForm(false)}
-                  className="btn-outline"
-                >
+                <button type="button" onClick={() => setShowRegistrationForm(false)} className="btn-outline">
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="btn-primary disabled:cursor-not-allowed disabled:opacity-60"
-                >
+                <button type="submit" disabled={isSubmitting} className="btn-primary disabled:cursor-not-allowed disabled:opacity-60">
                   {isSubmitting ? "Submitting..." : "Complete Registration"}
                 </button>
               </div>
             </form>
           </div>
         )}
-
-        
       </section>
     );
   }
@@ -595,38 +518,24 @@ export default function Card({
     >
       <div className="relative h-44 w-full overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/15 to-transparent" />
-        <span className="absolute right-3 top-3 rounded-md bg-slate-900/80 px-2 py-1 text-xs font-medium text-white">
-          {category}
-        </span>
-        {eventLevel && (
-          <span className="absolute bottom-3 left-3 rounded-md bg-white/90 px-2 py-1 text-xs font-semibold text-slate-800">
-            {eventLevel}
-          </span>
-        )}
+        <span className="absolute right-3 top-3 rounded-md bg-slate-900/80 px-2 py-1 text-xs font-medium text-white">{category}</span>
+        {eventLevel && <span className="absolute bottom-3 left-3 rounded-md bg-white/90 px-2 py-1 text-xs font-semibold text-slate-800">{eventLevel}</span>}
       </div>
 
       <div className="space-y-3 p-4">
         <p className="text-xs font-semibold tracking-wide text-amber-600">{date}</p>
         <h4 className="line-clamp-2 text-xl font-semibold text-slate-800">{title}</h4>
         <p className="text-sm text-slate-500">📍 {location}</p>
-        {winnerRewards && (
-          <p className="line-clamp-2 text-sm font-medium text-emerald-700">Rewards: {winnerRewards}</p>
-        )}
+        {winnerRewards && <p className="line-clamp-2 text-sm font-medium text-emerald-700">Rewards: {winnerRewards}</p>}
 
         <div className="pt-2">
           <div className="mb-2 flex items-center justify-between text-sm text-slate-500">
             <span>{safeSeatsLeft} seats left</span>
           </div>
           <div className="h-1.5 w-full rounded-full bg-slate-100">
-            <div
-              className={`h-1.5 rounded-full ${progressColor(seatsRatio)}`}
-              style={{ width: `${Math.round(seatsRatio * 100)}%` }}
-            />
+            <div className={`h-1.5 rounded-full ${progressColor(seatsRatio)}`} style={{ width: `${Math.round(seatsRatio * 100)}%` }} />
           </div>
         </div>
-
-        
-        
       </div>
     </article>
   );

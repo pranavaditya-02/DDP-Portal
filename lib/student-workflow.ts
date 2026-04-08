@@ -50,11 +50,6 @@ export const studentWorkflowQuickLinks = [
     summary: 'Open the event intake form for a new master record.',
   },
   {
-    title: 'My Registrations',
-    route: '/students/my-registrations',
-    summary: 'See all registrations, confirmations, and attendance states.',
-  },
-  {
     title: 'Activity Master',
     route: '/students/activity-master',
     summary: 'Open the master catalog and registration controls.',

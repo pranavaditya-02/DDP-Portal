@@ -480,6 +480,20 @@ export const apiClient = {
     return response.data;
   },
 
+  getRegistrationsByEventId: async (eventId: number, status?: 'pending' | 'approved' | 'rejected'): Promise<{ registrations: EventRegistrationRecord[] }> => {
+    const response = await client.get(`/registrations/by-event/${eventId}`, {
+      params: { status },
+    });
+    return response.data;
+  },
+
+  getMyRegistrations: async (status?: 'pending' | 'approved' | 'rejected'): Promise<{ registrations: EventRegistrationRecord[] }> => {
+    const response = await client.get('/registrations/my', {
+      params: { status },
+    });
+    return response.data;
+  },
+
   approveRegistration: async (registrationId: number): Promise<{ message: string; registration: EventRegistrationRecord }> => {
     const response = await client.post(`/registrations/${registrationId}/approve`);
     return response.data;

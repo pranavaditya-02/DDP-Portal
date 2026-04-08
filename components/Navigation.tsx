@@ -44,12 +44,12 @@ export const Navigation: React.FC = () => {
     },
     {
       label: 'Activity Master',
-      href: '/students/activity-master',
+      href: '/student/activity/master',
       show: isStudent(),
     },
     {
       label: 'Activity Logger',
-      href: '/students/activity-logger',
+      href: '/student/activity/logger',
       show: isStudent(),
     },
     {

@@ -134,12 +134,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           icon: Calendar,
           show: isAdmin(),
         },
-        {
-          label: "My Registrations",
-          href: "/student/activity/my-registrations",
-          icon: ClipboardCheck,
-          show: isStudent(),
-        },
         
         ...studentNavItems.map((item) => ({
           label: item.label,
