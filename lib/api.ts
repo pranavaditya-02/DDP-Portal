@@ -74,6 +74,10 @@ client.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    // Don't set Content-Type for FormData requests - let axios handle it
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
     return config;
   },
   (error) => Promise.reject(error)
@@ -101,6 +105,32 @@ client.interceptors.response.use(
 );
 
 export const apiClient = {
+  // Generic HTTP methods
+  get: async (endpoint: string, config?: any) => {
+    const response = await client.get(endpoint, config);
+    return response.data;
+  },
+
+  post: async (endpoint: string, data: any, config?: any) => {
+    const response = await client.post(endpoint, data, config);
+    return response.data;
+  },
+
+  put: async (endpoint: string, data: any, config?: any) => {
+    const response = await client.put(endpoint, data, config);
+    return response.data;
+  },
+
+  patch: async (endpoint: string, data: any, config?: any) => {
+    const response = await client.patch(endpoint, data, config);
+    return response.data;
+  },
+
+  delete: async (endpoint: string, config?: any) => {
+    const response = await client.delete(endpoint, config);
+    return response.data;
+  },
+
   // Auth endpoints
   register: async (data: {
     email: string;

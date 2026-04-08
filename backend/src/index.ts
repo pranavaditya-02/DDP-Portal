@@ -10,6 +10,12 @@ import activityRoutes from './routes/activity.routes';
 import importRoutes from './routes/import.routes';
 import internshipTrackerRoutes from './routes/internshipTracker.routes';
 import eventsRoutes from './routes/events.routes';
+import paperPresentationRoutes from './routes/paperPresentation.routes';
+import studentPaperPresentationRoutes from './routes/studentPaperPresentation.routes';
+import studentProjectCompetitionRoutes from './routes/studentProjectCompetition.routes';
+import departmentsRoutes from './routes/departments.routes';
+import verifiedStudentsRoutes from './routes/verifiedStudents.routes';
+import sdgRoutes from './routes/sdg.routes';
 import { verifyMysqlConnection } from './database/mysql';
 
 dotenv.config();
@@ -33,13 +39,13 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // Request logging
-app.use((req, res, next) => {
+app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
   logger.info(`${req.method} ${req.path}`);
   next();
 });
 
 // Health check
-app.get('/api/health', (req, res) => {
+app.get('/api/health', (req: express.Request, res: express.Response) => {
   res.json({ status: 'ok', timestamp: new Date() });
 });
 
@@ -52,6 +58,12 @@ app.use('/api/import', importRoutes);
 app.use('/api/internship-tracker', internshipTrackerRoutes);
 app.use('/api/industries', industriesRoutes);
 app.use('/api/events', eventsRoutes);
+app.use('/api/paper-presentations', paperPresentationRoutes);
+app.use('/api', studentPaperPresentationRoutes);
+app.use('/api', studentProjectCompetitionRoutes);
+app.use('/api', departmentsRoutes);
+app.use('/api', verifiedStudentsRoutes);
+app.use('/api', sdgRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -63,7 +75,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 });
 
 // 404 handler
-app.use((req, res) => {
+app.use((req: express.Request, res: express.Response) => {
   res.status(404).json({ error: 'Route not found' });
 });
 

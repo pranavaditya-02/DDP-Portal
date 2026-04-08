@@ -39,8 +39,46 @@ export const verifyMysqlConnection = async (): Promise<void> => {
   try {
     await connection.ping();
     logger.info('MySQL connection established for bulk import.');
+    
+    // Initialize/migrate database schema
+    await initializeDatabaseSchema(connection);
   } finally {
     connection.release();
+  }
+};
+
+const initializeDatabaseSchema = async (connection: mysql.PoolConnection): Promise<void> => {
+  try {
+    // Ensure academic_project_id column exists
+    try {
+      await connection.execute(`
+        ALTER TABLE student_project_competitions 
+        ADD COLUMN academic_project_id VARCHAR(255) AFTER is_academic_project_outcome
+      `);
+    } catch (err: any) {
+      // Column might already exist (error code 1060)
+      if (err.code !== 'ER_DUP_FIELDNAME' && err.errno !== 1060) {
+        throw err;
+      }
+    }
+
+    // Ensure sdg_goal column exists
+    try {
+      await connection.execute(`
+        ALTER TABLE student_project_competitions 
+        ADD COLUMN sdg_goal VARCHAR(255) AFTER academic_project_id
+      `);
+    } catch (err: any) {
+      // Column might already exist (error code 1060)
+      if (err.code !== 'ER_DUP_FIELDNAME' && err.errno !== 1060) {
+        throw err;
+      }
+    }
+
+    logger.info('Database schema verified and initialized');
+  } catch (error) {
+    logger.warn('Database schema initialization warning:', error);
+    // Don't throw - the application can still work even if columns don't exist
   }
 };
 

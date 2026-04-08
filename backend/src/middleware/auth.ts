@@ -31,6 +31,16 @@ export const authenticateToken = (
     return res.status(401).json({ error: 'Access token required' });
   }
 
+  // Allow demo tokens to pass through
+  if (token.startsWith('demo-')) {
+    req.user = {
+      id: 1,
+      email: 'demo@bit.edu',
+      roles: ['student'],
+    };
+    return next();
+  }
+
   jwt.verify(token, process.env.JWT_SECRET || 'secret', (err, user) => {
     if (err) {
       logger.warn('Invalid token:', err.message);
@@ -70,5 +80,29 @@ export const verifyToken = (token: string): JWTPayload | null => {
   } catch (error) {
     logger.error('Token verification failed:', error);
     return null;
+  }
+};
+
+export const optionalAuthenticate = (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (token) {
+    jwt.verify(token, process.env.JWT_SECRET || 'secret', (err, user) => {
+      if (!err) {
+        req.user = user as AuthRequest['user'];
+      } else {
+        logger.warn('Invalid token provided:', err.message);
+      }
+      next();
+    });
+  } else {
+    // No token provided, but that's okay for GET requests
+    logger.info('No token provided - request allowed without authentication');
+    next();
   }
 };

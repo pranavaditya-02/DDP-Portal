@@ -1,0 +1,342 @@
+import { Router, Request, Response } from 'express';
+import { authenticateToken, optionalAuthenticate, AuthRequest } from '../middleware/auth';
+
+// Augment Express Request type to include user
+declare global {
+  namespace Express {
+    interface Request {
+      user?: { id: string | number; [key: string]: any };
+    }
+  }
+}
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import studentPaperPresentationService from '../services/studentPaperPresentation.service';
+import { logger } from '../utils/logger';
+
+const router = Router();
+
+// Configure multer for file uploads
+const uploadsDir = path.join(process.cwd(), 'uploads', 'paper-presentations');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: (
+    req: any,
+    file: Express.Multer.File,
+    cb: (error: Error | null, destination: string) => void
+  ) => {
+    cb(null, uploadsDir);
+  },
+  filename: (
+    req: any,
+    file: Express.Multer.File,
+    cb: (error: Error | null, filename: string) => void
+  ) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  },
+});
+
+const fileFilter = (
+  req: any,
+  file: Express.Multer.File,
+  cb: (error: Error | null, acceptFile?: boolean) => void
+) => {
+  const allowedMimes = ['application/pdf', 'image/jpeg', 'image/png', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+  const allowedExts = ['.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx'];
+  
+  const ext = path.extname(file.originalname).toLowerCase();
+  if (allowedExts.includes(ext) && allowedMimes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Invalid file type'), false);
+  }
+};
+
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+});
+
+/**
+ * POST /api/student-paper-presentations
+ * Create a new paper presentation record with file uploads
+ */
+router.post(
+  '/student-paper-presentations',
+  authenticateToken,
+  upload.fields([
+    { name: 'imageProof', maxCount: 1 },
+    { name: 'abstractProof', maxCount: 1 },
+    { name: 'certificateProof', maxCount: 1 },
+    { name: 'attestedCertificate', maxCount: 1 },
+    { name: 'winnerCertificateProof', maxCount: 1 },
+  ]),
+  async (req: AuthRequest, res: Response) => {
+    try {
+      if (!req.user?.id) {
+        return res.status(401).json({
+          success: false,
+          message: 'User authentication required',
+        });
+      }
+      const files = req.files as { [key: string]: Express.Multer.File[] };
+
+      const data = {
+        studentId: req.body.studentId,
+        studentName: req.body.studentName,
+        paperTitle: req.body.paperTitle,
+        eventStartDate: req.body.eventStartDate,
+        eventEndDate: req.body.eventEndDate,
+        isAcademicProjectOutcome: req.body.isAcademicProjectOutcome,
+        academicProjectId: req.body.academicProjectId,
+        sdgGoal: req.body.sdgGoal,
+        status: req.body.status,
+        winnerPlace: req.body.winnerPlace,
+        prizeType: req.body.prizeType,
+        iqacVerification: req.body.iqacVerification,
+        iqacRejectionRemarks: req.body.iqacRejectionRemarks,
+        parentalDepartmentId: req.body.parentalDepartmentId,
+        createdBy: String(req.user.id),
+        // Map uploaded files to paths
+        imageProofPath: files?.imageProof?.[0] ? `/uploads/paper-presentations/${files.imageProof[0].filename}` : undefined,
+        abstractProofPath: files?.abstractProof?.[0] ? `/uploads/paper-presentations/${files.abstractProof[0].filename}` : undefined,
+        certificateProofPath: files?.certificateProof?.[0] ? `/uploads/paper-presentations/${files.certificateProof[0].filename}` : undefined,
+        attestedCertificatePath: files?.attestedCertificate?.[0] ? `/uploads/paper-presentations/${files.attestedCertificate[0].filename}` : undefined,
+        winnerCertificateProof: files?.winnerCertificateProof?.[0] ? `/uploads/paper-presentations/${files.winnerCertificateProof[0].filename}` : undefined,
+      };
+
+      // Validate required fields
+      if (!data.studentId || !data.studentName || !data.paperTitle || !data.eventStartDate || !data.eventEndDate) {
+        return res.status(400).json({
+          success: false,
+          message: 'Missing required fields',
+        });
+      }
+
+      // Validate required files
+      if (!data.imageProofPath || !data.abstractProofPath || !data.certificateProofPath || !data.attestedCertificatePath) {
+        return res.status(400).json({
+          success: false,
+          message: 'All four proof documents are required',
+        });
+      }
+
+      const result = await studentPaperPresentationService.createPresentation(data as any);
+
+      logger.info(`Paper presentation created: ${result.id}`);
+      res.status(201).json({
+        success: true,
+        message: 'Paper presentation record created successfully',
+        id: result.id,
+        data: result,
+      });
+    } catch (error: any) {
+      logger.error('Error creating paper presentation:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Failed to create paper presentation',
+      });
+    }
+  }
+);
+
+/**
+ * GET /api/student-paper-presentations
+ * Get all paper presentation records for the current user with optional filters and pagination
+ */
+router.get('/student-paper-presentations', optionalAuthenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const filters = {
+      createdBy: req.user?.id ? String(req.user.id) : undefined, // Only filter by user if authenticated
+      studentId: req.query.studentId,
+      status: req.query.status,
+      iqacVerification: req.query.iqacVerification,
+    };
+
+    // Get pagination parameters from query
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.min(100, Math.max(10, parseInt(req.query.limit as string) || 20));
+
+    const response = await studentPaperPresentationService.getAllPresentations(filters, page, limit);
+
+    res.status(200).json({
+      success: true,
+      ...response,
+    });
+  } catch (error: any) {
+    logger.error('Error fetching paper presentations:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to fetch records',
+    });
+  }
+});
+
+/**
+ * GET /api/student-paper-presentations/:id
+ * Get a single paper presentation record
+ */
+router.get('/student-paper-presentations/:id', async (req: Request, res: Response) => {
+  try {
+    const idParam = typeof req.params.id === 'string' ? req.params.id : (req.params.id as any as string);
+    const record = await studentPaperPresentationService.getPresentationById(parseInt(idParam));
+
+    if (!record) {
+      return res.status(404).json({
+        success: false,
+        message: 'Paper presentation record not found',
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: record,
+    });
+  } catch (error: any) {
+    logger.error('Error fetching paper presentation:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to fetch record',
+    });
+  }
+});
+
+/**
+ * PUT /api/student-paper-presentations/:id
+ * Update a paper presentation record
+ */
+router.put(
+  '/student-paper-presentations/:id',
+  upload.fields([
+    { name: 'imageProof', maxCount: 1 },
+    { name: 'abstractProof', maxCount: 1 },
+    { name: 'certificateProof', maxCount: 1 },
+    { name: 'attestedCertificate', maxCount: 1 },
+  ]),
+  async (req: Request, res: Response) => {
+    try {
+      const idParam = typeof req.params.id === 'string' ? req.params.id : (req.params.id as any as string);
+      const files = req.files as { [key: string]: Express.Multer.File[] };
+
+      // Build update data
+      const updateData: any = {};
+      if (req.body.paperTitle) updateData.paperTitle = req.body.paperTitle;
+      if (req.body.eventStartDate) updateData.eventStartDate = req.body.eventStartDate;
+      if (req.body.eventEndDate) updateData.eventEndDate = req.body.eventEndDate;
+      if (req.body.isAcademicProjectOutcome) updateData.isAcademicProjectOutcome = req.body.isAcademicProjectOutcome;
+      if (req.body.status) updateData.status = req.body.status;
+      if (req.body.iqacVerification) updateData.iqacVerification = req.body.iqacVerification;
+      if (req.body.parentalDepartmentId) updateData.parentalDepartmentId = req.body.parentalDepartmentId;
+
+      // Handle file uploads
+      if (files?.imageProof?.[0]) {
+        updateData.imageProofPath = `/uploads/paper-presentations/${files.imageProof[0].filename}`;
+      }
+      if (files?.abstractProof?.[0]) {
+        updateData.abstractProofPath = `/uploads/paper-presentations/${files.abstractProof[0].filename}`;
+      }
+      if (files?.certificateProof?.[0]) {
+        updateData.certificateProofPath = `/uploads/paper-presentations/${files.certificateProof[0].filename}`;
+      }
+      if (files?.attestedCertificate?.[0]) {
+        updateData.attestedCertificatePath = `/uploads/paper-presentations/${files.attestedCertificate[0].filename}`;
+      }
+
+      await studentPaperPresentationService.updatePresentation(parseInt(idParam), updateData);
+
+      res.status(200).json({
+        success: true,
+        message: 'Paper presentation record updated successfully',
+      });
+    } catch (error: any) {
+      logger.error('Error updating paper presentation:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Failed to update record',
+      });
+    }
+  }
+);
+
+/**
+ * PUT /api/student-paper-presentations/:id/iqac-status
+ * Update IQAC verification status
+ */
+router.put('/student-paper-presentations/:id/iqac-status', async (req: Request, res: Response) => {
+  try {
+    const idParam = typeof req.params.id === 'string' ? req.params.id : (req.params.id as any as string);
+    const { iqacVerification } = req.body;
+
+    if (!['initiated', 'processing', 'completed'].includes(iqacVerification)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid IQAC verification status',
+      });
+    }
+    await studentPaperPresentationService.updatePresentation(parseInt(idParam), {
+      iqacVerification: iqacVerification as 'initiated' | 'processing' | 'completed',
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'IQAC status updated successfully',
+      iqacVerification,
+    });
+  } catch (error: any) {
+    logger.error('Error updating IQAC status:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to update IQAC status',
+    });
+  }
+});
+
+/**
+ * DELETE /api/student-paper-presentations/:id
+ * Delete a paper presentation record
+ */
+router.delete('/student-paper-presentations/:id', async (req: Request, res: Response) => {
+  try {
+    const idParam = typeof req.params.id === 'string' ? req.params.id : (req.params.id as any as string);
+
+    // Get record to delete associated files
+    const record = await studentPaperPresentationService.getPresentationById(parseInt(idParam));
+    if (!record) {
+      return res.status(404).json({
+        success: false,
+        message: 'Paper presentation record not found',
+      });
+    }
+
+    // Delete associated files
+    [record.imageProofPath, record.abstractProofPath, record.certificateProofPath, record.attestedCertificatePath]
+      .filter(Boolean)
+      .forEach((filePath: string) => {
+        const fullPath = path.join(process.cwd(), filePath);
+        if (fs.existsSync(fullPath)) {
+          fs.unlinkSync(fullPath);
+        }
+      });
+
+    await studentPaperPresentationService.deletePresentation(parseInt(idParam));
+
+    res.status(200).json({
+      success: true,
+      message: 'Paper presentation record deleted successfully',
+    });
+  } catch (error: any) {
+    logger.error('Error deleting paper presentation:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to delete record',
+    });
+  }
+});
+
+export default router;

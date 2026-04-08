@@ -225,6 +225,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: "activityLogger", label: "Activity Logger", icon: PlusCircle, href: "/student/activity/logger" },
     { id: "internshipTracker", label: "Internship Tracker", icon: GraduationCap, href: "/student/internship/tracker" },
     { id: "internshipReport", label: "Internship Report", icon: ClipboardCheck, href: "/student/internship/report" },
+    { id: "paperPresentation", label: "Paper Presentations", icon: FileText, href: "/student/paper-presentation" },
+    { id: "projectCompetition", label: "Project Competitions", icon: Trophy, href: "/student/project-competition" },
   ];
 
   const owiItems = [
