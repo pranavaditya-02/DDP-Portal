@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, useState, useEffect, useRef } from "react";
+import { ChangeEvent, useState, useEffect } from "react";
 import {
   ChevronRight,
   Database,
@@ -15,11 +15,7 @@ import {
   Link,
   BookOpen,
   GraduationCap,
-  FlaskConical,
-  CalendarDays,
-  Building2,
-  Eye,
-  ExternalLink
+  ExternalLink,
 } from "lucide-react";
 import { SearchableSelect } from "@/components/SearchableSelect";
 
@@ -30,14 +26,29 @@ type CourseRecord = {
   student_id: number;
   student_name: string;
   year_of_study: string;
+  special_lab_id: number;
+  online_course_id: number;
   course_type: string;
+  marks_available: number;
+  percentage_obtained: string | null;
+  credit_transfer: string | null;
   start_date: string;
   end_date: string;
   exam_date: string;
+  duration_weeks: number;
+  is_part_of_academic: number;
+  semester: number | null;
+  sponsorship_type: string;
+  interdisciplinary: number;
+  department: string;
+  original_certificate_file: string;
+  attested_certificate_file: string;
+  certificate_url: string;
   iqac_status: string;
-  course_name: string;
-  dept_name: string;
   created_at: string;
+  course_name: string;
+  lab_name: string;
+  dept_name: string;
   originalProofUrl: string;
   attendedProofUrl: string;
 };
@@ -96,6 +107,36 @@ const STEPS = [
   { id: 4, label: "Verification" },
 ];
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const TYPE_COLORS: Record<string, string> = {
+  "Swayam-NPTEL": "bg-violet-50 text-violet-700 border border-violet-200",
+  "Coursera": "bg-blue-50 text-blue-700 border border-blue-200",
+  "Others (MBA)": "bg-orange-50 text-orange-700 border border-orange-200",
+  "Others (Project-Outcome)": "bg-teal-50 text-teal-700 border border-teal-200",
+};
+
+const STATUS_MAP: Record<string, { cls: string; dot: string }> = {
+  Verified: { cls: "bg-emerald-50 text-emerald-700 border border-emerald-200", dot: "bg-emerald-500" },
+  Rejected: { cls: "bg-red-50 text-red-700 border border-red-200", dot: "bg-red-500" },
+  Initiated: { cls: "bg-amber-50 text-amber-700 border border-amber-200", dot: "bg-amber-400" },
+};
+
+const fmtDate = (d: string) =>
+  new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+
+const fmtDateLong = (d: string) =>
+  new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
+
+const fmtDateTime = (d: string) =>
+  new Date(d).toLocaleString("en-IN", {
+    day: "numeric", month: "short", year: "numeric",
+    hour: "2-digit", minute: "2-digit",
+  });
+
+const yesNo = (v: number | null) =>
+  v ? <span className="text-emerald-700 font-semibold">Yes</span> : <span className="text-red-600 font-semibold">No</span>;
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function CreateOnlineCoursePage() {
@@ -109,6 +150,7 @@ export default function CreateOnlineCoursePage() {
     originalProof: null,
     attendedProof: null,
   });
+  const [lightbox, setLightbox] = useState<{ url: string; label: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<CourseRecord | null>(null);
   const [recordsLoading, setRecordsLoading] = useState(true);
@@ -116,7 +158,6 @@ export default function CreateOnlineCoursePage() {
   const [success, setSuccess] = useState(false);
   const [activeStep, setActiveStep] = useState(1);
   const [students, setStudents] = useState<Student[]>([]);
-  const [studentsLoading, setStudentsLoading] = useState(true);
 
   const handleSearchableChange = (name: string, value: string) => {
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -161,7 +202,7 @@ export default function CreateOnlineCoursePage() {
       formData.append("originalProof", files.originalProof);
       formData.append("attendedProof", files.attendedProof);
 
-      const response = await fetch("http://localhost:5000/api/student-online-courses", {
+      const response = await fetch("http://localhost:5000/api/course/student-online-courses", {
         method: "POST",
         body: formData,
       });
@@ -190,16 +231,14 @@ export default function CreateOnlineCoursePage() {
           fetch("http://localhost:5000/courses/active"),
           fetch("http://localhost:5000/speciallabs/active"),
           fetch("http://localhost:5000/departments"),
-          fetch("http://localhost:5000/api/student-online-courses"),
+          fetch("http://localhost:5000/api/course/student-online-courses"),
           fetch("http://localhost:5000/students"),
         ]);
         setCourses(await courseRes.json());
         setLabs(await labRes.json());
         setDepartments(await deptRes.json());
-        const recordsData = await recordRes.json();
-        const studentData = await studentRes.json();
-        setStudents(studentData);
-        setRecords(recordsData);
+        setRecords(await recordRes.json());
+        setStudents(await studentRes.json());
       } catch (err) {
         console.error("Failed to load data", err);
       } finally {
@@ -246,6 +285,7 @@ export default function CreateOnlineCoursePage() {
               </button>
             </div>
           </div>
+
           <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
             {/* Toolbar */}
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 px-4 py-3">
@@ -265,9 +305,6 @@ export default function CreateOnlineCoursePage() {
                 Filter
               </button>
             </div>
-
-            {/* ── DROP-IN REPLACEMENT ── */}
-            {/* Add to your lucide-react imports: ExternalLink, ChevronRight (if not already there) */}
 
             {recordsLoading ? (
               <div className="flex min-h-[340px] flex-col items-center justify-center gap-2 px-4 py-12">
@@ -296,13 +333,31 @@ export default function CreateOnlineCoursePage() {
 
             ) : (
               <>
-                {/* ── TABLE ─────────────────────────────────────────── */}
+                {/* ── TABLE ── */}
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs">
                     <thead>
                       <tr className="border-b border-gray-100 bg-gray-50/80">
-                        {["Student / Course", "Type", "Start Date", "End Date", "Exam Date", "Status", ""].map((h) => (
-                          <th key={h} className="px-5 py-3 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">
+                        {[
+                          "Student / Course",
+                          "Lab",
+                          "Type",
+                          "Duration",
+                          "Semester",
+                          "Sponsorship",
+                          "Marks",
+                          "Academic",
+                          "Interdisciplinary",
+                          "Start Date",
+                          "End Date",
+                          "Exam Date",
+                          "Status",
+                          "",
+                        ].map((h) => (
+                          <th
+                            key={h}
+                            className="px-4 py-3 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap"
+                          >
                             {h}
                           </th>
                         ))}
@@ -310,40 +365,48 @@ export default function CreateOnlineCoursePage() {
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                       {records.map((record) => {
-                        const typeColors: Record<string, string> = {
-                          "Swayam-NPTEL": "bg-violet-50 text-violet-700 border border-violet-200",
-                          "Coursera": "bg-blue-50   text-blue-700   border border-blue-200",
-                          "Others (MBA)": "bg-orange-50 text-orange-700 border border-orange-200",
-                          "Others (Project-Outcome)": "bg-teal-50   text-teal-700   border border-teal-200",
-                        };
-                        const statusMap: Record<string, { cls: string; dot: string }> = {
-                          Verified: { cls: "bg-emerald-50 text-emerald-700 border border-emerald-200", dot: "bg-emerald-500" },
-                          Rejected: { cls: "bg-red-50     text-red-700     border border-red-200", dot: "bg-red-500" },
-                          Initiated: { cls: "bg-amber-50   text-amber-700   border border-amber-200", dot: "bg-amber-400" },
-                        };
-                        const s = statusMap[record.iqac_status] ?? statusMap["Initiated"];
-                        const fmt = (d: string) =>
-                          new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
-
+                        const s = STATUS_MAP[record.iqac_status] ?? STATUS_MAP["Initiated"];
                         return (
                           <tr
                             key={record.id}
                             onClick={() => setSelected(record)}
                             className="group hover:bg-indigo-50/40 cursor-pointer transition-colors"
                           >
-                            <td className="px-5 py-3.5 max-w-[200px]">
+                            <td className="px-4 py-3.5 max-w-[180px]">
                               <p className="font-semibold text-gray-800 leading-tight truncate">{record.course_name}</p>
                               <p className="text-gray-400 mt-0.5 truncate">{record.student_name}</p>
+                              <p className="text-gray-300 mt-0.5 text-[10px]">{record.year_of_study} year · #{record.id}</p>
                             </td>
-                            <td className="px-5 py-3.5">
-                              <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold whitespace-nowrap ${typeColors[record.course_type] ?? "bg-gray-100 text-gray-600 border border-gray-200"}`}>
+                            <td className="px-4 py-3.5 max-w-[140px]">
+                              <p className="text-gray-500 truncate text-[11px]">{record.lab_name}</p>
+                            </td>
+                            <td className="px-4 py-3.5">
+                              <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold whitespace-nowrap ${TYPE_COLORS[record.course_type] ?? "bg-gray-100 text-gray-600 border border-gray-200"}`}>
                                 {record.course_type}
                               </span>
                             </td>
-                            <td className="px-5 py-3.5 text-gray-600 whitespace-nowrap">{fmt(record.start_date)}</td>
-                            <td className="px-5 py-3.5 text-gray-600 whitespace-nowrap">{fmt(record.end_date)}</td>
-                            <td className="px-5 py-3.5 text-gray-600 whitespace-nowrap">{fmt(record.exam_date)}</td>
-                            <td className="px-5 py-3.5">
+                            <td className="px-4 py-3.5 text-gray-600 whitespace-nowrap">{record.duration_weeks}w</td>
+                            <td className="px-4 py-3.5 text-gray-600">{record.semester ?? "—"}</td>
+                            <td className="px-4 py-3.5 text-gray-600 whitespace-nowrap">{record.sponsorship_type}</td>
+                            <td className="px-4 py-3.5 text-gray-600">
+                              {record.marks_available
+                                ? <span className="text-emerald-700 font-semibold">{record.percentage_obtained}%</span>
+                                : <span className="text-gray-300">—</span>}
+                            </td>
+                            <td className="px-4 py-3.5">
+                              {record.is_part_of_academic
+                                ? <span className="text-emerald-700 font-semibold text-[11px]">Yes</span>
+                                : <span className="text-gray-400 text-[11px]">No</span>}
+                            </td>
+                            <td className="px-4 py-3.5">
+                              {record.interdisciplinary
+                                ? <span className="text-indigo-700 font-semibold text-[11px]">Yes</span>
+                                : <span className="text-gray-400 text-[11px]">No</span>}
+                            </td>
+                            <td className="px-4 py-3.5 text-gray-600 whitespace-nowrap">{fmtDate(record.start_date)}</td>
+                            <td className="px-4 py-3.5 text-gray-600 whitespace-nowrap">{fmtDate(record.end_date)}</td>
+                            <td className="px-4 py-3.5 text-gray-600 whitespace-nowrap">{fmtDate(record.exam_date)}</td>
+                            <td className="px-4 py-3.5">
                               <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ${s.cls}`}>
                                 <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
                                 {record.iqac_status}
@@ -359,16 +422,13 @@ export default function CreateOnlineCoursePage() {
                   </table>
                 </div>
 
-                {/* ── CENTERED MODAL ────────────────────────────────── */}
+                {/* ── DETAIL MODAL ── */}
                 {selected && (
                   <>
-                    {/* Backdrop */}
                     <div
                       onClick={() => setSelected(null)}
                       className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px] animate-in fade-in duration-150"
                     />
-
-                    {/* Modal */}
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95 duration-200">
 
@@ -376,28 +436,17 @@ export default function CreateOnlineCoursePage() {
                         <div className="flex items-start justify-between px-6 pt-6 pb-4 border-b border-gray-100 shrink-0">
                           <div className="min-w-0 pr-4">
                             <p className="text-base font-bold text-gray-900 leading-snug">{selected.course_name}</p>
-                            <p className="text-sm text-gray-400 mt-0.5">{selected.student_name}</p>
+                            <p className="text-sm text-gray-400 mt-0.5">{selected.student_name} · Record #{selected.id}</p>
                             <div className="flex flex-wrap gap-1.5 mt-2.5">
                               {(() => {
-                                const statusMap: Record<string, { cls: string; dot: string }> = {
-                                  Verified: { cls: "bg-emerald-50 text-emerald-700 border border-emerald-200", dot: "bg-emerald-500" },
-                                  Rejected: { cls: "bg-red-50     text-red-700     border border-red-200", dot: "bg-red-500" },
-                                  Initiated: { cls: "bg-amber-50   text-amber-700   border border-amber-200", dot: "bg-amber-400" },
-                                };
-                                const typeColors: Record<string, string> = {
-                                  "Swayam-NPTEL": "bg-violet-50 text-violet-700 border border-violet-200",
-                                  "Coursera": "bg-blue-50   text-blue-700   border border-blue-200",
-                                  "Others (MBA)": "bg-orange-50 text-orange-700 border border-orange-200",
-                                  "Others (Project-Outcome)": "bg-teal-50   text-teal-700   border border-teal-200",
-                                };
-                                const s = statusMap[selected.iqac_status] ?? statusMap["Initiated"];
+                                const s = STATUS_MAP[selected.iqac_status] ?? STATUS_MAP["Initiated"];
                                 return (
                                   <>
                                     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ${s.cls}`}>
                                       <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
                                       {selected.iqac_status}
                                     </span>
-                                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold ${typeColors[selected.course_type] ?? "bg-gray-100 text-gray-600 border border-gray-200"}`}>
+                                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold ${TYPE_COLORS[selected.course_type] ?? "bg-gray-100 text-gray-600 border border-gray-200"}`}>
                                       {selected.course_type}
                                     </span>
                                   </>
@@ -413,84 +462,131 @@ export default function CreateOnlineCoursePage() {
                           </button>
                         </div>
 
-                        {/* Modal body — scrollable */}
-                        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+                        {/* Modal body */}
+                        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
 
-                          {/* Info grid — 2 columns */}
-                          <div>
-                            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-3">Course Details</p>
+                          {/* Section: Student & Academic */}
+                          <ModalSection title="Student & Academic Info">
                             <div className="grid grid-cols-2 gap-3">
-                              {[
-                                { label: "Student Name", value: selected.student_name },
-                                { label: "Year of Study", value: selected.year_of_study },
-                                { label: "Department", value: selected.dept_name },
-                                { label: "Course Type", value: selected.course_type },
-                                {
-                                  label: "Start Date",
-                                  value: new Date(selected.start_date).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }),
-                                },
-                                {
-                                  label: "End Date",
-                                  value: new Date(selected.end_date).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }),
-                                },
-                                {
-                                  label: "Exam Date",
-                                  value: new Date(selected.exam_date).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }),
-                                },
-                                {
-                                  label: "Created At",
-                                  value: new Date(selected.created_at).toLocaleString("en-IN", {
-                                    day: "numeric", month: "short", year: "numeric",
-                                    hour: "2-digit", minute: "2-digit",
-                                  }),
-                                },
-                              ].map(({ label, value }) => (
-                                <div key={label} className="rounded-xl bg-gray-50 border border-gray-100 px-4 py-3">
-                                  <p className="text-[10px] text-gray-400 mb-0.5">{label}</p>
-                                  <p className="text-xs font-semibold text-gray-800">{value}</p>
-                                </div>
-                              ))}
+                              <InfoCell label="Student Name" value={selected.student_name} />
+                              <InfoCell label="Year of Study" value={selected.year_of_study} />
+                              <InfoCell label="Department" value={selected.dept_name} />
+                              <InfoCell label="Special Lab" value={selected.lab_name} />
+                              <InfoCell label="Semester" value={selected.semester?.toString() ?? "—"} />
+                              <InfoCell label="Part of Academic" value={yesNo(selected.is_part_of_academic)} />
+                              <InfoCell label="Interdisciplinary" value={yesNo(selected.interdisciplinary)} />
+                              <InfoCell label="Sponsorship Type" value={selected.sponsorship_type} />
                             </div>
-                          </div>
+                          </ModalSection>
 
-                          {/* Certificates */}
-                          <div>
-                            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-3">Certificate Documents</p>
-                            <div className="grid grid-cols-2 gap-4">
-                              {[
-                                { label: "Original Certificate", url: selected.originalProofUrl },
-                                { label: "Attested Certificate", url: selected.attendedProofUrl },
-                              ].map(({ label, url }) => (
+                          {/* Section: Course Details */}
+                          <ModalSection title="Course Details">
+                            <div className="grid grid-cols-2 gap-3">
+                              <InfoCell label="Course Type" value={selected.course_type} />
+                              <InfoCell label="Duration" value={`${selected.duration_weeks} week${selected.duration_weeks !== 1 ? "s" : ""}`} />
+                              <InfoCell label="Marks Available" value={yesNo(selected.marks_available)} />
+                              <InfoCell
+                                label="Percentage Obtained"
+                                value={selected.percentage_obtained ? `${selected.percentage_obtained}%` : "—"}
+                              />
+                              <InfoCell
+                                label="Credit Transfer"
+                                value={selected.credit_transfer ?? "—"}
+                              />
+                              <InfoCell label="IQAC Status" value={selected.iqac_status} />
+                            </div>
+                          </ModalSection>
+
+                          {/* Section: Dates */}
+                          <ModalSection title="Dates & Timeline">
+                            <div className="grid grid-cols-2 gap-3">
+                              <InfoCell label="Start Date" value={fmtDateLong(selected.start_date)} />
+                              <InfoCell label="End Date" value={fmtDateLong(selected.end_date)} />
+                              <InfoCell label="Exam Date" value={fmtDateLong(selected.exam_date)} />
+                              <InfoCell label="Created At" value={fmtDateTime(selected.created_at)} />
+                            </div>
+                          </ModalSection>
+
+                          {/* Section: Links & Files */}
+                          <ModalSection title="Links & Files">
+                            <div className="space-y-3">
+                              <div className="rounded-xl bg-gray-50 border border-gray-100 px-4 py-3">
+                                <p className="text-[10px] text-gray-400 mb-0.5">Certificate URL</p>
                                 <a
-                                  key={label}
-                                  href={url}
+                                  href={selected.certificate_url}
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="group block rounded-xl overflow-hidden border border-gray-200 hover:border-indigo-300 hover:shadow-lg transition-all"
+                                  className="text-xs font-medium text-indigo-600 hover:underline break-all"
                                 >
-                                  <div className="relative bg-gray-100 h-40 overflow-hidden">
-                                    {url ? (<img
-                                      src={url}
-                                      alt={label}
-                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                      onError={(e) => {
-                                        (e.target as HTMLImageElement).style.display = "none";
-                                      }}
-                                    />) : <div>No preview</div>
-                                    }
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                      <ExternalLink size={20} className="text-white drop-shadow" />
-                                    </div>
-                                  </div>
-                                  <div className="px-3 py-2.5 bg-white flex items-center justify-between gap-1">
-                                    <p className="text-xs font-medium text-gray-600 truncate">{label}</p>
-                                    <ExternalLink size={11} className="text-gray-300 shrink-0" />
-                                  </div>
+                                  {selected.certificate_url}
                                 </a>
-                              ))}
+                              </div>
+                            </div>
+                          </ModalSection>
+
+                          {/* Section: Certificate Documents */}
+                          <ModalSection title="Certificate Documents">
+                            <>
+                              <div className="grid grid-cols-2 gap-4">
+                                {[
+                                  { label: "Original Certificate", url: selected.originalProofUrl },
+                                  { label: "Attested Certificate", url: selected.attendedProofUrl },
+                                ].map(({ label, url }) => (
+                                  <button
+                                    key={label}
+                                    type="button"
+                                    onClick={() => setLightbox({ url, label })}
+                                    className="group block rounded-xl overflow-hidden border border-gray-200 hover:border-indigo-300 hover:shadow-md transition-all text-left w-full"
+                                  >
+                                    <div className="relative bg-gray-100 h-40 overflow-hidden flex items-center justify-center">
+                                      <img
+                                        src={url}
+                                        alt={label}
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                        onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                                      />
+                                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <Search size={20} className="text-white drop-shadow" />
+                                      </div>
+                                    </div>
+                                    <div className="px-3 py-2.5 bg-white flex items-center justify-between gap-1">
+                                      <p className="text-xs font-medium text-gray-600 truncate">{label}</p>
+                                    </div>
+                                  </button>
+                                ))}
+                              </div>
+
+                            </>
+                          </ModalSection>
+                        </div>
+                        {lightbox && (
+                          <div
+                            onClick={() => setLightbox(null)}
+                            className="fixed inset-0 z-[60] bg-black/85 flex items-center justify-center p-6"
+                          >
+                            <div
+                              className="relative max-w-[90vw] max-h-[85vh]"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <button
+                                onClick={() => setLightbox(null)}
+                                className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-black/60 hover:bg-black/85 text-white flex items-center justify-center transition-colors"
+                              >
+                                <X size={16} />
+                              </button>
+
+                              <img
+                                src={lightbox.url}
+                                alt={lightbox.label}
+                                className="block max-w-[90vw] max-h-[85vh] object-contain rounded-xl"
+                              />
+
+                              <div className="absolute bottom-0 left-0 right-0 px-4 py-2.5 bg-black/55 rounded-b-xl">
+                                <p className="text-sm font-medium text-white">{lightbox.label}</p>
+                              </div>
                             </div>
                           </div>
-                        </div>
+                        )}
 
                         {/* Modal footer */}
                         <div className="px-6 py-4 border-t border-gray-100 shrink-0 flex justify-end">
@@ -513,6 +609,7 @@ export default function CreateOnlineCoursePage() {
     );
   }
 
+  // ── Create form view ───────────────────────────────────────────────────────
 
   return (
     <div className="min-h-screen bg-gray-50/70 p-4 sm:p-6 lg:p-8">
@@ -520,7 +617,6 @@ export default function CreateOnlineCoursePage() {
 
         {/* Form header */}
         <div className="border-b border-gray-100 px-6 py-5 sm:px-8">
-          {/* Breadcrumb */}
           <nav className="flex flex-wrap items-center gap-1.5 text-xs text-gray-400 mb-4">
             <span className="font-medium">Resources</span>
             <ChevronRight size={12} className="text-gray-300" />
@@ -548,8 +644,6 @@ export default function CreateOnlineCoursePage() {
                 type="button"
                 onClick={handleCancel}
                 className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors"
-                aria-label="Close create record page"
-                title="Close"
               >
                 <X size={13} />
                 Close
@@ -575,18 +669,12 @@ export default function CreateOnlineCoursePage() {
                     >
                       {isDone ? <Check size={11} strokeWidth={2.5} /> : step.id}
                     </div>
-                    <span
-                      className={`hidden sm:block text-xs transition-colors ${isActive ? "font-medium text-gray-800" : "text-gray-400"
-                        }`}
-                    >
+                    <span className={`hidden sm:block text-xs transition-colors ${isActive ? "font-medium text-gray-800" : "text-gray-400"}`}>
                       {step.label}
                     </span>
                   </div>
                   {i < STEPS.length - 1 && (
-                    <div
-                      className={`mx-3 h-px flex-1 transition-colors ${isDone ? "bg-emerald-400" : "bg-gray-200"
-                        }`}
-                    />
+                    <div className={`mx-3 h-px flex-1 transition-colors ${isDone ? "bg-emerald-400" : "bg-gray-200"}`} />
                   )}
                 </div>
               );
@@ -612,11 +700,7 @@ export default function CreateOnlineCoursePage() {
         <form onSubmit={handleSubmit} className="px-6 py-6 sm:px-8 sm:py-7 space-y-7">
 
           {/* Section 1 – Student */}
-          <FormSection
-            icon={<GraduationCap size={14} />}
-            title="Student information"
-            onActivate={() => setActiveStep(1)}
-          >
+          <FormSection icon={<GraduationCap size={14} />} title="Student information" onActivate={() => setActiveStep(1)}>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <SearchableSelect
                 label="Student"
@@ -624,10 +708,7 @@ export default function CreateOnlineCoursePage() {
                 name="student"
                 value={form.student}
                 placeholder="Choose student"
-                options={students.map((s) => ({
-                  value: String(s.id),
-                  label: `${s.name}`,
-                }))}
+                options={students.map((s) => ({ value: String(s.id), label: s.name }))}
                 onChange={handleSearchableChange}
               />
               <SelectField
@@ -642,11 +723,7 @@ export default function CreateOnlineCoursePage() {
           </FormSection>
 
           {/* Section 2 – Course details */}
-          <FormSection
-            icon={<BookOpen size={14} />}
-            title="Course details"
-            onActivate={() => setActiveStep(2)}
-          >
+          <FormSection icon={<BookOpen size={14} />} title="Course details" onActivate={() => setActiveStep(2)}>
             <div className="space-y-4">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <SearchableSelect
@@ -773,11 +850,7 @@ export default function CreateOnlineCoursePage() {
           </FormSection>
 
           {/* Section 3 – Documents */}
-          <FormSection
-            icon={<UploadCloud size={14} />}
-            title="Document uploads"
-            onActivate={() => setActiveStep(3)}
-          >
+          <FormSection icon={<UploadCloud size={14} />} title="Document uploads" onActivate={() => setActiveStep(3)}>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-1.5">
                 <FileField
@@ -787,9 +860,7 @@ export default function CreateOnlineCoursePage() {
                   onChange={handleFileChange}
                   fileName={files.originalProof?.name}
                 />
-                <p className="text-xs text-red-500 font-medium">
-                  Format: Reg.No – ODC – Date of Event
-                </p>
+                <p className="text-xs text-red-500 font-medium">Format: Reg.No – OC – Date of Event</p>
               </div>
               <div className="space-y-1.5">
                 <FileField
@@ -799,19 +870,13 @@ export default function CreateOnlineCoursePage() {
                   onChange={handleFileChange}
                   fileName={files.attendedProof?.name}
                 />
-                <p className="text-xs text-red-500 font-medium">
-                  Format: Reg.No – ODC – Date of Event
-                </p>
+                <p className="text-xs text-red-500 font-medium">Format: Reg.No – OC – Date of Event</p>
               </div>
             </div>
           </FormSection>
 
           {/* Section 4 – Verification */}
-          <FormSection
-            icon={<Link size={14} />}
-            title="Verification & links"
-            onActivate={() => setActiveStep(4)}
-          >
+          <FormSection icon={<Link size={14} />} title="Verification & links" onActivate={() => setActiveStep(4)}>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <InputField
                 label="Certificate URL"
@@ -875,7 +940,29 @@ export default function CreateOnlineCoursePage() {
   );
 }
 
-// ─── Section wrapper ──────────────────────────────────────────────────────────
+// ─── Modal section wrapper ────────────────────────────────────────────────────
+
+function ModalSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-3">{title}</p>
+      {children}
+    </div>
+  );
+}
+
+// ─── Info cell ────────────────────────────────────────────────────────────────
+
+function InfoCell({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="rounded-xl bg-gray-50 border border-gray-100 px-4 py-3">
+      <p className="text-[10px] text-gray-400 mb-0.5">{label}</p>
+      <div className="text-xs font-semibold text-gray-800">{value}</div>
+    </div>
+  );
+}
+
+// ─── Form section wrapper ─────────────────────────────────────────────────────
 
 function FormSection({
   icon,
@@ -902,7 +989,7 @@ function FormSection({
   );
 }
 
-// ─── IQAC toggle ─────────────────────────────────────────────────────────────
+// ─── IQAC toggle ──────────────────────────────────────────────────────────────
 
 const IQAC_OPTIONS = [
   {
@@ -1025,7 +1112,9 @@ function FileField({ label, required, name, onChange, fileName }: FileFieldProps
           }`}
       >
         <div
-          className={`flex items-center justify-center rounded-lg p-2 transition-colors ${fileName ? "bg-emerald-100 text-emerald-600" : "bg-gray-100 text-gray-400 group-hover:bg-indigo-100 group-hover:text-indigo-500"
+          className={`flex items-center justify-center rounded-lg p-2 transition-colors ${fileName
+            ? "bg-emerald-100 text-emerald-600"
+            : "bg-gray-100 text-gray-400 group-hover:bg-indigo-100 group-hover:text-indigo-500"
             }`}
         >
           {fileName ? <Check size={16} /> : <UploadCloud size={16} />}
@@ -1036,13 +1125,7 @@ function FileField({ label, required, name, onChange, fileName }: FileFieldProps
           </p>
           {!fileName && <p className="mt-0.5 text-xs text-gray-400">PDF, JPG, PNG</p>}
         </div>
-        <input
-          name={name}
-          type="file"
-          className="hidden"
-          onChange={onChange}
-          accept=".pdf,.jpg,.jpeg,.png"
-        />
+        <input name={name} type="file" className="hidden" onChange={onChange} accept=".pdf,.jpg,.jpeg,.png" />
       </label>
     </div>
   );
