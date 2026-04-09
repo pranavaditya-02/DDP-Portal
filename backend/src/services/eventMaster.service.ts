@@ -27,6 +27,7 @@ export interface EventMasterRecord {
   totalLevelOfCompetition: string | null;
   eligibleForRewards: boolean;
   winnerRewards: string | null;
+  imgLink: string | null;
   createdDate: string;
   updatedDate: string;
 }
@@ -57,6 +58,7 @@ interface EventMasterRow extends RowDataPacket {
   total_level_of_competition: string | null;
   eligible_for_rewards: number;
   winner_rewards: string | null;
+  img_link: string | null;
   created_date: string;
   updated_date: string;
 }
@@ -64,7 +66,6 @@ interface EventMasterRow extends RowDataPacket {
 export interface CreateEventMasterInput {
   maximumCount: number;
   appliedCount: number;
-  balanceCount: number;
   applyByStudent: boolean;
   eventCode: string;
   eventName: string;
@@ -86,6 +87,7 @@ export interface CreateEventMasterInput {
   totalLevelOfCompetition?: string | null;
   eligibleForRewards: boolean;
   winnerRewards?: string | null;
+  imgLink?: string | null;
 }
 
 export class EventCodeExistsError extends Error {
@@ -138,6 +140,7 @@ const mapRow = (row: EventMasterRow): EventMasterRecord => ({
   totalLevelOfCompetition: row.total_level_of_competition,
   eligibleForRewards: Number(row.eligible_for_rewards ?? 0) === 1,
   winnerRewards: row.winner_rewards,
+  imgLink: row.img_link,
   createdDate: row.created_date,
   updatedDate: row.updated_date,
 });
@@ -150,7 +153,7 @@ class EventMasterService {
         id,
         maximum_count,
         applied_count,
-        balance_count,
+        (maximum_count - applied_count) AS balance_count,
         apply_by_student,
         event_code,
         event_name,
@@ -172,6 +175,7 @@ class EventMasterService {
         total_level_of_competition,
         eligible_for_rewards,
         winner_rewards,
+        img_link,
         created_date,
         updated_date
       FROM ${eventMasterTableRef}
@@ -195,7 +199,6 @@ class EventMasterService {
       `INSERT INTO ${eventMasterTableRef} (
         maximum_count,
         applied_count,
-        balance_count,
         apply_by_student,
         event_code,
         event_name,
@@ -216,13 +219,13 @@ class EventMasterService {
         competition_name,
         total_level_of_competition,
         eligible_for_rewards,
-        winner_rewards
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        winner_rewards,
+        img_link
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         input.maximumCount,
         input.appliedCount,
-        input.balanceCount,
-        input.applyByStudent ? 1 : 0,
+          input.applyByStudent ? 'Yes' : 'No',
         input.eventCode,
         input.eventName,
         input.eventOrganizer ?? null,
@@ -232,17 +235,25 @@ class EventMasterService {
         input.startDate ?? null,
         input.endDate ?? null,
         input.durationDays ?? null,
-        input.eventLocation ?? null,
+        ((): string | null => {
+          const val = input.eventLocation ?? null;
+          if (val === null) return null;
+          const s = String(val).trim().toLowerCase();
+          if (!s) return null;
+          if (s.includes('online') || s.startsWith('http') || s.includes('zoom') || s.includes('meet') || s.includes('virtual')) return 'ONLINE';
+          return 'OFFLINE';
+        })(),
         input.eventLevel ?? null,
         input.state ?? null,
         input.country ?? null,
-        input.withinBit ? 1 : 0,
-        input.relatedToSpecialLab ? 1 : 0,
+          input.withinBit ? 'Yes' : 'No',
+          input.relatedToSpecialLab ? 'Yes' : 'No',
         input.department ?? null,
         input.competitionName ?? null,
         input.totalLevelOfCompetition ?? null,
-        input.eligibleForRewards ? 1 : 0,
+          input.eligibleForRewards ? 'Yes' : 'No',
         input.winnerRewards ?? null,
+        input.imgLink ?? null,
       ]
     );
 
@@ -251,7 +262,7 @@ class EventMasterService {
         id,
         maximum_count,
         applied_count,
-        balance_count,
+        (maximum_count - applied_count) AS balance_count,
         apply_by_student,
         event_code,
         event_name,
@@ -273,6 +284,7 @@ class EventMasterService {
         total_level_of_competition,
         eligible_for_rewards,
         winner_rewards,
+        img_link,
         created_date,
         updated_date
       FROM ${eventMasterTableRef}

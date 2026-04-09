@@ -264,9 +264,9 @@ export default function InternshipReportCreatePage() {
       stateValue.trim().length > 0 &&
       city.trim().length > 0 &&
       address1.trim().length > 0 &&
-      postalCode.trim().length > 0 &&
+      postalCode.trim().length > 0 && /^[0-9]+$/.test(postalCode) &&
       industryWebsite.trim().length > 0 &&
-      industryContact.trim().length > 0 &&
+      industryContact.trim().length > 0 && /^[0-9]+$/.test(industryContact) &&
       referredBy &&
       refereeValid &&
       stipendReceived &&
@@ -293,7 +293,7 @@ export default function InternshipReportCreatePage() {
     setMessage(null);
 
     if (!canSubmit) {
-      setError('Please fill all required fields and upload all required files.');
+      setError('Please fill all required fields and upload all required files. Ensure postal code and industry contact are numeric.');
       return;
     }
 
@@ -558,9 +558,11 @@ export default function InternshipReportCreatePage() {
             <span className="text-sm font-medium text-slate-700">Postal Code *</span>
             <input
               type="text"
+              inputMode="numeric"
+              pattern="\d*"
               value={postalCode}
-              onChange={(e) => setPostalCode(e.target.value)}
-              placeholder="Postal Code"
+              onChange={(e) => setPostalCode(e.target.value.replace(/\D/g, ''))}
+              placeholder="Postal Code (numbers only)"
               className="input-base mt-1 w-full"
               required
             />
@@ -583,10 +585,12 @@ export default function InternshipReportCreatePage() {
           <label className="block lg:col-span-2">
             <span className="text-sm font-medium text-slate-700">Industry Contact Details *</span>
             <input
-              type="text"
+              type="tel"
+              inputMode="numeric"
+              pattern="\d*"
               value={industryContact}
-              onChange={(e) => setIndustryContact(e.target.value)}
-              placeholder="Industry Contact Details"
+              onChange={(e) => setIndustryContact(e.target.value.replace(/\D/g, ''))}
+              placeholder="Contact number (digits only)"
               className="input-base mt-1 w-full"
               required
             />

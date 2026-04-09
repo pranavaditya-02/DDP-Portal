@@ -1,7 +1,6 @@
 import express from 'express';
 import { z } from 'zod';
 import eventMasterService, { EventCodeExistsError } from '../services/eventMaster.service';
-import { authenticateToken, requireRole, type AuthRequest } from '../middleware/auth';
 import { logger } from '../utils/logger';
 
 const router = express.Router();
@@ -32,10 +31,20 @@ const toNullableString = (value: unknown): string | null => {
   return trimmed.length > 0 ? trimmed : null;
 };
 
+const toNullableStringOrNumber = (value: unknown): string | null => {
+  if (typeof value === 'number') {
+    return String(value);
+  }
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  }
+  return null;
+};
+
 const createEventSchema = z.object({
   maximumCount: z.coerce.number().int().min(0).default(0),
   appliedCount: z.coerce.number().int().min(0).default(0),
-  balanceCount: z.coerce.number().int().min(0).default(0),
   applyByStudent: z.any().optional().transform(toBoolean),
   eventCode: z.string().trim().min(1),
   eventName: z.string().trim().min(1),
@@ -56,7 +65,8 @@ const createEventSchema = z.object({
   competitionName: z.any().optional().transform(toNullableString),
   totalLevelOfCompetition: z.any().optional().transform(toNullableString),
   eligibleForRewards: z.any().optional().transform(toBoolean),
-  winnerRewards: z.any().optional().transform(toNullableString),
+  winnerRewards: z.any().optional().transform(toNullableStringOrNumber),
+  imgLink: z.any().optional().transform(toNullableString),
 });
 
 router.get('/', async (req, res) => {
@@ -70,11 +80,8 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.post('/', authenticateToken, requireRole('maintenance'), async (req: AuthRequest, res) => {
+router.post('/', async (req, res) => {
   try {
-    if (!req.user) {
-      return res.status(401).json({ error: 'Authentication required' });
-    }
 
     const data = createEventSchema.parse(req.body);
 
@@ -90,8 +97,8 @@ router.post('/', authenticateToken, requireRole('maintenance'), async (req: Auth
       ...data,
       maximumCount: data.maximumCount,
       appliedCount: data.appliedCount,
-      balanceCount: Math.max(0, data.maximumCount - data.appliedCount),
       winnerRewards: data.eligibleForRewards ? data.winnerRewards : null,
+      imgLink: data.imgLink ?? null,
     });
 
     return res.status(201).json({ message: 'Event created successfully', event });

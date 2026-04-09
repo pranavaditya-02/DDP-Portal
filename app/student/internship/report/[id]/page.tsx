@@ -79,7 +79,7 @@ export default function Page() {
     loadReport();
   }, [reportId]);
 
-  const handleUpdateReportStatus = async (iqac_verification: 'Initiated' | 'Approved' | 'Rejected', reject_reason?: string) => {
+  const handleUpdateReportStatus = async (iqac_verification: 'initiated' | 'approved' | 'declined', reject_reason?: string) => {
     if (!report) return;
 
     setError(null);
@@ -254,7 +254,7 @@ export default function Page() {
                 <div className="text-xs uppercase tracking-wide text-slate-500">Full Document Proof</div>
                 {report.full_document_proof_url ? (
                   <a
-                    href={report.full_document_proof_url}
+                    href={report.full_document_proof_url?.startsWith('/') ? `${BACKEND_BASE}${report.full_document_proof_url}` : report.full_document_proof_url}
                     target="_blank"
                     rel="noreferrer"
                     className="mt-2 block text-sm font-medium text-blue-600 hover:underline"
@@ -269,7 +269,7 @@ export default function Page() {
                 <div className="text-xs uppercase tracking-wide text-slate-500">Original Certificate</div>
                 {report.original_certificate_url ? (
                   <a
-                    href={report.original_certificate_url}
+                    href={report.original_certificate_url?.startsWith('/') ? `${BACKEND_BASE}${report.original_certificate_url}` : report.original_certificate_url}
                     target="_blank"
                     rel="noreferrer"
                     className="mt-2 block text-sm font-medium text-blue-600 hover:underline"
@@ -284,7 +284,7 @@ export default function Page() {
                 <div className="text-xs uppercase tracking-wide text-slate-500">Attested Certificate</div>
                 {report.attested_certificate_url ? (
                   <a
-                    href={report.attested_certificate_url}
+                    href={report.attested_certificate_url?.startsWith('/') ? `${BACKEND_BASE}${report.attested_certificate_url}` : report.attested_certificate_url}
                     target="_blank"
                     rel="noreferrer"
                     className="mt-2 block text-sm font-medium text-blue-600 hover:underline"
@@ -322,7 +322,7 @@ export default function Page() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => handleUpdateReportStatus('Rejected', rejectReason.trim())}
+                        onClick={() => handleUpdateReportStatus('declined', rejectReason.trim())}
                         disabled={updatingReportId === report.id || !rejectReason.trim()}
                         className="inline-flex justify-center rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-70"
                       >
@@ -342,7 +342,7 @@ export default function Page() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleUpdateReportStatus('Approved')}
+                      onClick={() => handleUpdateReportStatus('approved')}
                       disabled={updatingReportId === report.id}
                       className="inline-flex justify-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70"
                     >

@@ -56,6 +56,7 @@ export interface CreateEventPayload {
   totalLevelOfCompetition?: string | null;
   eligibleForRewards: boolean;
   winnerRewards?: string | null;
+  imgLink?: string | null;
 }
 
 export interface EventRegistrationRecord {
@@ -331,6 +332,34 @@ export const apiClient = {
     return response.data;
   },
 
+  createPatentTracker: async (formData: FormData) => {
+    const response = await client.post('/patent-tracker', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  createPatentReport: async (formData: FormData) => {
+    const response = await client.post('/patent-report', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  getPatentTrackers: async () => {
+    const response = await client.get('/patent-tracker');
+    return response.data;
+  },
+
+  getPatentReports: async () => {
+    const response = await client.get('/patent-report');
+    return response.data;
+  },
+
   getInternshipTrackers: async () => {
     const response = await client.get('/internship-tracker');
     return response.data;
@@ -362,7 +391,7 @@ export const apiClient = {
     return response.data;
   },
 
-  updateInternshipReportIqac: async (id: number, iqac_verification: 'Initiated' | 'Approved' | 'Rejected', reject_reason?: string) => {
+  updateInternshipReportIqac: async (id: number, iqac_verification: 'initiated' | 'approved' | 'declined', reject_reason?: string) => {
     const payload: Record<string, unknown> = { iqac_verification };
     if (reject_reason) payload.reject_reason = reject_reason;
     const response = await client.patch(`/internship-report/${id}/iqac`, payload);

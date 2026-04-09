@@ -59,7 +59,8 @@ const CREATE_REPORT_SQL = `CREATE TABLE IF NOT EXISTS internship_reports (
   full_document_proof_url VARCHAR(255) NOT NULL,
   original_certificate_url VARCHAR(255) NOT NULL,
   attested_certificate_url VARCHAR(255) NOT NULL,
-  iqac_verification ENUM('Initiated', 'Approved', 'Rejected') DEFAULT 'Initiated',
+  iqac_verification ENUM('initiated', 'approved', 'declined') DEFAULT 'initiated',
+  
   reject_reason VARCHAR(255) DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -148,7 +149,7 @@ export interface InternshipReportCreateInput {
   full_document_proof_url: string;
   original_certificate_url: string;
   attested_certificate_url: string;
-  iqac_verification?: 'Initiated' | 'Approved' | 'Rejected';
+  iqac_verification?: 'initiated' | 'approved' | 'declined';
   reject_reason?: string | null;
 }
 
@@ -183,7 +184,7 @@ export interface InternshipReportRecord {
   full_document_proof_url: string;
   original_certificate_url: string;
   attested_certificate_url: string;
-  iqac_verification: 'Initiated' | 'Approved' | 'Rejected';
+  iqac_verification: 'initiated' | 'approved' | 'declined';
   reject_reason?: string | null;
   created_at: string;
   updated_at: string;
@@ -268,7 +269,7 @@ export class InternshipReportService {
         data.full_document_proof_url,
         data.original_certificate_url,
         data.attested_certificate_url,
-        data.iqac_verification ?? 'Initiated',
+          data.iqac_verification ?? 'initiated',
         data.reject_reason ?? null,
       ],
     );
@@ -281,11 +282,11 @@ export class InternshipReportService {
     return report;
   }
 
-  async updateIqacVerification(id: number, iqac_verification: 'Initiated' | 'Approved' | 'Rejected', reject_reason?: string | null): Promise<InternshipReportRecord | null> {
+  async updateIqacVerification(id: number, iqac_verification: 'initiated' | 'approved' | 'declined', reject_reason?: string | null): Promise<InternshipReportRecord | null> {
     await ensureTablesExist();
 
     const pool = getMysqlPool();
-    if (iqac_verification === 'Rejected') {
+    if (iqac_verification === 'declined') {
       await pool.query('UPDATE internship_reports SET iqac_verification = ?, reject_reason = ? WHERE id = ?', [iqac_verification, reject_reason ?? null, id]);
     } else {
       await pool.query('UPDATE internship_reports SET iqac_verification = ?, reject_reason = NULL WHERE id = ?', [iqac_verification, id]);

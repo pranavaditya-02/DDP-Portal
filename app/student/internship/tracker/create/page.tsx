@@ -460,8 +460,8 @@ export default function CreateTrackerPage() {
               className="input-base"
             />
             <p className="text-xs text-red-500">
-              * File names should follow the expected student format, for example
-              7376251CS492-internship-04072026.pdf or 201CS111-ITI-08.06.2025.pdf.
+              * File names should follow the expected student format, for example &nbsp;
+              <b className="text-blue-700">7376251CS492-internship-04072026.pdf.</b>
             </p>
           </div>
 

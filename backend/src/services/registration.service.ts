@@ -149,7 +149,7 @@ class RegistrationService {
           event_code,
           maximum_count,
           applied_count,
-          balance_count,
+          (maximum_count - applied_count) AS balance_count,
           active_status
         FROM event_master
         WHERE id = ?
@@ -220,8 +220,7 @@ class RegistrationService {
       await connection.execute<ResultSetHeader>(
         `UPDATE event_master
         SET
-          applied_count = applied_count + 1,
-          balance_count = CASE WHEN balance_count > 0 THEN balance_count - 1 ELSE 0 END
+          applied_count = applied_count + 1
         WHERE id = ?`,
         [input.eventId],
       );
@@ -388,11 +387,7 @@ class RegistrationService {
         await connection.execute<ResultSetHeader>(
           `UPDATE event_master
           SET
-            applied_count = CASE WHEN applied_count > 0 THEN applied_count - 1 ELSE 0 END,
-            balance_count = CASE
-              WHEN balance_count < maximum_count THEN balance_count + 1
-              ELSE maximum_count
-            END
+            applied_count = CASE WHEN applied_count > 0 THEN applied_count - 1 ELSE 0 END
           WHERE id = ?`,
           [existing.event_id],
         );

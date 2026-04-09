@@ -256,8 +256,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const studentItems = [
     { id: "activityMaster", label: "Activity Master", icon: Clipboard, href: "/student/activity/master" },
     { id: "activityLogger", label: "Activity Logger", icon: PlusCircle, href: "/student/activity/logger" },
+    { id: "industries", label: "Industries", icon: Building2, href: "/student/industries" },
     { id: "internshipTracker", label: "Internship Tracker", icon: GraduationCap, href: "/student/internship/tracker" },
     { id: "internshipReport", label: "Internship Report", icon: ClipboardCheck, href: "/student/internship/report" },
+    { id: "patentTracker", label: "Patent Tracker", icon: ClipboardCheck, href: "/student/patent/tracker" },
+    { id: "patentReport", label: "Patent Report", icon: ClipboardCheck, href: "/student/patent/report" },
   ];
 
   const owiItems = [

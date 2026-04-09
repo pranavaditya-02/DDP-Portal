@@ -9,6 +9,20 @@ import { sendEmail } from '../utils/mailer';
 
 const router = express.Router();
 
+// Helper to build full URL for stored relative upload paths using request origin
+const makeFullUrl = (req: express.Request, p?: string | null) => {
+  if (!p) return null;
+  if (!p.startsWith('/')) return p;
+  const origin = `${req.protocol}://${req.get('host')}`;
+  return `${origin}${p}`;
+};
+
+const transformTrackerForResponse = (req: express.Request, tracker: any) => ({
+  ...tracker,
+  aim_objectives_link: makeFullUrl(req, tracker?.aim_objectives_link ?? null),
+  offer_letter_link: makeFullUrl(req, tracker?.offer_letter_link ?? null),
+});
+
 const uploadDir = path.resolve(process.cwd(), process.env.UPLOAD_DIR || './uploads/students/internships/tracker');
 const allowedFileTypes = new Set(
   (process.env.ALLOWED_FILE_TYPES || 'pdf,jpg,jpeg,png,docx,xlsx')
@@ -28,7 +42,16 @@ const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, uploadDir),
   filename: (_req, file, cb) => {
     const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
-    cb(null, `${Date.now()}-${safeName}`);
+    // Ensure generated filenames are unique within this request (avoid collisions across fields)
+    const reqAny = _req as any;
+    if (!reqAny._generatedFilenames) reqAny._generatedFilenames = new Set<string>();
+    const makeCandidate = () => `${Date.now()}-${Math.random().toString(36).slice(2, 9)}-${safeName}`;
+    let candidate = makeCandidate();
+    while (reqAny._generatedFilenames.has(candidate)) {
+      candidate = makeCandidate();
+    }
+    reqAny._generatedFilenames.add(candidate);
+    cb(null, candidate);
   },
 });
 
@@ -101,7 +124,7 @@ router.post('/', uploadHandler, async (req, res) => {
         offer_letter_link: offerLetterLink,
       });
 
-      return res.status(201).json({ message: 'Internship tracker created successfully', tracker });
+      return res.status(201).json({ message: 'Internship tracker created successfully', tracker: transformTrackerForResponse(req, tracker) });
     } catch (error) {
       logger.error('Error creating internship tracker:', error);
       if (error instanceof z.ZodError) {
@@ -148,7 +171,7 @@ router.patch(
       }
 
       if (tracker.student_email && parsed.iqac_verification !== 'initiated') {
-        const statusText = parsed.iqac_verification === 'approved' ? 'approved' : 'rejected';
+        const statusText = parsed.iqac_verification === 'approved' ? 'approved' : 'declined';
         const subject = `Internship Tracker ${statusText.toUpperCase()} | BannariAmman College IQAC`;
         const bodyText = `Hello ${tracker.student_name ?? 'Student'},\n\nYour internship tracker submission (ID: ${tracker.id}) has been ${statusText} by the IQAC team at BannariAmman College.\n\n${parsed.reject_reason ? `Reason: ${parsed.reject_reason}\n\n` : ''}If you have any questions, please reply to this email.\n\nIQAC Team\nSanthosh\n BannariAmman College`;
         const bodyHtml = `<p>Hello ${tracker.student_name ?? 'Student'},</p><p>Your internship tracker submission <strong>(ID: ${tracker.id})</strong> has been <strong>${statusText}</strong> by the IQAC team at <strong>BannariAmman College</strong>.</p>${parsed.reject_reason ? `<p><strong>Reason:</strong> ${parsed.reject_reason}</p>` : ''}<p>If you have any questions, please reply to this email.</p><p>IQAC Team<br/>BannariAmman College</p>`;
@@ -165,7 +188,7 @@ router.patch(
         }
       }
 
-      return res.json({ message: 'IQAC verification updated successfully', tracker });
+      return res.json({ message: 'IQAC verification updated successfully', tracker: transformTrackerForResponse(req, tracker) });
     } catch (error) {
       logger.error('Error updating IQAC verification:', error);
       if (error instanceof z.ZodError) {
@@ -182,7 +205,7 @@ router.patch(
 router.get('/', async (_req, res) => {
   try {
     const trackers = await internshipTrackerService.listTrackers();
-    return res.json({ trackers });
+    return res.json({ trackers: trackers.map((t) => transformTrackerForResponse(_req, t)) });
   } catch (error) {
     logger.error('Error listing internship trackers:', error);
     return res.status(500).json({ error: 'Failed to list internship trackers' });
@@ -197,7 +220,7 @@ router.get('/student/:studentId/approved', async (req, res) => {
     }
 
     const trackers = await internshipTrackerService.listApprovedTrackersByStudent(studentId);
-    return res.json({ trackers });
+      return res.json({ trackers: trackers.map((t) => transformTrackerForResponse(req, t)) });
   } catch (error) {
     logger.error('Error listing approved student trackers:', error);
     return res.status(500).json({ error: 'Failed to list approved trackers' });
@@ -211,7 +234,7 @@ router.get('/:trackerId(\\d+)', async (req, res) => {
     if (!tracker) {
       return res.status(404).json({ error: 'Internship tracker not found' });
     }
-    return res.json({ tracker });
+    return res.json({ tracker: transformTrackerForResponse(req, tracker) });
   } catch (error) {
     logger.error('Error fetching internship tracker by ID:', error);
     return res.status(500).json({ error: 'Failed to fetch internship tracker' });
