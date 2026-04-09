@@ -2794,3 +2794,6 @@
 {"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-09 16:20:51"}
 {"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-09 16:20:52"}
 {"level":"info","message":"POST /api/events","service":"faculty-tracking-api","timestamp":"2026-04-09 16:20:56"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-09 16:23:32"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-09 16:23:32"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-09 16:23:33"}
