@@ -34,6 +34,7 @@ import {
   Plane,
   Video,
   UserCheck,
+  Book,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -228,6 +229,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: "onlineCourse", label: "Online Course", icon: Video, href: "/student/online-course" },
     { id: "competitionReport", label: "Competition Report", icon: Trophy, href: "/student/competition-report" },
     { id: "journalPublication", label: "Journal Publication", icon: PenTool, href: "/student/journal-publication" },
+    { id: "bookPublication", label: "Book Chapter Publication", icon: Book, href: "/student/book-publication" },
   ];
 
   const owiItems = [

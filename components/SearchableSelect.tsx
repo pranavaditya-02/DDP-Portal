@@ -25,9 +25,9 @@ export function SearchableSelect({
   const wrapRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const selected = options.find((o) => o.value === value);
+  const selected = options.find((o) => String(o.value) === String(value));
   const filtered = options.filter((o) =>
-    o.label.toLowerCase().includes(query.toLowerCase())
+    (o.label || "").toLowerCase().includes(query.toLowerCase())
   );
 
   useEffect(() => {
@@ -111,7 +111,7 @@ export function SearchableSelect({
                       }`}
                   >
                     {opt.label}
-                    {opt.value === value && <Check size={13} className="text-indigo-500" />}
+                    {String(opt.value) === String(value) && <Check size={13} className="text-indigo-500" />}
                   </li>
                 ))
               )}

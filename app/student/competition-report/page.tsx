@@ -212,7 +212,7 @@ export default function CreateCompetitionReport() {
   const [selectedRecord, setSelectedRecord] = useState<CompetitionRecord | null>(null);
   const [lightbox, setLightbox] = useState<{ url: string; label: string } | null>(null);
 
-  const [students, setStudents] = useState<{ id: number; name: string }[]>([]);
+  const [students, setStudents] = useState<{ id: number; student_name: string }[]>([]);
   const [sdgList, setSdgList] = useState<{ id: number; sdg_number: number; title: string }[]>([]);
 
   /* helpers */
@@ -225,7 +225,7 @@ export default function CreateCompetitionReport() {
     if (name === "student") {
       const s = students.find((s) => String(s.id) === value);
       set("studentId", value);
-      set("studentName", s?.name ?? "");
+      set("studentName", s?.student_name ?? "");
       return;
     }
     set(name as FormKey, value as FormValues[FormKey]);
@@ -702,7 +702,7 @@ export default function CreateCompetitionReport() {
                 name="student"
                 value={form.studentId}
                 placeholder="Choose student"
-                options={students.map((s) => ({ value: String(s.id), label: s.name }))}
+                options={students.map((s) => ({ value: String(s.id), label: s.student_name }))}
                 onChange={handleSearchableChange}
               />
               <FieldError msg={errors.studentId} />

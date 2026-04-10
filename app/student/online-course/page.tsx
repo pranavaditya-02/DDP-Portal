@@ -55,6 +55,7 @@ type CourseRecord = {
 
 type FormState = {
   student: string;
+  studentName: string;
   yearOfStudy: string;
   specialLab: string;
   onlineCourse: string;
@@ -76,6 +77,7 @@ type FormState = {
 
 const INITIAL_FORM: FormState = {
   student: "",
+  studentName: "",
   yearOfStudy: "",
   specialLab: "",
   onlineCourse: "",
@@ -96,7 +98,7 @@ const INITIAL_FORM: FormState = {
 };
 
 type Department = { id: number; dept_name: string };
-type Student = { id: number; name: string };
+type Student = { id: number; student_name?: string; name?: string };
 
 // ─── Step config ──────────────────────────────────────────────────────────────
 
@@ -137,11 +139,36 @@ const fmtDateTime = (d: string) =>
 const yesNo = (v: number | null) =>
   v ? <span className="text-emerald-700 font-semibold">Yes</span> : <span className="text-red-600 font-semibold">No</span>;
 
+const getStudentLabel = (student: Student) => student.student_name ?? student.name ?? "";
+
+// Filter the table client-side so the search box works immediately.
+const matchesSearch = (record: CourseRecord, searchTerm: string) => {
+  const query = searchTerm.trim().toLowerCase();
+  if (!query) {
+    return true;
+  }
+
+  return [
+    record.course_name,
+    record.student_name,
+    record.course_type,
+    record.sponsorship_type,
+    record.year_of_study,
+    record.lab_name,
+    record.dept_name,
+    record.iqac_status,
+    String(record.id),
+  ]
+    .filter(Boolean)
+    .some((value) => String(value).toLowerCase().includes(query));
+};
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function CreateOnlineCoursePage() {
   const [form, setForm] = useState<FormState>(INITIAL_FORM);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const [courses, setCourses] = useState<{ id: number; name: string }[]>([]);
   const [labs, setLabs] = useState<{ id: number; specialLabName: string }[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -160,6 +187,16 @@ export default function CreateOnlineCoursePage() {
   const [students, setStudents] = useState<Student[]>([]);
 
   const handleSearchableChange = (name: string, value: string) => {
+    if (name === "student") {
+      const s = students.find((s) => String(s.id) === value);
+      setForm((prev) => ({ 
+        ...prev, 
+        student: value,
+        studentName: s ? getStudentLabel(s) : ""
+      }));
+      setError(null);
+      return;
+    }
     setForm((prev) => ({ ...prev, [name]: value }));
     setError(null);
   };
@@ -202,7 +239,7 @@ export default function CreateOnlineCoursePage() {
       formData.append("originalProof", files.originalProof);
       formData.append("attendedProof", files.attendedProof);
 
-      const response = await fetch("http://localhost:5000/api/course/student-online-courses", {
+      const response = await fetch("http://localhost:5000/api/online/course/student-online-courses", {
         method: "POST",
         body: formData,
       });
@@ -227,20 +264,42 @@ export default function CreateOnlineCoursePage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const fetchJson = async <T,>(url: string): Promise<T> => {
+          const response = await fetch(url);
+          const raw = await response.text();
+
+          if (!response.ok) {
+            throw new Error(`Request failed (${response.status}) for ${url}`);
+          }
+
+          try {
+            return JSON.parse(raw) as T;
+          } catch {
+            throw new Error(`Invalid JSON response from ${url}`);
+          }
+        };
+
         const [courseRes, labRes, deptRes, recordRes, studentRes] = await Promise.all([
-          fetch("http://localhost:5000/courses/active"),
-          fetch("http://localhost:5000/speciallabs/active"),
-          fetch("http://localhost:5000/departments"),
-          fetch("http://localhost:5000/api/course/student-online-courses"),
-          fetch("http://localhost:5000/students"),
+          fetchJson<{ id: number; name: string }[]>("http://localhost:5000/courses/active"),
+          fetchJson<{ id: number; specialLabName: string }[]>("http://localhost:5000/speciallabs/active"),
+          fetchJson<Department[]>("http://localhost:5000/departments"),
+          fetchJson<CourseRecord[]>("http://localhost:5000/api/online/course/student-online-courses"),
+          fetchJson<Student[]>("http://localhost:5000/students"),
         ]);
-        setCourses(await courseRes.json());
-        setLabs(await labRes.json());
-        setDepartments(await deptRes.json());
-        setRecords(await recordRes.json());
-        setStudents(await studentRes.json());
+
+        setCourses(courseRes);
+        setLabs(labRes);
+        setDepartments(deptRes);
+        setRecords(recordRes);
+        setStudents(
+          studentRes.map((student) => ({
+            ...student,
+            student_name: getStudentLabel(student),
+          }))
+        );
       } catch (err) {
         console.error("Failed to load data", err);
+        setError(err instanceof Error ? err.message : "Failed to load data");
       } finally {
         setRecordsLoading(false);
       }
@@ -294,6 +353,8 @@ export default function CreateOnlineCoursePage() {
                 <input
                   type="text"
                   placeholder="Search courses, students…"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full bg-transparent text-xs text-gray-700 placeholder:text-gray-400 outline-none"
                 />
               </div>
@@ -312,14 +373,18 @@ export default function CreateOnlineCoursePage() {
                 <p className="text-xs text-gray-400">Loading records…</p>
               </div>
 
-            ) : records.length === 0 ? (
+            ) : records.filter((record) => matchesSearch(record, searchTerm)).length === 0 ? (
               <div className="flex min-h-[340px] flex-col items-center justify-center gap-3 px-4 py-12 text-center">
                 <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gray-50 border border-gray-100">
                   <Database size={22} className="text-gray-300" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-600">No course records found</p>
-                  <p className="mt-0.5 text-xs text-gray-400">Get started by creating your first online course entry.</p>
+                  <p className="mt-0.5 text-xs text-gray-400">
+                    {searchTerm.trim()
+                      ? "Try a different student, course, or status search term."
+                      : "Get started by creating your first online course entry."}
+                  </p>
                 </div>
                 <button
                   type="button"
@@ -364,7 +429,7 @@ export default function CreateOnlineCoursePage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                      {records.map((record) => {
+                      {records.filter((record) => matchesSearch(record, searchTerm)).map((record) => {
                         const s = STATUS_MAP[record.iqac_status] ?? STATUS_MAP["Initiated"];
                         return (
                           <tr
@@ -704,11 +769,12 @@ export default function CreateOnlineCoursePage() {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <SearchableSelect
                 label="Student"
-                required
                 name="student"
                 value={form.student}
-                placeholder="Choose student"
-                options={students.map((s) => ({ value: String(s.id), label: s.name }))}
+                options={students.map(s => ({
+                  value: String(s.id),
+                  label: getStudentLabel(s)
+                }))}
                 onChange={handleSearchableChange}
               />
               <SelectField
@@ -1073,15 +1139,15 @@ type SelectFieldProps = BaseFieldProps & {
 function SelectField({ label, name, required, value, options, onChange }: SelectFieldProps) {
   return (
     <div>
-      <label className="mb-1.5 block text-xs font-medium text-gray-700">
+      <label className="mb-1.5 block text-sm font-semibold text-gray-700">
         {label}
-        {required && <span className="ml-0.5 text-red-500">*</span>}
+        {required && <span className="ml-1 text-red-500">*</span>}
       </label>
       <select
         name={name}
         value={value}
         onChange={onChange}
-        className="w-full appearance-none rounded-lg border border-gray-200 bg-white bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%239CA3AF%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22M6%209l6%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_10px_center] px-3 py-2 pr-8 text-sm text-gray-800 outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+        className="w-full appearance-none rounded-lg border border-gray-200 bg-white bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%239CA3AF%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22M6%209l6%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_10px_center] px-3.5 py-2.5 pr-8 text-sm text-gray-800 outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
       >
         {options.map((option) => (
           <option key={option} value={option.startsWith("Choose") ? "" : option}>
