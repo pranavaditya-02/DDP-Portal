@@ -20,8 +20,8 @@ export const studentNavItems: StudentNavItem[] = [
   { label: "Product", slug: "product" },
   { label: "Online Course", slug: "online-course" },
   { label: "Journal Publication", slug: "journal-publication" },
+  { label: "Book Publication", slug: "book-publication" },
   { label: "Non-Technical", slug: "non-technical" },
-  { label: "Book Chapter Publication", slug: "book-chapter-publication" },
   {
     label: "Technical Body Membership",
     slug: "technical-body-membership",

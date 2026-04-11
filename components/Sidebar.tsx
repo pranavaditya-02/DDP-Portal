@@ -34,6 +34,7 @@ import {
   Plane,
   Video,
   UserCheck,
+  Book,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -261,6 +262,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: "internshipReport", label: "Internship Report", icon: ClipboardCheck, href: "/student/internship/report" },
     { id: "patentTracker", label: "Patent Tracker", icon: ClipboardCheck, href: "/student/patent/tracker" },
     { id: "patentReport", label: "Patent Report", icon: ClipboardCheck, href: "/student/patent/report" },
+    { id: "onlineCourse", label: "Online Course", icon: Video, href: "/student/online-course" },
+    { id: "competitionReport", label: "Competition Report", icon: Trophy, href: "/student/competition-report" },
+    { id: "journalPublication", label: "Journal Publication", icon: PenTool, href: "/student/journal-publication" },
+    { id: "bookPublication", label: "Book Chapter Publication", icon: Book, href: "/student/book-publication" },
   ];
 
   const owiItems = [
@@ -378,13 +383,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     key={item.href}
                     href={item.href}
                     onClick={() => setMobileOpen(false)}
-                    className={`group flex items-center gap-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 relative ${
-                      collapsed ? "justify-center px-2" : "px-3"
-                    } ${
-                      active
-                        ? "bg-[#7D53F6] text-white shadow-sm"
-                        : "text-slate-500 hover:bg-purple-50 hover:text-[#7D53F6]"
-                    }`}
+                    className={`group flex items-center gap-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 relative ${collapsed ? "justify-center px-2" : "px-3"
+                      } ${active
+                        ? "bg-blue-600/20 text-blue-400"
+                        : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                      }`}
                     title={collapsed ? item.label : undefined}
                   >
                     {active && (
@@ -614,14 +617,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <div className="space-y-1 mt-2 ml-2">
                       {studentItems.map((item) => {
                         const Icon = item.icon;
-                        const href = item.href;
+                        if (!item.href) return null;
                         return (
                           <Link
                             key={item.id}
-                            href={href}
+                            href={item.href}
                             onClick={() => setMobileOpen(false)}
                             className={`w-full flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 ${
-                              pathname === href
+                              pathname === item.href
                                 ? "bg-blue-600/20 text-blue-400"
                                 : "text-slate-400 hover:bg-slate-800 hover:text-white"
                             }`}
@@ -637,6 +640,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </div>
             )}
       </nav>
+
 
       {/* User Profile Section */}
       <div className="border-t border-slate-200 p-3">
