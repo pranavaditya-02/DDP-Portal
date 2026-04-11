@@ -14,6 +14,7 @@ import path from 'path';
 import fs from 'fs';
 import studentTechnicalBodyMembershipService from '../services/studentTechnicalBodyMembership.service';
 import { logger } from '../utils/logger';
+import { sendEmail } from '../utils/mailer';
 
 const router = Router();
 
@@ -278,27 +279,62 @@ router.put(
   async (req: AuthRequest, res: Response) => {
     try {
       const { id } = req.params;
-      const { iqacVerification } = req.body;
+      const { iqacVerification, iqacRejectionRemarks } = req.body;
 
-      if (!['initiated', 'processing', 'completed'].includes(iqacVerification)) {
+      logger.debug(`TBM iqac-status endpoint - Request body:`, { iqacVerification, iqacRejectionRemarks, fullBody: req.body });
+
+      if (!iqacVerification || typeof iqacVerification !== 'string' || !['initiated', 'approved', 'rejected'].includes(iqacVerification)) {
+        logger.error(`TBM validation failed - iqacVerification: ${iqacVerification}, type: ${typeof iqacVerification}, validValues: ['initiated', 'approved', 'rejected']`);
         return res.status(400).json({
           success: false,
-          message: 'Invalid IQAC verification status',
+          message: 'Invalid IQAC verification status. Must be one of: initiated, approved, rejected',
+          received: iqacVerification,
         });
       }
 
-      const record = await studentTechnicalBodyMembershipService.updateMembership(parseInt(id), {
-        iqacVerification,
-      });
-
-      if (!record) {
+      // Get the record with email
+      const recordWithEmail = await studentTechnicalBodyMembershipService.getMembershipByIdWithEmail(parseInt(id));
+      if (!recordWithEmail) {
         return res.status(404).json({
           success: false,
           message: 'Technical body membership record not found',
         });
       }
 
-      logger.info(`IQAC status updated for technical body membership: ${id}`);
+      // Prepare update data
+      const updateData: any = {
+        iqacVerification,
+      };
+      
+      if (iqacRejectionRemarks && iqacVerification === 'rejected') {
+        updateData.iqacRejectionRemarks = iqacRejectionRemarks;
+      }
+
+      // Update the record
+      const record = await studentTechnicalBodyMembershipService.updateMembership(parseInt(id), updateData);
+
+      // Send email notification if student email is available
+      const studentEmail = recordWithEmail.studentEmail;
+      if (studentEmail) {
+        const statusText = iqacVerification === 'approved' ? 'APPROVED' : iqacVerification === 'rejected' ? 'REJECTED' : 'UNDER REVIEW';
+        const subject = `Technical Body Membership Submission ${statusText} - BannariAmman College`;
+        const bodyText = `Hello ${recordWithEmail.studentName ?? 'Student'},\n\nYour technical body membership submission (ID: ${recordWithEmail.id}, Society: "${recordWithEmail.membershipSociety}") has been ${statusText} by the IQAC team at BannariAmman College.\n${iqacRejectionRemarks ? `\nReason: ${iqacRejectionRemarks}\n` : ''}\nIf you have any questions, please reply to this email.\n\nIQAC Team\nBannariAmman College`;
+        const bodyHtml = `<p>Hello ${recordWithEmail.studentName ?? 'Student'},</p><p>Your technical body membership submission <strong>(ID: ${recordWithEmail.id})</strong> for <strong>"${recordWithEmail.membershipSociety || 'the membership'}"</strong> has been <strong>${statusText}</strong> by the IQAC team at <strong>BannariAmman College</strong>.</p>${iqacRejectionRemarks ? `<p><strong>Reason:</strong> ${iqacRejectionRemarks}</p>` : ''}<p>If you have any questions, please reply to this email.</p><p>IQAC Team<br/>BannariAmman College</p>`;
+
+        try {
+          await sendEmail({
+            to: studentEmail,
+            subject,
+            text: bodyText,
+            html: bodyHtml,
+          });
+          logger.info(`Email notification sent to ${studentEmail} for technical body membership ${id}`);
+        } catch (emailError) {
+          logger.error('Failed to send technical body membership status email:', emailError);
+        }
+      }
+
+      logger.info(`IQAC status updated for technical body membership ${id}: ${iqacVerification}${iqacRejectionRemarks ? ' with remarks: ' + iqacRejectionRemarks : ''}`);
       res.status(200).json({
         success: true,
         message: 'IQAC status updated successfully',

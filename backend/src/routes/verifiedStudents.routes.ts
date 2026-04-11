@@ -13,15 +13,15 @@ export interface VerifiedStudent {
 
 /**
  * GET /api/verified-students
- * Fetch all dummy students for selection in forms
+ * Fetch all students from the students table for selection in forms
  */
 router.get('/', async (req: Request, res: Response) => {
   try {
     const connection = await getMysqlPool().getConnection();
     try {
       const [rows] = await connection.execute(`
-        SELECT id, student_id as studentId, student_name as studentName, student_email as studentEmail 
-        FROM dummy_students 
+        SELECT id, roll_no as studentId, student_name as studentName, college_email as studentEmail 
+        FROM students 
         ORDER BY student_name ASC
       `);
 

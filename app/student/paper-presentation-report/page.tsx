@@ -14,7 +14,7 @@ interface PaperPresentation {
   eventStartDate: string;
   eventEndDate: string;
   status: "participated" | "winner";
-  iqacVerification: "initiated" | "processing" | "completed";
+  iqacVerification: "initiated" | "approved" | "rejected";
   isAcademicProjectOutcome: string;
   parentalDepartmentId?: number;
   imageProofPath?: string;
@@ -39,8 +39,8 @@ function StatusBadge({ status }: { status: string }) {
   
   const styles: Record<string, string> = {
     initiated: "bg-yellow-100 text-yellow-800",
-    processing: "bg-blue-100 text-blue-800",
-    completed: "bg-green-100 text-green-800",
+    approved: "bg-green-100 text-green-800",
+    rejected: "bg-red-100 text-red-800",
     participated: "bg-slate-100 text-slate-800",
     winner: "bg-amber-100 text-amber-800",
   };
@@ -111,7 +111,7 @@ export default function PaperPresentationReportPage() {
 
   const handleUpdateIqacStatus = async (id: number, currentStatus: string) => {
     const nextStatus = currentStatus === "initiated" ? "processing" : 
-                      currentStatus === "processing" ? "completed" : null;
+                      currentStatus === "approved" ? "rejected" : null;
     
     if (!nextStatus) return;
 
@@ -282,7 +282,7 @@ export default function PaperPresentationReportPage() {
                     {isVerification && (
                       <button
                         onClick={() => handleUpdateIqacStatus(record.id, record.iqacVerification)}
-                        disabled={updatingId === record.id || record.iqacVerification === "completed"}
+                        disabled={updatingId === record.id || record.iqacVerification === "rejected"}
                         className="w-full mt-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition font-medium flex items-center justify-center gap-2"
                       >
                         <ChevronRight className="w-4 h-4" />

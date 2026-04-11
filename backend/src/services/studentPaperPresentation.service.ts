@@ -14,7 +14,7 @@ export interface StudentPaperPresentationData {
   certificateProofPath?: string;
   attestedCertificatePath?: string;
   status: 'participated' | 'winner';
-  iqacVerification?: 'initiated' | 'processing' | 'completed';
+  iqacVerification?: 'initiated' | 'approved' | 'rejected';
   iqacRejectionRemarks?: string;
   parentalDepartmentId?: number;
   createdBy?: string;
@@ -192,8 +192,9 @@ class StudentPaperPresentationService {
 
     try {
       const query = `
-        SELECT spp.*, spp.student_email
+        SELECT spp.*, s.college_email as student_email
         FROM student_paper_presentations spp
+        LEFT JOIN students s ON spp.student_id = s.roll_no
         WHERE spp.id = ?
       `;
       const [rows] = await connection.execute(query, [id]);

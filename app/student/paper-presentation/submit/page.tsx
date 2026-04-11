@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ChevronLeft, Upload, X, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/api";
+import { useRoles } from "@/hooks/useRoles";
 
 interface FormData {
   student: string;
@@ -141,6 +142,7 @@ const FileUploadField = ({
 
 export default function PaperPresentationSubmitPage() {
   const router = useRouter();
+  const { isVerification } = useRoles();
   const [formData, setFormData] = useState<FormData>({
     student: "",
     paperTitle: "",
@@ -168,6 +170,31 @@ export default function PaperPresentationSubmitPage() {
   const [departmentsLoading, setDepartmentsLoading] = useState(true);
   const [studentsLoading, setStudentsLoading] = useState(true);
   const [sdgsLoading, setSDGsLoading] = useState(true);
+
+  // Show access denied for verification role
+  if (isVerification()) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-lg border border-red-200 shadow-lg p-8 text-center">
+          <div className="mb-4 flex justify-center">
+            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+              <AlertCircle className="w-6 h-6 text-red-600" />
+            </div>
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Access Denied</h2>
+          <p className="text-slate-600 mb-6">
+            Verification roles cannot submit records. Please use the verification dashboard to review and approve submitted records.
+          </p>
+          <Link
+            href="/student/paper-presentation"
+            className="inline-block px-6 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition"
+          >
+            Back to Records
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   // Fetch departments, verified students, and SDG goals on mount
   useEffect(() => {

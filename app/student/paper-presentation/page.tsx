@@ -1,707 +1,491 @@
-"use client";
+'use client';
 
-import React, { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
-import { Search, PlusCircle, FileText, Download, Trash2, Eye, Calendar, Award, X, ChevronRight } from "lucide-react";
-import { apiClient } from "@/lib/api";
-import { useRoles } from "@/hooks/useRoles";
+import React, { useState, useMemo, useEffect } from 'react';
+import Link from 'next/link';
+import { apiClient } from '@/lib/api';
+import toast from 'react-hot-toast';
+import {
+  Search,
+  ChevronUp,
+  ChevronDown,
+  Eye,
+  X,
+  AlertCircle,
+  CheckCircle2,
+  XCircle,
+  Plus,
+  Trash2,
+  Download,
+  FileText,
+  Award,
+} from 'lucide-react';
 
 interface PaperPresentation {
   id: number;
   studentId: string;
   studentName: string;
   paperTitle: string;
+  conferenceName?: string;
+  eventLevel?: string;
+  eventMode?: string;
   eventStartDate: string;
   eventEndDate: string;
-  status: "participated" | "winner";
-  iqacVerification: "initiated" | "processing" | "completed";
-  isAcademicProjectOutcome: string;
-  parentalDepartmentId?: number;
+  sponsorshipType?: string;
+  status: 'participated' | 'winner';
+  iqacVerification: 'initiated' | 'approved' | 'rejected';
+  createdAt: string;
   imageProofPath?: string;
   abstractProofPath?: string;
   certificateProofPath?: string;
   attestedCertificatePath?: string;
-  createdAt: string;
 }
 
-const BACKEND_BASE = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(
-  /\/api$/,
-  ""
-);
+type SortKey = 'studentName' | 'paperTitle' | 'eventLevel' | 'iqacVerification' | 'createdAt';
+type SortDirection = 'asc' | 'desc' | null;
 
-const formatDate = (value: string) => {
-  if (!value) return "";
-  return new Date(value).toLocaleDateString("en-IN");
-};
-
-function StatusBadge({ status }: { status: string }) {
-  if (!status) return null;
-  
-  const styles: Record<string, string> = {
-    initiated: "bg-yellow-100 text-yellow-800",
-    processing: "bg-green-100 text-green-800",
-    completed: "bg-red-100 text-red-800",
-    participated: "bg-slate-100 text-slate-800",
-    winner: "bg-amber-100 text-amber-800",
-  };
-  return (
-    <span className={`px-3 py-1 rounded-full text-xs font-medium ${styles[status] || styles.initiated}`}>
-      {status.charAt(0).toUpperCase() + status.slice(1)}
-    </span>
-  );
-}
-
-// Details Modal Component
-function DetailsModal({
-  record,
-  isOpen,
-  onClose,
-  onDelete,
-  onApprove,
-  onReject,
-  isDeleting,
-  isUpdating,
-}: {
-  record: PaperPresentation | null;
-  isOpen: boolean;
-  onClose: () => void;
-  onDelete: (id: number) => void;
-  onApprove: (id: number) => void;
-  onReject: (id: number) => void;
-  isDeleting: boolean;
-  isUpdating: boolean;
-}) {
-  if (!isOpen || !record) return null;
-
-  return (
-    <>
-      {/* Backdrop */}
-      <div
-        className={`fixed inset-0 bg-black z-[9998] pointer-events-auto ${
-          isOpen ? "animate-in fade-in duration-200 ease-out" : "animate-out fade-out duration-200 ease-in"
-        }`}
-        style={{
-          opacity: isOpen ? 0.5 : 0,
-          transition: "opacity 300ms ease-out",
-        }}
-        onClick={onClose}
-      />
-
-      {/* Modal */}
-      <div
-        className={`fixed inset-0 z-[9999] flex items-center justify-center p-4 pointer-events-none ${
-          isOpen ? "animate-in fade-in zoom-in duration-300 ease-out" : "animate-out fade-out zoom-out duration-200 ease-in"
-        }`}
-        style={{
-          opacity: isOpen ? 1 : 0,
-          transform: isOpen ? "scale(1)" : "scale(0.95)",
-          transition: "all 300ms ease-out",
-        }}
-      >
-        <div
-          className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto pointer-events-auto"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Header */}
-          <div className="sticky top-0 flex items-center justify-between p-6 border-b border-slate-200 bg-white">
-            <div className="flex-1">
-              <h2 className="text-xl font-bold text-slate-900">{record.paperTitle}</h2>
-              <p className="text-sm text-slate-500 mt-1">
-                {record.studentName} ({record.studentId})
-              </p>
-            </div>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-slate-100 rounded-lg transition"
-              title="Close"
-            >
-              <X className="w-5 h-5 text-slate-600" />
-            </button>
-          </div>
-
-          {/* Content */}
-          <div className="p-6 space-y-6">
-            {/* Status Badges */}
-            <div className="flex flex-wrap gap-4">
-              <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase mb-2">Participation Status</p>
-                <StatusBadge status={record.status} />
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase mb-2">IQAC Verification</p>
-                <StatusBadge status={record.iqacVerification} />
-              </div>
-            </div>
-
-            {/* Basic Information */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 rounded-lg p-4">
-              <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase mb-1">Student ID</p>
-                <p className="text-slate-900 font-medium">{record.studentId}</p>
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase mb-1">Student Name</p>
-                <p className="text-slate-900 font-medium">{record.studentName}</p>
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase mb-1">Event Start Date</p>
-                <p className="text-slate-900 font-medium">{formatDate(record.eventStartDate)}</p>
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase mb-1">Event End Date</p>
-                <p className="text-slate-900 font-medium">{formatDate(record.eventEndDate)}</p>
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase mb-1">Academic Project</p>
-                {record.isAcademicProjectOutcome === "yes" ? (
-                  <span className="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
-                    Yes
-                  </span>
-                ) : (
-                  <span className="inline-block px-3 py-1 bg-slate-200 text-slate-700 rounded-full text-sm font-semibold">
-                    No
-                  </span>
-                )}
-              </div>
-              <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase mb-1">Submitted On</p>
-                <p className="text-slate-900 font-medium">{formatDate(record.createdAt)}</p>
-              </div>
-            </div>
-
-            {/* Documents/Images Section */}
-            <div className="border-t border-slate-200 pt-6">
-              <h3 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-indigo-600" />
-                Uploaded Documents
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Photo/Geotag */}
-                {record.imageProofPath && (
-                  <div className="border border-slate-200 rounded-lg overflow-hidden">
-                    <div className="bg-slate-100 aspect-video flex items-center justify-center">
-                      <img
-                        src={`${BACKEND_BASE}${record.imageProofPath}`}
-                        alt="Photo/Geotag Proof"
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = "none";
-                        }}
-                      />
-                    </div>
-                    <div className="p-3 bg-white">
-                      <p className="text-sm font-medium text-slate-900 mb-2">Photo/Geotag Proof</p>
-                      <a
-                        href={`${BACKEND_BASE}${record.imageProofPath}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-2 px-3 py-2 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
-                      >
-                        <Download className="w-4 h-4" />
-                        Download
-                      </a>
-                    </div>
-                  </div>
-                )}
-
-                {/* Abstract */}
-                {record.abstractProofPath && (
-                  <div className="border border-slate-200 rounded-lg overflow-hidden">
-                    <div className="bg-slate-100 p-8 flex items-center justify-center">
-                      <FileText className="w-12 h-12 text-slate-400" />
-                    </div>
-                    <div className="p-3 bg-white">
-                      <p className="text-sm font-medium text-slate-900 mb-2">Abstract Document</p>
-                      <a
-                        href={`${BACKEND_BASE}${record.abstractProofPath}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-2 px-3 py-2 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
-                      >
-                        <Download className="w-4 h-4" />
-                        Download
-                      </a>
-                    </div>
-                  </div>
-                )}
-
-                {/* Certificate */}
-                {record.certificateProofPath && (
-                  <div className="border border-slate-200 rounded-lg overflow-hidden">
-                    <div className="bg-slate-100 p-8 flex items-center justify-center">
-                      <Award className="w-12 h-12 text-slate-400" />
-                    </div>
-                    <div className="p-3 bg-white">
-                      <p className="text-sm font-medium text-slate-900 mb-2">Original Certificate</p>
-                      <a
-                        href={`${BACKEND_BASE}${record.certificateProofPath}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-2 px-3 py-2 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
-                      >
-                        <Download className="w-4 h-4" />
-                        Download
-                      </a>
-                    </div>
-                  </div>
-                )}
-
-                {/* Attested Certificate */}
-                {record.attestedCertificatePath && (
-                  <div className="border border-slate-200 rounded-lg overflow-hidden">
-                    <div className="bg-slate-100 p-8 flex items-center justify-center">
-                      <Award className="w-12 h-12 text-slate-400" />
-                    </div>
-                    <div className="p-3 bg-white">
-                      <p className="text-sm font-medium text-slate-900 mb-2">Attested Certificate</p>
-                      <a
-                        href={`${BACKEND_BASE}${record.attestedCertificatePath}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-2 px-3 py-2 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
-                      >
-                        <Download className="w-4 h-4" />
-                        Download
-                      </a>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {(record.imageProofPath || record.abstractProofPath || record.certificateProofPath || record.attestedCertificatePath) ? null : (
-                <div className="text-center py-8 bg-slate-50 rounded-lg">
-                  <FileText className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                  <p className="text-slate-500 text-sm">No documents uploaded</p>
-                </div>
-              )}
-            </div>
-
-            {/* Actions */}
-            <div className="border-t border-slate-200 pt-6 flex flex-wrap gap-3">
-              {record.iqacVerification === "initiated" && (
-                <>
-                  <button
-                    onClick={() => onApprove(record.id)}
-                    disabled={isUpdating}
-                    className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition font-medium flex items-center gap-2"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                    {isUpdating ? "Approving..." : "Approve"}
-                  </button>
-                  <button
-                    onClick={() => onReject(record.id)}
-                    disabled={isUpdating}
-                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition font-medium flex items-center gap-2"
-                  >
-                    <X className="w-4 h-4" />
-                    {isUpdating ? "Rejecting..." : "Reject"}
-                  </button>
-                </>
-              )}
-              
-              <button
-                onClick={() => onDelete(record.id)}
-                disabled={isDeleting}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition font-medium flex items-center gap-2"
-              >
-                <Trash2 className="w-4 h-4" />
-                {isDeleting ? "Deleting..." : "Delete Record"}
-              </button>
-              <button
-                onClick={onClose}
-                className="ml-auto px-4 py-2 border border-slate-300 text-slate-900 rounded-lg hover:bg-slate-50 transition font-medium"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
-  );
-}
-
-// Rejection Modal Component
-function RejectionModal({
-  isOpen,
-  onClose,
-  onSubmit,
-  isLoading,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (remarks: string) => void;
-  isLoading: boolean;
-}) {
-  const [remarks, setRemarks] = useState("");
-
-  if (!isOpen) return null;
-
-  const handleSubmit = () => {
-    if (!remarks.trim()) {
-      alert("Please enter rejection remarks");
-      return;
-    }
-    onSubmit(remarks);
-    setRemarks("");
-  };
-
-  return (
-    <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black z-[9998] opacity-50 pointer-events-auto transition-opacity duration-200"
-        onClick={onClose}
-      />
-
-      {/* Modal */}
-      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 pointer-events-none">
-        <div
-          className="bg-white rounded-lg shadow-xl max-w-md w-full pointer-events-auto animate-in zoom-in duration-200"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="p-6">
-            <h2 className="text-lg font-bold text-slate-900 mb-4">Reject Record</h2>
-            <p className="text-sm text-slate-600 mb-4">Please provide the reason for rejection:</p>
-            
-            <textarea
-              value={remarks}
-              onChange={(e) => setRemarks(e.target.value)}
-              placeholder="Enter rejection reason..."
-              className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
-              rows={4}
-            />
-
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={onClose}
-                disabled={isLoading}
-                className="flex-1 px-4 py-2 border border-slate-300 text-slate-900 rounded-lg hover:bg-slate-50 transition font-medium disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSubmit}
-                disabled={isLoading}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? "Rejecting..." : "Reject"}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
-  );
-}
+const BACKEND_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/api$/, '');
 
 export default function PaperPresentationPage() {
   const [records, setRecords] = useState<PaperPresentation[]>([]);
-  const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [deletingId, setDeletingId] = useState<number | null>(null);
-  const [updatingId, setUpdatingId] = useState<number | null>(null);
+  const [query, setQuery] = useState('');
+  const [sortKey, setSortKey] = useState<SortKey | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const [selectedRecord, setSelectedRecord] = useState<PaperPresentation | null>(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
-  const [recordToReject, setRecordToReject] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
-  // Fetch records on mount
+  // Fetch records
   useEffect(() => {
-    const loadRecords = async () => {
+    const fetchRecords = async () => {
       try {
         setLoading(true);
-        const response = await apiClient.get("/student-paper-presentations?page=1&limit=50");
-        setRecords(response?.records || []);
-      } catch (err: any) {
-        console.error("Failed to load paper presentations:", err);
-        setError(err?.response?.data?.message || "Failed to load records");
+        const response = await apiClient.get('/student-paper-presentations?page=1&limit=1000');
+        setRecords(response.records || []);
+      } catch (error) {
+        console.error('Failed to fetch records:', error);
+        toast.error('Failed to load records');
       } finally {
         setLoading(false);
       }
     };
 
-    loadRecords();
+    fetchRecords();
   }, []);
 
+  // Filter records
   const filteredRecords = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    if (!normalized) return records;
-
-    return records.filter(
-      (item) =>
-        item.studentName.toLowerCase().includes(normalized) ||
-        item.studentId.toLowerCase().includes(normalized) ||
-        item.paperTitle.toLowerCase().includes(normalized) ||
-        item.status.toLowerCase().includes(normalized)
-    );
+    return records.filter((record) => {
+      if (!normalized) return true;
+      return (
+        record.id?.toString().includes(normalized) ||
+        record.studentName?.toLowerCase().includes(normalized) ||
+        record.paperTitle?.toLowerCase().includes(normalized) ||
+        record.conferenceName?.toLowerCase().includes(normalized) ||
+        record.eventLevel?.toLowerCase().includes(normalized) ||
+        record.iqacVerification?.toLowerCase().includes(normalized)
+      );
+    });
   }, [query, records]);
 
-  const handleDeleteRecord = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this record?")) return;
+  // Sort records
+  const sortedRecords = useMemo(() => {
+    if (!sortKey || !sortDirection) return filteredRecords;
 
+    const sorted = [...filteredRecords];
+    sorted.sort((a, b) => {
+      let aValue = a[sortKey as keyof PaperPresentation];
+      let bValue = b[sortKey as keyof PaperPresentation];
+
+      if (aValue === null || aValue === undefined) aValue = '';
+      if (bValue === null || bValue === undefined) bValue = '';
+
+      if (typeof aValue === 'string') {
+        aValue = aValue.toLowerCase();
+        bValue = (bValue as string).toLowerCase();
+      }
+
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return sorted;
+  }, [filteredRecords, sortKey, sortDirection]);
+
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      if (sortDirection === 'asc') {
+        setSortDirection('desc');
+      } else if (sortDirection === 'desc') {
+        setSortKey(null);
+        setSortDirection(null);
+      }
+    } else {
+      setSortKey(key);
+      setSortDirection('asc');
+    }
+  };
+
+  const computeSortIcon = (key: SortKey) => {
+    if (sortKey !== key) return null;
+    return sortDirection === 'asc' ? (
+      <ChevronUp className="ml-1 inline-block h-3 w-3" />
+    ) : (
+      <ChevronDown className="ml-1 inline-block h-3 w-3" />
+    );
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'approved':
+        return (
+          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-700">
+            <CheckCircle2 className="h-3 w-3" />
+            Approved
+          </span>
+        );
+      case 'rejected':
+        return (
+          <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-3 py-1 text-sm font-medium text-red-700">
+            <XCircle className="h-3 w-3" />
+            Rejected
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-700">
+            <AlertCircle className="h-3 w-3" />
+            Initiated
+          </span>
+        );
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!window.confirm('Are you sure you want to delete this record?')) return;
     try {
       setDeletingId(id);
       await apiClient.delete(`/student-paper-presentations/${id}`);
-      setRecords((prev) => prev.filter((r) => r.id !== id));
-      setModalOpen(false);
-      setError(null);
-    } catch (err: any) {
-      console.error("Failed to delete record:", err);
-      setError(err?.response?.data?.message || "Failed to delete record");
+      setRecords((prev) => prev.filter((record) => record.id !== id));
+      toast.success('Record deleted successfully');
+    } catch (error) {
+      console.error('Failed to delete:', error);
+      toast.error('Failed to delete record');
     } finally {
       setDeletingId(null);
     }
-  };
-
-  const handleApproveRecord = async (id: number) => {
-    try {
-      setUpdatingId(id);
-      await apiClient.put(`/student-paper-presentations/${id}/iqac-status`, {
-        iqacVerification: "processing",
-      });
-      setRecords((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, iqacVerification: "processing" } : r))
-      );
-      // Update modal record if open
-      if (selectedRecord?.id === id) {
-        setSelectedRecord({ ...selectedRecord, iqacVerification: "processing" });
-      }
-      setError(null);
-    } catch (err: any) {
-      console.error("Failed to approve record:", err);
-      setError(err?.response?.data?.message || "Failed to approve record");
-    } finally {
-      setUpdatingId(null);
-    }
-  };
-
-  const handleRejectRecord = async (remarks: string) => {
-    if (!recordToReject) return;
-
-    try {
-      setUpdatingId(recordToReject);
-      await apiClient.put(`/student-paper-presentations/${recordToReject}/iqac-status`, {
-        iqacVerification: "completed",
-        iqacRejectionRemarks: remarks,
-      });
-      setRecords((prev) =>
-        prev.map((r) => (r.id === recordToReject ? { ...r, iqacVerification: "completed" } : r))
-      );
-      // Update modal record if open
-      if (selectedRecord?.id === recordToReject) {
-        setSelectedRecord({ ...selectedRecord, iqacVerification: "completed" });
-      }
-      setRejectionModalOpen(false);
-      setRecordToReject(null);
-      setError(null);
-    } catch (err: any) {
-      console.error("Failed to reject record:", err);
-      setError(err?.response?.data?.message || "Failed to reject record");
-    } finally {
-      setUpdatingId(null);
-    }
-  };
-
-  const openRejectModal = (id: number) => {
-    setRecordToReject(id);
-    setRejectionModalOpen(true);
-  };
-
-  const openDetails = (record: PaperPresentation) => {
-    setSelectedRecord(record);
-    setModalOpen(true);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-indigo-100 rounded-lg">
-              <FileText className="h-6 w-6 text-indigo-600" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900">Paper Presentation</h1>
-              <p className="text-sm text-slate-500 mt-1">View and manage your paper presentation records</p>
-            </div>
+        <div className="mb-6 rounded-2xl border border-indigo-100 bg-white p-5 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">Paper Presentations</h1>
+            <p className="text-slate-600">Manage your paper presentation submissions</p>
           </div>
-
           <Link
             href="/student/paper-presentation/submit"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium shadow-lg hover:shadow-xl"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium"
           >
-            <PlusCircle className="w-5 h-5" />
-            Add New Record
+            <Plus className="h-5 w-5" />
+            Add Record
           </Link>
         </div>
 
         {/* Search Bar */}
-        <div className="mb-6 flex flex-col sm:flex-row items-center gap-3 bg-white rounded-lg border border-slate-200 shadow-sm p-4">
-          <div className="relative flex-1 w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+        <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-5 w-5 text-slate-400" />
             <input
+              type="text"
+              placeholder="Search by ID, student, paper, conference, level or IQAC status..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search by student name, ID, or paper title..."
-              className="w-full pl-10 pr-4 py-2 border-0 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-slate-50"
+              className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
-          <span className="text-sm font-medium text-slate-600 whitespace-nowrap">{filteredRecords.length} records</span>
         </div>
 
-        {/* Error Message */}
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
-            <div className="flex-shrink-0">
-              <div className="flex items-center justify-center h-8 w-8 rounded-full bg-red-100">
-                <span className="text-red-600 font-bold">!</span>
-              </div>
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-red-800">{error}</p>
-            </div>
-            <button onClick={() => setError(null)} className="text-red-600 hover:text-red-700">
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-        )}
-
-        {/* Content */}
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
-              <p className="text-slate-600 font-medium">Loading paper presentations...</p>
-            </div>
-          </div>
-        ) : filteredRecords.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-lg border-2 border-dashed border-slate-300">
-            <div className="inline-block p-3 bg-slate-100 rounded-lg mb-4">
-              <PlusCircle className="w-8 h-8 text-slate-400" />
-            </div>
-            <h2 className="text-lg font-semibold text-slate-900 mb-2">No Records Yet</h2>
-            <p className="text-slate-600 mb-6">Start by adding your first paper presentation record.</p>
-            <Link
-              href="/student/paper-presentation/submit"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
-            >
-              <PlusCircle className="w-4 h-4" />
-              Add First Record
-            </Link>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredRecords.map((record) => (
-              <div
-                key={record.id}
-                className="bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-lg transition overflow-hidden flex flex-col"
-              >
-                {/* Card Header Badge */}
-                <div className="h-1 bg-gradient-to-r from-indigo-500 to-indigo-600"></div>
-
-                {/* Card Content */}
-                <div className="p-5 flex flex-col flex-1">
-                  {/* Title */}
-                  <h3 className="font-semibold text-slate-900 line-clamp-2 mb-4 text-base leading-tight">
-                    {record.paperTitle}
-                  </h3>
-
-                  {/* Student Info */}
-                  <div className="mb-4 pb-3 border-b border-slate-100">
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Student Details</p>
-                    <p className="text-sm text-slate-900 font-medium">{record.studentName}</p>
-                    <p className="text-xs text-slate-600">{record.studentId}</p>
-                  </div>
-
-                  {/* Status Badges */}
-                  <div className="mb-4 pb-3 border-b border-slate-100">
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Statuses</p>
-                    <div className="flex gap-2">
-                      <div className="flex-1">
-                        <p className="text-xs text-slate-600 mb-1">Participation</p>
-                        <StatusBadge status={record.status} />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-xs text-slate-600 mb-1">IQAC</p>
-                        <StatusBadge status={record.iqacVerification} />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Event Information */}
-                  <div className="mb-4 pb-3 border-b border-slate-100">
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Event Details</p>
-                    <div className="space-y-2">
-                      <div className="flex items-start gap-2">
-                        <Calendar className="w-4 h-4 text-indigo-600 flex-shrink-0 mt-0.5" />
-                        <div className="text-xs">
-                          <p className="text-slate-900 font-medium">{formatDate(record.eventStartDate)}</p>
-                          <p className="text-slate-600">to {formatDate(record.eventEndDate)}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Academic Project */}
-                  <div className="mb-4 pb-3 border-b border-slate-100">
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Academic Project</p>
-                    {record.isAcademicProjectOutcome === "yes" ? (
-                      <span className="inline-block px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-semibold">
-                        ✓ Yes
-                      </span>
-                    ) : (
-                      <span className="inline-block px-2 py-1 bg-slate-200 text-slate-700 rounded text-xs font-semibold">
-                        ✗ No
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Submission Date */}
-                  <div className="mb-4">
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Submitted</p>
-                    <p className="text-xs text-slate-900">{formatDate(record.createdAt)}</p>
-                  </div>
-
-                  {/* View Details Button */}
+        {/* Table */}
+        <div className="mb-6 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+          <table className="w-full text-sm border-collapse">
+            <thead className="bg-slate-50 border-b border-slate-200">
+              <tr>
+                <th className="px-4 py-3 text-left font-medium text-slate-500 whitespace-nowrap">ID</th>
+                <th className="px-4 py-3 text-left font-medium text-slate-500">
                   <button
-                    onClick={() => openDetails(record)}
-                    className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium flex items-center justify-center gap-2 mt-auto"
+                    type="button"
+                    className="inline-flex items-center gap-1"
+                    onClick={() => handleSort('studentName')}
                   >
-                    <Eye className="w-4 h-4" />
-                    View Full Details & Documents
+                    Student
+                    {computeSortIcon('studentName')}
                   </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-slate-500">
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1"
+                    onClick={() => handleSort('paperTitle')}
+                  >
+                    Paper Title
+                    {computeSortIcon('paperTitle')}
+                  </button>
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-slate-500">
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1"
+                    onClick={() => handleSort('eventLevel')}
+                  >
+                    Level
+                    {computeSortIcon('eventLevel')}
+                  </button>
+                </th>
+                <th className="px-4 py-3 text-left bg-amber-50 font-semibold text-amber-900">
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1"
+                    onClick={() => handleSort('iqacVerification')}
+                  >
+                    IQAC Status
+                    {computeSortIcon('iqacVerification')}
+                  </button>
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-slate-500">
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1"
+                    onClick={() => handleSort('createdAt')}
+                  >
+                    Submitted
+                    {computeSortIcon('createdAt')}
+                  </button>
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-slate-500">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
+                    Loading records...
+                  </td>
+                </tr>
+              ) : sortedRecords.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
+                    No records found.
+                  </td>
+                </tr>
+              ) : (
+                sortedRecords.map((record) => (
+                  <tr key={record.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-4 py-3 whitespace-nowrap text-slate-700 font-medium">{record.id}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-slate-700">{record.studentName || 'N/A'}</td>
+                    <td className="px-4 py-3 text-slate-700">{record.paperTitle || 'N/A'}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-slate-700">{record.eventLevel || 'N/A'}</td>
+                    <td className="px-4 py-3 whitespace-nowrap bg-amber-50">{getStatusBadge(record.iqacVerification)}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-slate-700">
+                      {new Date(record.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setSelectedRecord(record)}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors text-sm font-medium"
+                        >
+                          <Eye className="h-4 w-4" />
+                          View
+                        </button>
+                        <button
+                          onClick={() => handleDelete(record.id)}
+                          disabled={deletingId === record.id}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors text-sm font-medium disabled:opacity-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {/* Details Modal */}
-      <DetailsModal
-        record={selectedRecord}
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onDelete={handleDeleteRecord}
-        onApprove={handleApproveRecord}
-        onReject={openRejectModal}
-        isDeleting={deletingId !== null}
-        isUpdating={updatingId !== null}
-      />
+      {/* Detail Modal */}
+      {selectedRecord && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm p-4"
+          onClick={() => setSelectedRecord(null)}
+        >
+          <div
+            className="w-full max-w-3xl max-h-[85vh] overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-slate-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-5">
+              <div>
+                <h2 className="text-xl font-semibold text-slate-900">Paper Presentation Details</h2>
+                <p className="text-sm text-slate-500">View the submission details</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedRecord(null)}
+                className="rounded-full border border-slate-200 bg-slate-100 px-3 py-2 text-slate-700 hover:bg-slate-200"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
 
-      {/* Rejection Modal */}
-      <RejectionModal
-        isOpen={rejectionModalOpen}
-        onClose={() => {
-          setRejectionModalOpen(false);
-          setRecordToReject(null);
-        }}
-        onSubmit={handleRejectRecord}
-        isLoading={updatingId !== null}
-      />
+            {/* Modal Body */}
+            <div className="space-y-4 px-6 py-6 overflow-y-auto max-h-[70vh]">
+              {/* Basic Information */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-slate-500">Submission ID</div>
+                  <div className="mt-1 font-medium text-slate-900">{selectedRecord.id}</div>
+                </div>
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-slate-500">Student Name</div>
+                  <div className="mt-1 font-medium text-slate-900">{selectedRecord.studentName || 'N/A'}</div>
+                </div>
+                <div className="sm:col-span-2">
+                  <div className="text-xs uppercase tracking-wide text-slate-500">Paper Title</div>
+                  <div className="mt-1 font-medium text-slate-900">{selectedRecord.paperTitle || 'N/A'}</div>
+                </div>
+              </div>
+
+              {/* Conference Details */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-slate-500">Conference Name</div>
+                  <div className="mt-1 font-medium text-slate-900">{selectedRecord.conferenceName || 'N/A'}</div>
+                </div>
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-slate-500">Event Level</div>
+                  <div className="mt-1 font-medium text-slate-900">{selectedRecord.eventLevel || 'N/A'}</div>
+                </div>
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-slate-500">Event Mode</div>
+                  <div className="mt-1 font-medium text-slate-900">{selectedRecord.eventMode || 'N/A'}</div>
+                </div>
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-slate-500">Status</div>
+                  <div className="mt-1 font-medium text-slate-900 capitalize">{selectedRecord.status || 'N/A'}</div>
+                </div>
+              </div>
+
+              {/* IQAC Status - Highlighted */}
+              <div className="rounded-2xl border-2 border-amber-200 bg-amber-50 p-4">
+                <div className="text-sm font-semibold uppercase tracking-wide text-amber-900 mb-2">🎯 IQAC Verification Status</div>
+                <div className="flex items-center gap-3">
+                  {getStatusBadge(selectedRecord.iqacVerification)}
+                  <span className="text-sm text-amber-800">
+                    {selectedRecord.iqacVerification === 'initiated'
+                      ? 'Pending review by IQAC'
+                      : selectedRecord.iqacVerification === 'approved'
+                        ? 'Approved by IQAC'
+                        : 'Rejected by IQAC'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Dates */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-slate-500">Event Start Date</div>
+                  <div className="mt-1 font-medium text-slate-900">
+                    {selectedRecord.eventStartDate ? new Date(selectedRecord.eventStartDate).toLocaleDateString() : 'N/A'}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-slate-500">Event End Date</div>
+                  <div className="mt-1 font-medium text-slate-900">
+                    {selectedRecord.eventEndDate ? new Date(selectedRecord.eventEndDate).toLocaleDateString() : 'N/A'}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-slate-500">Submitted On</div>
+                  <div className="mt-1 font-medium text-slate-900">
+                    {new Date(selectedRecord.createdAt).toLocaleDateString()}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-slate-500">Sponsorship Type</div>
+                  <div className="mt-1 font-medium text-slate-900">{selectedRecord.sponsorshipType || 'N/A'}</div>
+                </div>
+              </div>
+
+              {/* Documents */}
+              <div>
+                <div className="text-sm font-semibold uppercase tracking-wide text-slate-700 mb-3">Uploaded Documents</div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {selectedRecord.imageProofPath && (
+                    <a
+                      href={`${BACKEND_BASE}${selectedRecord.imageProofPath}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="rounded-xl border border-slate-200 bg-slate-50 p-3 flex flex-col items-center gap-2 hover:bg-slate-100 transition"
+                    >
+                      <FileText className="h-5 w-5 text-slate-600" />
+                      <span className="text-xs font-medium text-slate-700 text-center">Image Proof</span>
+                    </a>
+                  )}
+                  {selectedRecord.abstractProofPath && (
+                    <a
+                      href={`${BACKEND_BASE}${selectedRecord.abstractProofPath}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="rounded-xl border border-slate-200 bg-slate-50 p-3 flex flex-col items-center gap-2 hover:bg-slate-100 transition"
+                    >
+                      <FileText className="h-5 w-5 text-slate-600" />
+                      <span className="text-xs font-medium text-slate-700 text-center">Abstract</span>
+                    </a>
+                  )}
+                  {selectedRecord.certificateProofPath && (
+                    <a
+                      href={`${BACKEND_BASE}${selectedRecord.certificateProofPath}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="rounded-xl border border-slate-200 bg-slate-50 p-3 flex flex-col items-center gap-2 hover:bg-slate-100 transition"
+                    >
+                      <Award className="h-5 w-5 text-slate-600" />
+                      <span className="text-xs font-medium text-slate-700 text-center">Certificate</span>
+                    </a>
+                  )}
+                  {selectedRecord.attestedCertificatePath && (
+                    <a
+                      href={`${BACKEND_BASE}${selectedRecord.attestedCertificatePath}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="rounded-xl border border-slate-200 bg-slate-50 p-3 flex flex-col items-center gap-2 hover:bg-slate-100 transition"
+                    >
+                      <Award className="h-5 w-5 text-slate-600" />
+                      <span className="text-xs font-medium text-slate-700 text-center">Attested Cert</span>
+                    </a>
+                  )}
+                </div>
+                {!selectedRecord.imageProofPath &&
+                  !selectedRecord.abstractProofPath &&
+                  !selectedRecord.certificateProofPath &&
+                  !selectedRecord.attestedCertificatePath && (
+                    <div className="text-center py-6 bg-slate-50 rounded-lg">
+                      <FileText className="h-8 w-8 text-slate-400 mx-auto mb-2" />
+                      <p className="text-slate-500 text-sm">No documents uploaded</p>
+                    </div>
+                  )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+

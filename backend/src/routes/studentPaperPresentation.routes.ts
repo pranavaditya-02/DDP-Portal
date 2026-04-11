@@ -274,10 +274,14 @@ router.put('/:id/iqac-status', async (req: Request, res: Response) => {
     const idParam = typeof req.params.id === 'string' ? req.params.id : (req.params.id as any as string);
     const { iqacVerification, iqacRejectionRemarks } = req.body;
 
-    if (!['initiated', 'processing', 'completed'].includes(iqacVerification)) {
+    logger.debug(`PPR iqac-status endpoint - Request body:`, { iqacVerification, iqacRejectionRemarks, fullBody: req.body });
+
+    if (!iqacVerification || typeof iqacVerification !== 'string' || !['initiated', 'approved', 'rejected'].includes(iqacVerification)) {
+      logger.error(`PPR validation failed - iqacVerification: ${iqacVerification}, type: ${typeof iqacVerification}, validValues: ['initiated', 'approved', 'rejected']`);
       return res.status(400).json({
         success: false,
-        message: 'Invalid IQAC verification status',
+        message: 'Invalid IQAC verification status. Must be one of: initiated, approved, rejected',
+        received: iqacVerification,
       });
     }
 
@@ -297,7 +301,7 @@ router.put('/:id/iqac-status', async (req: Request, res: Response) => {
       iqacVerification,
     };
     
-    if (iqacRejectionRemarks && iqacVerification === 'completed') {
+    if (iqacRejectionRemarks && iqacVerification === 'rejected') {
       updateData.iqacRejectionRemarks = iqacRejectionRemarks;
     }
 
@@ -307,7 +311,7 @@ router.put('/:id/iqac-status', async (req: Request, res: Response) => {
     // Send email notification if student email is available
     const studentEmail = record.studentEmail;
     if (studentEmail) {
-      const statusText = iqacVerification === 'processing' ? 'APPROVED' : iqacVerification === 'completed' ? 'REJECTED' : 'UNDER REVIEW';
+      const statusText = iqacVerification === 'approved' ? 'APPROVED' : iqacVerification === 'rejected' ? 'REJECTED' : 'UNDER REVIEW';
       const subject = `Paper Presentation Submission ${statusText} - BannariAmman College`;
       const bodyText = `Hello ${record.studentName ?? 'Student'},\n\nYour paper presentation submission (ID: ${record.id}, Title: "${record.paperTitle}") has been ${statusText} by the IQAC team at BannariAmman College.\n${iqacRejectionRemarks ? `\nReason: ${iqacRejectionRemarks}\n` : ''}\nIf you have any questions, please reply to this email.\n\nIQAC Team\nBannariAmman College`;
       const bodyHtml = `<p>Hello ${record.studentName ?? 'Student'},</p><p>Your paper presentation submission <strong>(ID: ${record.id})</strong> with title <strong>"${record.paperTitle}"</strong> has been <strong>${statusText}</strong> by the IQAC team at <strong>BannariAmman College</strong>.</p>${iqacRejectionRemarks ? `<p><strong>Reason:</strong> ${iqacRejectionRemarks}</p>` : ''}<p>If you have any questions, please reply to this email.</p><p>IQAC Team<br/>BannariAmman College</p>`;

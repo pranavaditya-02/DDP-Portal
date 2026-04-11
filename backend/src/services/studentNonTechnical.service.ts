@@ -35,7 +35,7 @@ export interface StudentNonTechnicalData {
   interdisciplinaryDept?: number;
   otherDeptStudentCount?: number;
   certificateProofPath?: string;
-  iqacVerification?: 'initiated' | 'processing' | 'completed';
+  iqacVerification?: 'initiated' | 'approved' | 'rejected';
   createdBy?: string;
 }
 
@@ -52,6 +52,7 @@ function convertToCamelCase(row: any): any {
     eventStartDate: row.event_start_date,
     eventEndDate: row.event_end_date,
     eventDuration: row.event_duration,
+    eventMode: row.event_mode,
     eventLocation: row.event_location,
     eventOrganiser: row.event_organiser,
     organisationName: row.organisation_name,
@@ -99,7 +100,7 @@ class StudentNonTechnicalService {
           status, prize_type, prize_amount, social_activity_involved, social_activity_name,
           time_spent_hours, interdisciplinary, interdisciplinary_dept, other_dept_student_count,
           certificate_proof_path, iqac_verification, created_by
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
       const [result] = await connection.execute(query, [
@@ -321,8 +322,46 @@ class StudentNonTechnicalService {
   /**
    * Update IQAC verification status
    */
-  async updateIqacStatus(id: number, status: string): Promise<any> {
-    return this.updateRecord(id, { iqacVerification: status as any });
+  async updateIqacStatus(id: number, status: string, remarks?: string): Promise<any> {
+    const pool = getMysqlPool();
+    const connection = await pool.getConnection();
+
+    try {
+      // Fetch record with email from students table
+      const queryFetch = `
+        SELECT snt.*, s.college_email as student_email
+        FROM student_non_technical snt
+        LEFT JOIN students s ON snt.student_id = s.roll_no
+        WHERE snt.id = ?
+      `;
+      const [rows] = await connection.execute(queryFetch, [id]);
+      const results = rows as any[];
+      
+      if (results.length === 0) {
+        return null;
+      }
+
+      // Update the record with new status
+      const updateData: any = { iqacVerification: status };
+      if (remarks && status === 'rejected') {
+        updateData.iqacRejectionRemarks = remarks;
+      }
+      
+      await this.updateRecord(id, updateData);
+      
+      // Return the updated record with email
+      const record = convertToCamelCase(results[0]);
+      record.iqacVerification = status;
+      if (remarks && status === 'rejected') {
+        record.iqacRejectionRemarks = remarks;
+      }
+      return record;
+    } catch (error) {
+      logger.error('Error updating IQAC status:', error);
+      throw error;
+    } finally {
+      connection.release();
+    }
   }
 }
 

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ChevronLeft, Upload, X, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/api";
+import { useRoles } from "@/hooks/useRoles";
 
 interface FormData {
   competitionType: "national" | "international";
@@ -22,8 +23,6 @@ interface FormData {
   prizeType?: string;
   winnerCertificateProof?: File | null;
   runnerCertificateProof?: File | null;
-  iqacVerification: "initiated" | "processing" | "completed";
-  iqacRejectionRemarks: string;
   parentalDepartment: string;
 }
 
@@ -143,6 +142,7 @@ const FileUploadField = ({
 
 export default function ProjectCompetitionSubmitPage() {
   const router = useRouter();
+  const { isVerification } = useRoles();
   const [formData, setFormData] = useState<FormData>({
     competitionType: "national",
     student: "",
@@ -159,8 +159,6 @@ export default function ProjectCompetitionSubmitPage() {
     prizeType: "",
     winnerCertificateProof: null,
     runnerCertificateProof: null,
-    iqacVerification: "initiated",
-    iqacRejectionRemarks: "",
     parentalDepartment: "",
   });
 
@@ -172,6 +170,31 @@ export default function ProjectCompetitionSubmitPage() {
   const [departmentsLoading, setDepartmentsLoading] = useState(true);
   const [studentsLoading, setStudentsLoading] = useState(true);
   const [sdgsLoading, setSDGsLoading] = useState(true);
+
+  // Show access denied for verification role
+  if (isVerification()) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-lg border border-red-200 shadow-lg p-8 text-center">
+          <div className="mb-4 flex justify-center">
+            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+              <AlertCircle className="w-6 h-6 text-red-600" />
+            </div>
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Access Denied</h2>
+          <p className="text-slate-600 mb-6">
+            Verification roles cannot submit records. Please use the verification dashboard to review and approve submitted records.
+          </p>
+          <Link
+            href="/student/project-competition"
+            className="inline-block px-6 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition"
+          >
+            Back to Records
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   // Points table data
   const pointsTable = {
@@ -247,10 +270,6 @@ export default function ProjectCompetitionSubmitPage() {
     if (formData.status === "runner") {
       if (!formData.runnerCertificateProof) newErrors.runnerCertificateProof = "Certificate proof is required for runner status";
     }
-    if (formData.iqacVerification === "completed" && !formData.iqacRejectionRemarks.trim()) {
-      newErrors.iqacRejectionRemarks = "Remarks are required when status is Rejected";
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -305,10 +324,7 @@ export default function ProjectCompetitionSubmitPage() {
           formDataToSend.append("runnerCertificateProof", formData.runnerCertificateProof);
         }
       }
-      formDataToSend.append("iqacVerification", formData.iqacVerification);
-      if (formData.iqacVerification === "completed" && formData.iqacRejectionRemarks) {
-        formDataToSend.append("iqacRejectionRemarks", formData.iqacRejectionRemarks);
-      }
+      formDataToSend.append("iqacVerification", "initiated");
       formDataToSend.append("parentalDepartmentId", formData.parentalDepartment);
 
       if (formData.imageProof) {
@@ -866,61 +882,6 @@ export default function ProjectCompetitionSubmitPage() {
                 />
               )}
             </div>
-          </div>
-
-          {/* IQAC Verification */}
-          <div className="bg-white rounded-lg border border-slate-200 p-6 space-y-6">
-            <div className="flex items-center gap-2 pb-4 border-b border-slate-200">
-              <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
-                <span className="text-indigo-600 font-bold">5</span>
-              </div>
-              <h2 className="text-lg font-semibold text-slate-900">Verification</h2>
-            </div>
-
-            <div>
-              <label className="block font-medium text-slate-700 mb-2">
-                IQAC Verification Status
-              </label>
-              <select
-                value={formData.iqacVerification}
-                onChange={(e) => handleChange("iqacVerification", e.target.value)}
-                className="w-full px-4 py-3 pr-10 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent appearance-none"
-                style={{
-                  backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 8 10 12 14 8"></polyline></svg>')`,
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'right 8px center',
-                  backgroundSize: '20px',
-                }}
-              >
-                <option value="">-- Select Status --</option>
-                <option value="initiated">Initiated</option>
-                <option value="processing">Approved</option>
-                <option value="completed">Rejected</option>
-              </select>
-            </div>
-
-            {/* Conditional Remarks Field for Rejection */}
-            {formData.iqacVerification === "completed" && (
-              <div>
-                <label className="block font-medium text-slate-700 mb-2">
-                  Remarks <span className="text-red-500">*</span>
-                </label>
-                <textarea
-                  value={formData.iqacRejectionRemarks}
-                  onChange={(e) => handleChange("iqacRejectionRemarks", e.target.value)}
-                  placeholder="Please enter the reason for rejection..."
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none ${
-                    errors.iqacRejectionRemarks ? "border-red-400 bg-red-50" : "border-slate-300"
-                  }`}
-                  rows={4}
-                />
-                {errors.iqacRejectionRemarks && (
-                  <p className="text-red-600 text-sm mt-2 flex items-center gap-1">
-                    <AlertCircle className="w-4 h-4" /> {errors.iqacRejectionRemarks}
-                  </p>
-                )}
-              </div>
-            )}
           </div>
 
           {/* Form Actions */}

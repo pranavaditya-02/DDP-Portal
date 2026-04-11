@@ -5,6 +5,7 @@ import path from 'path';
 import fs from 'fs';
 import studentNonTechnicalService from '../services/studentNonTechnical.service';
 import { logger } from '../utils/logger';
+import { sendEmail } from '../utils/mailer';
 
 const router = Router();
 
@@ -266,16 +267,20 @@ router.put(
   async (req: AuthRequest, res: Response) => {
     try {
       const { id } = req.params;
-      const { iqacVerification } = req.body;
+      const { iqacVerification, iqacRejectionRemarks } = req.body;
 
-      if (!['initiated', 'processing', 'completed'].includes(iqacVerification)) {
+      logger.debug(`NT iqac-status endpoint - Request body:`, { iqacVerification, iqacRejectionRemarks, fullBody: req.body });
+
+      if (!iqacVerification || typeof iqacVerification !== 'string' || !['initiated', 'approved', 'rejected'].includes(iqacVerification)) {
+        logger.error(`NT validation failed - iqacVerification: ${iqacVerification}, type: ${typeof iqacVerification}, validValues: ['initiated', 'approved', 'rejected']`);
         return res.status(400).json({
           success: false,
-          message: 'Invalid IQAC verification status',
+          message: 'Invalid IQAC verification status. Must be one of: initiated, approved, rejected',
+          received: iqacVerification,
         });
       }
 
-      const record = await studentNonTechnicalService.updateIqacStatus(parseInt(id), iqacVerification);
+      const record = await studentNonTechnicalService.updateIqacStatus(parseInt(id), iqacVerification, iqacRejectionRemarks);
 
       if (!record) {
         return res.status(404).json({
@@ -284,7 +289,28 @@ router.put(
         });
       }
 
-      logger.info(`IQAC status for non-technical event record ${id} updated to ${iqacVerification}`);
+      // Send email notification if student email is available
+      const studentEmail = record.student_email;
+      if (studentEmail) {
+        const statusText = iqacVerification === 'approved' ? 'APPROVED' : iqacVerification === 'rejected' ? 'REJECTED' : 'UNDER REVIEW';
+        const subject = `Non-Technical Activity Submission ${statusText} - BannariAmman College`;
+        const bodyText = `Hello ${record.student_name ?? 'Student'},\n\nYour non-technical activity submission (ID: ${record.id}, Event: "${record.event_attended ?? 'Activity'}") has been ${statusText} by the IQAC team at BannariAmman College.\n${iqacRejectionRemarks ? `\nReason: ${iqacRejectionRemarks}\n` : ''}\nIf you have any questions, please reply to this email.\n\nIQAC Team\nBannariAmman College`;
+        const bodyHtml = `<p>Hello ${record.student_name ?? 'Student'},</p><p>Your non-technical activity submission <strong>(ID: ${record.id})</strong> for <strong>"${record.event_attended ?? 'Activity'}"</strong> has been <strong>${statusText}</strong> by the IQAC team at <strong>BannariAmman College</strong>.</p>${iqacRejectionRemarks ? `<p><strong>Reason:</strong> ${iqacRejectionRemarks}</p>` : ''}<p>If you have any questions, please reply to this email.</p><p>IQAC Team<br/>BannariAmman College</p>`;
+
+        try {
+          await sendEmail({
+            to: studentEmail,
+            subject,
+            text: bodyText,
+            html: bodyHtml,
+          });
+          logger.info(`Email notification sent to ${studentEmail} for non-technical event ${id}`);
+        } catch (emailError) {
+          logger.error('Failed to send non-technical activity status email:', emailError);
+        }
+      }
+
+      logger.info(`IQAC status for non-technical event record ${id} updated to ${iqacVerification}${iqacRejectionRemarks ? ' with remarks: ' + iqacRejectionRemarks : ''}`);
       res.status(200).json({
         success: true,
         message: 'IQAC verification status updated successfully',

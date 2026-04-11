@@ -30,7 +30,6 @@ interface FormData {
   eventEndDate: string;
   academicProject: string;
   status: string;
-  iqacVerification: string;
   parentalDepartment: string;
   
   imageProof: FileField;
@@ -46,7 +45,6 @@ const INITIAL_FORM_DATA: FormData = {
   eventEndDate: "",
   academicProject: "",
   status: "",
-  iqacVerification: "initiated",
   parentalDepartment: "",
   
   imageProof: { file: null, name: "", error: "" },
@@ -237,7 +235,7 @@ export default function PaperPresentationSubmitPage() {
       formDataToSend.append("event_end_date", formData.eventEndDate);
       formDataToSend.append("academic_project_type", formData.academicProject);
       formDataToSend.append("status", formData.status);
-      formDataToSend.append("iqac_verification", formData.iqacVerification);
+      formDataToSend.append("iqac_verification", "initiated");
       formDataToSend.append("parental_department", formData.parentalDepartment);
 
       // Add proof files and names
@@ -581,23 +579,6 @@ export default function PaperPresentationSubmitPage() {
                     {errors.parentalDepartment}
                   </p>
                 )}
-              </div>
-
-              {/* IQAC Verification */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-slate-900">
-                  IQAC Verification
-                </label>
-                <select
-                  name="iqacVerification"
-                  value={formData.iqacVerification}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
-                >
-                  <option value="initiated">Initiated</option>
-                  <option value="processing">Processing</option>
-                  <option value="completed">Completed</option>
-                </select>
               </div>
             </div>
           </div>

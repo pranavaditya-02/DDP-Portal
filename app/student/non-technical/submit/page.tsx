@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ChevronLeft, Upload, X, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/api";
+import { useRoles } from "@/hooks/useRoles";
 
 interface FormData {
   student: string;
@@ -39,7 +40,6 @@ interface FormData {
   interdisciplinaryDept?: string;
   otherDeptStudentCount?: string;
   certificateProof: File | null;
-  iqacVerification: "initiated" | "processing" | "completed" | "";
 }
 
 interface FormErrors {
@@ -152,6 +152,7 @@ const FileUploadField = ({
 
 export default function NonTechnicalSubmitPage() {
   const router = useRouter();
+  const { isVerification } = useRoles();
   const [formData, setFormData] = useState<FormData>({
     student: "",
     yearOfStudy: "",
@@ -170,7 +171,6 @@ export default function NonTechnicalSubmitPage() {
     timeSpentHours: "",
     interdisciplinary: "",
     certificateProof: null,
-    iqacVerification: "",
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -181,6 +181,31 @@ export default function NonTechnicalSubmitPage() {
   const [departmentsLoading, setDepartmentsLoading] = useState(true);
   const [clubsLoading, setClubsLoading] = useState(true);
   const [studentsLoading, setStudentsLoading] = useState(true);
+
+  // Show access denied for verification role
+  if (isVerification()) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-lg border border-red-200 shadow-lg p-8 text-center">
+          <div className="mb-4 flex justify-center">
+            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+              <AlertCircle className="w-6 h-6 text-red-600" />
+            </div>
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Access Denied</h2>
+          <p className="text-slate-600 mb-6">
+            Verification roles cannot submit records. Please use the verification dashboard to review and approve submitted records.
+          </p>
+          <Link
+            href="/student/non-technical"
+            className="inline-block px-6 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition"
+          >
+            Back to Records
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   useEffect(() => {
     const loadData = async () => {
@@ -244,7 +269,6 @@ export default function NonTechnicalSubmitPage() {
     if (formData.interdisciplinary === "yes" && !formData.interdisciplinaryDept) newErrors.interdisciplinaryDept = "Department selection is required";
     if (formData.interdisciplinary === "yes" && !formData.otherDeptStudentCount) newErrors.otherDeptStudentCount = "Number of other department students is required";
     if (!formData.certificateProof) newErrors.certificateProof = "Certificate proof is required";
-    if (!formData.iqacVerification) newErrors.iqacVerification = "IQAC verification is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -333,7 +357,7 @@ export default function NonTechnicalSubmitPage() {
         formDataToSend.append("interdisciplinaryDept", formData.interdisciplinaryDept || "");
         formDataToSend.append("otherDeptStudentCount", formData.otherDeptStudentCount || "");
       }
-      formDataToSend.append("iqacVerification", formData.iqacVerification);
+      formDataToSend.append("iqacVerification", "initiated");
       if (formData.certificateProof) {
         formDataToSend.append("certificateProof", formData.certificateProof);
       }
@@ -1178,32 +1202,6 @@ export default function NonTechnicalSubmitPage() {
               hint="Format: Reg.No-NT-DD.MM.YYYY (e.g., 201CS111-NT-08.06.2021)"
               required
             />
-
-            {/* IQAC Verification */}
-            <div>
-              <label className="block font-medium text-slate-700 mb-2">
-                IQAC Verification <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={formData.iqacVerification}
-                onChange={(e) => handleChange("iqacVerification", e.target.value)}
-                className={`w-full px-4 py-3 pr-10 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent appearance-none ${
-                  errors.iqacVerification ? "border-red-400 bg-red-50" : "border-slate-300"
-                }`}
-                style={{
-                  backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 8 10 12 14 8"></polyline></svg>')`,
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'right 8px center',
-                  backgroundSize: '20px',
-                }}
-              >
-                <option value="">-- Select Status --</option>
-                <option value="initiated">Initiated</option>
-                <option value="processing">Processing</option>
-                <option value="completed">Completed</option>
-              </select>
-              {errors.iqacVerification && <p className="text-red-600 text-sm mt-2">{errors.iqacVerification}</p>}
-            </div>
           </div>
 
           {/* Submit Button */}

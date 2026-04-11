@@ -3991,3 +3991,854 @@
 {"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-09 15:27:08"}
 {"level":"info","message":"GET /api/clubs","service":"faculty-tracking-api","timestamp":"2026-04-09 15:27:08"}
 {"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-09 15:27:08"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 10:43:31"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 10:43:31"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 10:43:34"}
+{"level":"warn","message":"Dummy students table initialization warning:","service":"faculty-tracking-api","timestamp":"2026-04-10 10:43:34"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 10:43:35"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 10:43:37"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 10:43:37"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 11:51:05"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 11:51:05"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 11:51:08"}
+{"level":"warn","message":"Dummy students table initialization warning:","service":"faculty-tracking-api","timestamp":"2026-04-10 11:51:08"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 11:51:09"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 11:51:10"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 11:51:10"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 11:52:27"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 11:52:27"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 11:52:30"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 11:52:34"}
+{"level":"info","message":"GET /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-10 11:52:50"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 14:02:20"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 14:02:20"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:02:24"}
+{"level":"warn","message":"Dummy students table initialization warning:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:02:25"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 14:02:27"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 14:02:29"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:02:29"}
+{"level":"info","message":"GET /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-10 14:02:53"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 14:03:35"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 14:03:37"}
+{"level":"info","message":"GET /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-10 14:05:56"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-10 14:05:58"}
+{"level":"info","message":"GET /api/clubs","service":"faculty-tracking-api","timestamp":"2026-04-10 14:05:58"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 14:05:58"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 14:05:58"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 14:16:12"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 14:16:12"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:16:15"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 14:16:15"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-10 14:16:16"}
+{"level":"info","message":"GET /api/clubs","service":"faculty-tracking-api","timestamp":"2026-04-10 14:16:16"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 14:16:16"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 14:16:17"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:16:17"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 14:16:54"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 14:17:11"}
+{"level":"warn","message":"No token provided","service":"faculty-tracking-api","timestamp":"2026-04-10 14:17:11"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:17:16"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:17:16"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 14:17:20"}
+{"level":"info","message":"GET /uploads/project-competitions/1775580392460-884866872.png","service":"faculty-tracking-api","timestamp":"2026-04-10 14:17:22"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:17:29"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:17:29"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:17:29"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:17:29"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 14:21:11"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 14:21:11"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:21:13"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:21:13"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:21:13"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 14:21:14"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 14:21:15"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:21:15"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:21:17"}
+{"level":"info","message":"No token provided - request allowed without authentication","service":"faculty-tracking-api","timestamp":"2026-04-10 14:21:17"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 14:21:28"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:21:29"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:21:29"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:21:37"}
+{"level":"info","message":"No token provided - request allowed without authentication","service":"faculty-tracking-api","timestamp":"2026-04-10 14:21:37"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:21:42"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:21:42"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-10 14:22:15"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 14:22:15"}
+{"level":"info","message":"GET /api/sdgs","service":"faculty-tracking-api","timestamp":"2026-04-10 14:22:16"}
+{"level":"info","message":"Fetched 17 SDG goals","service":"faculty-tracking-api","timestamp":"2026-04-10 14:22:16"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-10 14:22:20"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 14:22:20"}
+{"level":"info","message":"GET /api/sdgs","service":"faculty-tracking-api","timestamp":"2026-04-10 14:22:21"}
+{"level":"info","message":"Fetched 17 SDG goals","service":"faculty-tracking-api","timestamp":"2026-04-10 14:22:21"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:22:26"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:22:26"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-10 14:22:28"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 14:22:28"}
+{"level":"info","message":"GET /api/sdgs","service":"faculty-tracking-api","timestamp":"2026-04-10 14:22:28"}
+{"level":"info","message":"Fetched 17 SDG goals","service":"faculty-tracking-api","timestamp":"2026-04-10 14:22:28"}
+{"level":"info","message":"POST /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:23:20"}
+{"level":"info","message":"Paper presentation created with ID: 90001","service":"faculty-tracking-api","timestamp":"2026-04-10 14:23:20"}
+{"level":"info","message":"Paper presentation created: 90001","service":"faculty-tracking-api","timestamp":"2026-04-10 14:23:20"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:23:20"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:23:20"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:23:20"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:23:20"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 14:30:03"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 14:30:03"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:30:06"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 14:30:07"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 14:30:08"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:30:08"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 14:30:10"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 14:30:10"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:30:12"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 14:30:13"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 14:30:14"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:30:14"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 14:30:29"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 14:30:29"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:30:32"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 14:30:33"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 14:30:35"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:30:35"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 14:30:40"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 14:30:40"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:30:43"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 14:30:44"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 14:30:45"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:30:45"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 14:31:02"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 14:31:02"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:31:04"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 14:31:05"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 14:31:07"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:31:07"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 14:32:35"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 14:32:36"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:32:38"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 14:32:39"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 14:32:40"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:32:40"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:32:41"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:32:41"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:33:10"}
+{"level":"info","message":"No token provided - request allowed without authentication","service":"faculty-tracking-api","timestamp":"2026-04-10 14:33:10"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:33:14"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:33:14"}
+{"level":"info","message":"PUT /api/student-paper-presentations/90001/iqac-status","service":"faculty-tracking-api","timestamp":"2026-04-10 14:33:22"}
+{"level":"info","message":"Paper presentation 90001 updated","service":"faculty-tracking-api","timestamp":"2026-04-10 14:33:23"}
+{"level":"info","message":"IQAC status updated for paper presentation 90001: processing","service":"faculty-tracking-api","timestamp":"2026-04-10 14:33:23"}
+{"level":"info","message":"GET /uploads/paper-presentations/1775549766568-516093351.pdf","service":"faculty-tracking-api","timestamp":"2026-04-10 14:33:47"}
+{"level":"info","message":"GET /uploads/paper-presentations/1775468200200-900253138.png","service":"faculty-tracking-api","timestamp":"2026-04-10 14:33:52"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 14:34:00"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:34:04"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:34:04"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:34:04"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:34:04"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:37:18"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:37:18"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:37:18"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:37:18"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-10 14:37:24"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 14:37:24"}
+{"level":"info","message":"GET /api/sdgs","service":"faculty-tracking-api","timestamp":"2026-04-10 14:37:25"}
+{"level":"info","message":"Fetched 17 SDG goals","service":"faculty-tracking-api","timestamp":"2026-04-10 14:37:25"}
+{"level":"info","message":"POST /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:38:02"}
+{"level":"info","message":"Paper presentation created with ID: 120001","service":"faculty-tracking-api","timestamp":"2026-04-10 14:38:02"}
+{"level":"info","message":"Paper presentation created: 120001","service":"faculty-tracking-api","timestamp":"2026-04-10 14:38:02"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:38:03"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:38:03"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:38:03"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:38:03"}
+{"level":"info","message":"PUT /api/student-paper-presentations/120001/iqac-status","service":"faculty-tracking-api","timestamp":"2026-04-10 14:38:09"}
+{"code":"ER_DATA_TOO_LONG","errno":1406,"level":"error","message":"Error updating paper presentation: Data Too Long, field len 9, data len 10","service":"faculty-tracking-api","sql":"UPDATE student_paper_presentations SET iqac_verification = ? WHERE id = ?","sqlMessage":"Data Too Long, field len 9, data len 10","sqlState":"22001","stack":"Error: Data Too Long, field len 9, data len 10\n    at PromisePoolConnection.execute (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/node_modules/mysql2/lib/promise/connection.js:47:22)\n    at StudentPaperPresentationService.updatePresentation (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/studentPaperPresentation.service.ts:236:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async <anonymous> (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/routes/studentPaperPresentation.routes.ts:305:5)","timestamp":"2026-04-10 14:38:10"}
+{"code":"ER_DATA_TOO_LONG","errno":1406,"level":"error","message":"Error updating IQAC status: Data Too Long, field len 9, data len 10","service":"faculty-tracking-api","sql":"UPDATE student_paper_presentations SET iqac_verification = ? WHERE id = ?","sqlMessage":"Data Too Long, field len 9, data len 10","sqlState":"22001","stack":"Error: Data Too Long, field len 9, data len 10\n    at PromisePoolConnection.execute (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/node_modules/mysql2/lib/promise/connection.js:47:22)\n    at StudentPaperPresentationService.updatePresentation (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/studentPaperPresentation.service.ts:236:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async <anonymous> (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/routes/studentPaperPresentation.routes.ts:305:5)","timestamp":"2026-04-10 14:38:10"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 14:40:42"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 14:40:42"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:40:44"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 14:40:45"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 14:40:46"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:40:46"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:40:46"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:40:46"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:40:46"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:40:46"}
+{"level":"info","message":"PUT /api/student-paper-presentations/120001/iqac-status","service":"faculty-tracking-api","timestamp":"2026-04-10 14:40:52"}
+{"code":"ER_DATA_TOO_LONG","errno":1406,"level":"error","message":"Error updating paper presentation: Data Too Long, field len 9, data len 10","service":"faculty-tracking-api","sql":"UPDATE student_paper_presentations SET iqac_verification = ? WHERE id = ?","sqlMessage":"Data Too Long, field len 9, data len 10","sqlState":"22001","stack":"Error: Data Too Long, field len 9, data len 10\n    at PromisePoolConnection.execute (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/node_modules/mysql2/lib/promise/connection.js:47:22)\n    at StudentPaperPresentationService.updatePresentation (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/studentPaperPresentation.service.ts:236:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async <anonymous> (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/routes/studentPaperPresentation.routes.ts:305:5)","timestamp":"2026-04-10 14:40:52"}
+{"code":"ER_DATA_TOO_LONG","errno":1406,"level":"error","message":"Error updating IQAC status: Data Too Long, field len 9, data len 10","service":"faculty-tracking-api","sql":"UPDATE student_paper_presentations SET iqac_verification = ? WHERE id = ?","sqlMessage":"Data Too Long, field len 9, data len 10","sqlState":"22001","stack":"Error: Data Too Long, field len 9, data len 10\n    at PromisePoolConnection.execute (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/node_modules/mysql2/lib/promise/connection.js:47:22)\n    at StudentPaperPresentationService.updatePresentation (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/studentPaperPresentation.service.ts:236:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async <anonymous> (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/routes/studentPaperPresentation.routes.ts:305:5)","timestamp":"2026-04-10 14:40:52"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 14:42:49"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 14:42:49"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:42:51"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 14:42:52"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 14:42:54"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:42:54"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 14:43:14"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 14:43:14"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:43:17"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 14:43:18"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 14:43:19"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:43:19"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 14:43:25"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 14:43:25"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:43:28"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 14:43:29"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 14:43:30"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:43:30"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 14:43:49"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 14:43:49"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:43:52"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 14:43:53"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 14:43:54"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:43:54"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 14:45:18"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 14:45:18"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:45:20"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:45:20"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:45:20"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:45:20"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:45:20"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 14:45:21"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 14:45:22"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:45:22"}
+{"level":"info","message":"PUT /api/student-paper-presentations/120001/iqac-status","service":"faculty-tracking-api","timestamp":"2026-04-10 14:45:26"}
+{"level":"info","message":"PUT /api/student-paper-presentations/120001/iqac-status","service":"faculty-tracking-api","timestamp":"2026-04-10 14:45:32"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 14:46:31"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 14:46:31"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:46:33"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 14:46:35"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 14:46:37"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:46:37"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 14:47:17"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 14:47:17"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:47:19"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 14:47:20"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 14:47:21"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:47:21"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 14:47:27"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 14:47:27"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:47:30"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 14:47:31"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 14:47:32"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:47:32"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 14:47:33"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 14:47:33"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:47:35"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 14:47:36"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 14:47:37"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:47:37"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 14:47:38"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 14:47:38"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:47:40"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 14:47:41"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 14:47:43"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:47:43"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 14:47:52"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 14:47:52"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:47:55"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 14:47:56"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 14:47:57"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:47:57"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:48:01"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:48:01"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:48:01"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:48:01"}
+{"level":"info","message":"PUT /api/student-paper-presentations/120001/iqac-status","service":"faculty-tracking-api","timestamp":"2026-04-10 14:48:07"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 14:48:21"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 14:48:21"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:48:24"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 14:48:25"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 14:48:26"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:48:26"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:49:14"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:49:14"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:49:14"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:49:14"}
+{"level":"info","message":"PUT /api/student-paper-presentations/120001/iqac-status","service":"faculty-tracking-api","timestamp":"2026-04-10 14:49:19"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:51:01"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:51:01"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 14:51:10"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 14:51:10"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:51:12"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:51:13"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:51:13"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:51:13"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:51:13"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 14:51:13"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 14:51:15"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:51:15"}
+{"level":"info","message":"PUT /api/student-paper-presentations/120001/iqac-status","service":"faculty-tracking-api","timestamp":"2026-04-10 14:51:19"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:53:42"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:53:42"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:53:42"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:53:42"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-10 14:53:45"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 14:53:45"}
+{"level":"info","message":"GET /api/sdgs","service":"faculty-tracking-api","timestamp":"2026-04-10 14:53:45"}
+{"level":"info","message":"Fetched 17 SDG goals","service":"faculty-tracking-api","timestamp":"2026-04-10 14:53:46"}
+{"level":"info","message":"POST /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:54:17"}
+{"level":"info","message":"Paper presentation created with ID: 120002","service":"faculty-tracking-api","timestamp":"2026-04-10 14:54:18"}
+{"level":"info","message":"Paper presentation created: 120002","service":"faculty-tracking-api","timestamp":"2026-04-10 14:54:18"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:54:18"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:54:18"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 14:54:18"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 14:54:18"}
+{"level":"info","message":"PUT /api/student-paper-presentations/120002/iqac-status","service":"faculty-tracking-api","timestamp":"2026-04-10 14:54:40"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 14:58:02"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 14:58:02"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:58:05"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 14:58:06"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 14:58:08"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:58:08"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 14:58:58"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 14:58:58"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:59:01"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 14:59:03"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 14:59:05"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 14:59:05"}
+{"level":"info","message":"PUT /api/student-paper-presentations/1/iqac-status","service":"faculty-tracking-api","timestamp":"2026-04-10 15:00:06"}
+{"level":"info","message":"PUT /api/student-paper-presentations/1/iqac-status","service":"faculty-tracking-api","timestamp":"2026-04-10 15:00:14"}
+{"level":"error","message":"PPR validation failed - iqacVerification: invalid_value, type: string, validValues: ['initiated', 'approved', 'rejected']","service":"faculty-tracking-api","timestamp":"2026-04-10 15:00:14"}
+{"level":"info","message":"PUT /api/student-paper-presentations/1/iqac-status","service":"faculty-tracking-api","timestamp":"2026-04-10 15:00:30"}
+{"level":"error","message":"PPR validation failed - iqacVerification: undefined, type: undefined, validValues: ['initiated', 'approved', 'rejected']","service":"faculty-tracking-api","timestamp":"2026-04-10 15:00:30"}
+{"level":"info","message":"PUT /api/student-project-competitions/1/iqac-status","service":"faculty-tracking-api","timestamp":"2026-04-10 15:00:41"}
+{"level":"warn","message":"No token provided","service":"faculty-tracking-api","timestamp":"2026-04-10 15:00:41"}
+{"level":"info","message":"PUT /api/student-technical-body-memberships/1/iqac-status","service":"faculty-tracking-api","timestamp":"2026-04-10 15:00:41"}
+{"level":"warn","message":"No token provided","service":"faculty-tracking-api","timestamp":"2026-04-10 15:00:41"}
+{"level":"info","message":"PUT /api/student-non-technical/1/iqac-status","service":"faculty-tracking-api","timestamp":"2026-04-10 15:00:41"}
+{"level":"warn","message":"No token provided","service":"faculty-tracking-api","timestamp":"2026-04-10 15:00:41"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 15:01:34"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 15:01:34"}
+{"level":"info","message":"PUT /api/student-paper-presentations/120002/iqac-status","service":"faculty-tracking-api","timestamp":"2026-04-10 15:01:39"}
+{"level":"error","message":"PPR validation failed - iqacVerification: processing, type: string, validValues: ['initiated', 'approved', 'rejected']","service":"faculty-tracking-api","timestamp":"2026-04-10 15:01:39"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 15:02:14"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 15:02:14"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 15:02:16"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 15:02:16"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 15:02:16"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 15:02:16"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 15:02:16"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 15:02:17"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 15:02:18"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 15:02:18"}
+{"level":"info","message":"PUT /api/student-paper-presentations/120002/iqac-status","service":"faculty-tracking-api","timestamp":"2026-04-10 15:02:22"}
+{"level":"error","message":"PPR validation failed - iqacVerification: processing, type: string, validValues: ['initiated', 'approved', 'rejected']","service":"faculty-tracking-api","timestamp":"2026-04-10 15:02:22"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 15:04:41"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 15:04:41"}
+{"level":"info","message":"PUT /api/student-paper-presentations/1/iqac-status","service":"faculty-tracking-api","timestamp":"2026-04-10 15:05:10"}
+{"level":"info","message":"PUT /api/student-paper-presentations/1/iqac-status","service":"faculty-tracking-api","timestamp":"2026-04-10 15:05:10"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 15:05:49"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 15:05:49"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 15:05:52"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 15:05:53"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 15:05:53"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 15:05:53"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 15:05:53"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 15:05:53"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 15:05:54"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 15:05:54"}
+{"level":"info","message":"PUT /api/student-paper-presentations/120002/iqac-status","service":"faculty-tracking-api","timestamp":"2026-04-10 15:05:59"}
+{"level":"info","message":"Paper presentation 120002 updated","service":"faculty-tracking-api","timestamp":"2026-04-10 15:06:00"}
+{"level":"info","message":"IQAC status updated for paper presentation 120002: approved","service":"faculty-tracking-api","timestamp":"2026-04-10 15:06:00"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 15:07:59"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 15:07:59"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 15:08:01"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 15:08:03"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 15:08:04"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 15:08:04"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-10 15:08:09"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 15:08:09"}
+{"level":"info","message":"GET /api/sdgs","service":"faculty-tracking-api","timestamp":"2026-04-10 15:08:10"}
+{"level":"info","message":"Fetched 17 SDG goals","service":"faculty-tracking-api","timestamp":"2026-04-10 15:08:10"}
+{"level":"info","message":"POST /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 15:08:50"}
+{"level":"info","message":"Paper presentation created with ID: 120003","service":"faculty-tracking-api","timestamp":"2026-04-10 15:08:50"}
+{"level":"info","message":"Paper presentation created: 120003","service":"faculty-tracking-api","timestamp":"2026-04-10 15:08:50"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 15:08:51"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 15:08:51"}
+{"level":"info","message":"PUT /api/student-paper-presentations/120003/iqac-status","service":"faculty-tracking-api","timestamp":"2026-04-10 15:09:02"}
+{"level":"info","message":"Paper presentation 120003 updated","service":"faculty-tracking-api","timestamp":"2026-04-10 15:09:03"}
+{"level":"info","message":"IQAC status updated for paper presentation 120003: approved","service":"faculty-tracking-api","timestamp":"2026-04-10 15:09:03"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 15:12:41"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 15:12:41"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 15:12:44"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 15:12:44"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 15:12:46"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 15:12:47"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 15:12:48"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 15:12:48"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 15:14:03"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 15:14:03"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 15:14:05"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 15:14:06"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 15:14:07"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 15:14:07"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 15:15:09"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 15:15:09"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 15:15:11"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 15:15:12"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 15:15:13"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 15:15:13"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 15:15:23"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 15:15:23"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 15:15:25"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 15:15:26"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 15:15:28"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 15:15:28"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 15:15:44"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 15:15:44"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 15:15:46"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 15:15:48"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 15:15:49"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 15:15:49"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 15:16:12"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 15:16:12"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 15:16:14"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 15:16:15"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 15:16:16"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 15:16:16"}
+{"level":"info","message":"SIGTERM signal received: closing HTTP server","service":"faculty-tracking-api","timestamp":"2026-04-10 15:16:32"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 15:17:53"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 15:17:53"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 15:17:56"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 15:17:56"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 15:17:57"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 15:17:57"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 15:19:05"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 15:19:05"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 15:19:08"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 15:19:09"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 15:19:09"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 15:19:09"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 15:19:10"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 15:19:10"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-10 15:19:12"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 15:19:13"}
+{"level":"info","message":"GET /api/sdgs","service":"faculty-tracking-api","timestamp":"2026-04-10 15:19:13"}
+{"level":"info","message":"Fetched 17 SDG goals","service":"faculty-tracking-api","timestamp":"2026-04-10 15:19:14"}
+{"level":"info","message":"POST /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 15:19:41"}
+{"level":"info","message":"Paper presentation created with ID: 150001","service":"faculty-tracking-api","timestamp":"2026-04-10 15:19:42"}
+{"level":"info","message":"Paper presentation created: 150001","service":"faculty-tracking-api","timestamp":"2026-04-10 15:19:42"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 15:19:42"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 15:19:42"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 15:19:42"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 15:19:42"}
+{"level":"info","message":"PUT /api/student-paper-presentations/150001/iqac-status","service":"faculty-tracking-api","timestamp":"2026-04-10 15:19:48"}
+{"level":"info","message":"Paper presentation 150001 updated","service":"faculty-tracking-api","timestamp":"2026-04-10 15:19:49"}
+{"level":"info","message":"Email sent to karshan3110@gmail.com with subject: Paper Presentation Submission APPROVED - BannariAmman College","service":"faculty-tracking-api","timestamp":"2026-04-10 15:19:55"}
+{"level":"info","message":"Email notification sent to karshan3110@gmail.com for paper presentation 150001","service":"faculty-tracking-api","timestamp":"2026-04-10 15:19:55"}
+{"level":"info","message":"IQAC status updated for paper presentation 150001: approved","service":"faculty-tracking-api","timestamp":"2026-04-10 15:19:55"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 15:24:46"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-10 15:24:50"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 15:24:50"}
+{"level":"info","message":"GET /api/sdgs","service":"faculty-tracking-api","timestamp":"2026-04-10 15:24:50"}
+{"level":"info","message":"Fetched 17 SDG goals","service":"faculty-tracking-api","timestamp":"2026-04-10 15:24:50"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-10 15:25:26"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-10 15:25:26"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-10 15:25:28"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-10 15:25:29"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-10 15:25:30"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-10 15:25:30"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-10 15:28:38"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 15:28:39"}
+{"level":"info","message":"GET /api/sdgs","service":"faculty-tracking-api","timestamp":"2026-04-10 15:28:39"}
+{"level":"info","message":"Fetched 17 SDG goals","service":"faculty-tracking-api","timestamp":"2026-04-10 15:28:40"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-10 15:36:46"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-10 15:36:46"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 15:36:48"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 15:36:48"}
+{"level":"info","message":"GET /api/sdgs","service":"faculty-tracking-api","timestamp":"2026-04-10 15:36:48"}
+{"level":"info","message":"GET /api/sdgs","service":"faculty-tracking-api","timestamp":"2026-04-10 15:36:48"}
+{"level":"info","message":"Fetched 17 SDG goals","service":"faculty-tracking-api","timestamp":"2026-04-10 15:36:49"}
+{"level":"info","message":"Fetched 17 SDG goals","service":"faculty-tracking-api","timestamp":"2026-04-10 15:36:49"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 15:41:17"}
+{"level":"info","message":"GET /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-10 15:41:19"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 15:41:21"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 15:41:23"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 15:41:23"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 15:41:44"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 15:41:44"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 15:41:47"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 15:41:47"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 15:41:47"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 15:41:47"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:04:39"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 16:05:03"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 16:05:04"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 16:05:04"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:05:29"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 16:05:40"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 16:05:40"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 16:05:40"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 16:05:40"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:05:42"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:05:42"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 16:05:43"}
+{"level":"info","message":"GET /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-10 16:05:45"}
+{"code":"EHOSTUNREACH","errno":-65,"level":"error","message":"Error fetching project competitions: read EHOSTUNREACH","service":"faculty-tracking-api","stack":"Error: read EHOSTUNREACH\n    at PromisePoolConnection.execute (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/node_modules/mysql2/lib/promise/connection.js:47:22)\n    at StudentProjectCompetitionService.getAllCompetitions (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/studentProjectCompetition.service.ts:141:46)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async <anonymous> (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/routes/studentProjectCompetition.routes.ts:178:22)","timestamp":"2026-04-10 16:05:51"}
+{"code":"EHOSTUNREACH","errno":-65,"level":"error","message":"Error fetching project competitions: read EHOSTUNREACH","service":"faculty-tracking-api","stack":"Error: read EHOSTUNREACH\n    at PromisePoolConnection.execute (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/node_modules/mysql2/lib/promise/connection.js:47:22)\n    at StudentProjectCompetitionService.getAllCompetitions (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/studentProjectCompetition.service.ts:141:46)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async <anonymous> (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/routes/studentProjectCompetition.routes.ts:178:22)","timestamp":"2026-04-10 16:05:51"}
+{"code":"EHOSTUNREACH","errno":-65,"level":"error","message":"Error fetching technical body memberships: read EHOSTUNREACH","service":"faculty-tracking-api","stack":"Error: read EHOSTUNREACH\n    at PromisePoolConnection.execute (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/node_modules/mysql2/lib/promise/connection.js:47:22)\n    at StudentTechnicalBodyMembershipService.getAllMemberships (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/studentTechnicalBodyMembership.service.ts:136:46)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async <anonymous> (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/routes/studentTechnicalBodyMembership.routes.ts:180:22)","timestamp":"2026-04-10 16:06:02"}
+{"code":"EHOSTUNREACH","errno":-65,"level":"error","message":"Error fetching technical body memberships: read EHOSTUNREACH","service":"faculty-tracking-api","stack":"Error: read EHOSTUNREACH\n    at PromisePoolConnection.execute (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/node_modules/mysql2/lib/promise/connection.js:47:22)\n    at StudentTechnicalBodyMembershipService.getAllMemberships (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/studentTechnicalBodyMembership.service.ts:136:46)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async <anonymous> (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/routes/studentTechnicalBodyMembership.routes.ts:180:22)","timestamp":"2026-04-10 16:06:02"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 16:06:42"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 16:06:42"}
+{"level":"info","message":"GET /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-10 16:06:43"}
+{"level":"info","message":"GET /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-10 16:06:43"}
+{"level":"info","message":"GET /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-10 16:08:01"}
+{"level":"info","message":"GET /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-10 16:08:01"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 16:08:02"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 16:08:02"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:08:02"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:08:02"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 16:08:03"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 16:08:03"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 16:08:03"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 16:08:03"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:08:04"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:08:04"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 16:08:05"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 16:08:05"}
+{"level":"info","message":"GET /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-10 16:08:06"}
+{"level":"info","message":"GET /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-10 16:08:06"}
+{"level":"info","message":"GET /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-10 16:09:49"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 16:09:54"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 16:09:54"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:09:55"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:09:58"}
+{"level":"warn","message":"No token provided","service":"faculty-tracking-api","timestamp":"2026-04-10 16:09:58"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:10:08"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 16:10:09"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 16:10:09"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:10:13"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:10:13"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 16:11:18"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 16:11:18"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 16:11:28"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 16:11:34"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 16:11:34"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 16:13:56"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 16:13:56"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 16:13:58"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 16:14:01"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 16:14:01"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 16:14:01"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 16:14:01"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:14:02"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-10 16:14:03"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 16:14:04"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 16:14:04"}
+{"level":"info","message":"GET /api/sdgs","service":"faculty-tracking-api","timestamp":"2026-04-10 16:14:04"}
+{"level":"info","message":"Fetched 17 SDG goals","service":"faculty-tracking-api","timestamp":"2026-04-10 16:14:04"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 16:14:05"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 16:14:05"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 16:15:58"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 16:15:58"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 16:16:09"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 16:16:09"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 16:16:12"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 16:16:12"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 16:16:16"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 16:16:16"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 16:16:20"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 16:16:20"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 16:16:20"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 16:16:20"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:16:22"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:16:22"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 16:16:23"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 16:16:23"}
+{"level":"info","message":"GET /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-10 16:16:24"}
+{"level":"info","message":"GET /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-10 16:17:39"}
+{"level":"info","message":"GET /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-10 16:17:39"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-10 16:17:41"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 16:17:41"}
+{"level":"info","message":"GET /api/clubs","service":"faculty-tracking-api","timestamp":"2026-04-10 16:17:41"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-10 16:17:41"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 16:17:41"}
+{"level":"info","message":"GET /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-10 16:17:43"}
+{"level":"info","message":"GET /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-10 16:17:43"}
+{"level":"info","message":"GET /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:04"}
+{"level":"info","message":"GET /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:12"}
+{"level":"warn","message":"No token provided","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:12"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:25"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:26"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:27"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:27"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:27"}
+{"level":"info","message":"GET /api/sdgs","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:27"}
+{"level":"info","message":"Fetched 17 SDG goals","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:27"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:28"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:28"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:28"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:28"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:28"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:28"}
+{"level":"info","message":"GET /api/sdgs","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:28"}
+{"level":"info","message":"GET /api/sdgs","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:28"}
+{"level":"info","message":"Fetched 17 SDG goals","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:29"}
+{"level":"info","message":"Fetched 17 SDG goals","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:29"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:29"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:29"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:29"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:29"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:29"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:29"}
+{"level":"info","message":"GET /api/sdgs","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:29"}
+{"level":"info","message":"GET /api/sdgs","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:30"}
+{"level":"info","message":"Fetched 17 SDG goals","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:30"}
+{"level":"info","message":"Fetched 17 SDG goals","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:30"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:30"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:30"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:30"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:30"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:30"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:30"}
+{"level":"info","message":"GET /api/sdgs","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:30"}
+{"level":"info","message":"GET /api/sdgs","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:30"}
+{"level":"info","message":"Fetched 17 SDG goals","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:30"}
+{"level":"info","message":"Fetched 17 SDG goals","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:31"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:31"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:31"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:31"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:31"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:31"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:31"}
+{"level":"info","message":"GET /api/sdgs","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:31"}
+{"level":"info","message":"GET /api/sdgs","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:31"}
+{"level":"info","message":"Fetched 17 SDG goals","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:31"}
+{"level":"info","message":"Fetched 17 SDG goals","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:31"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:31"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:31"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:32"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:32"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:32"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:32"}
+{"level":"info","message":"GET /api/sdgs","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:32"}
+{"level":"info","message":"GET /api/sdgs","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:32"}
+{"level":"info","message":"Fetched 17 SDG goals","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:32"}
+{"level":"info","message":"Fetched 17 SDG goals","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:32"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:34"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:34"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:37"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:37"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:37"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:37"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:37"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:37"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:37"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:37"}
+{"level":"info","message":"GET /api/sdgs","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:37"}
+{"level":"info","message":"GET /api/sdgs","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:37"}
+{"level":"info","message":"Fetched 17 SDG goals","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:38"}
+{"level":"info","message":"Fetched 17 SDG goals","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:38"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:38"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:38"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 16:20:39"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 16:22:41"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 16:22:41"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 16:22:42"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-10 16:22:42"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 16:22:45"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 16:22:45"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 16:27:56"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 16:27:56"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 16:27:57"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 16:27:57"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-10 16:27:57"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-10 16:27:57"}
+{"code":"ECONNRESET","errno":-54,"level":"error","message":"Error fetching paper presentations: read ECONNRESET","service":"faculty-tracking-api","stack":"Error: read ECONNRESET\n    at PromisePoolConnection.execute (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/node_modules/mysql2/lib/promise/connection.js:47:22)\n    at StudentPaperPresentationService.getAllPresentations (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/studentPaperPresentation.service.ts:128:46)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async <anonymous> (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/routes/studentPaperPresentation.routes.ts:167:22)","timestamp":"2026-04-10 16:27:57"}
+{"code":"ECONNRESET","errno":-54,"level":"error","message":"Error fetching paper presentations: read ECONNRESET","service":"faculty-tracking-api","stack":"Error: read ECONNRESET\n    at PromisePoolConnection.execute (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/node_modules/mysql2/lib/promise/connection.js:47:22)\n    at StudentPaperPresentationService.getAllPresentations (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/studentPaperPresentation.service.ts:128:46)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async <anonymous> (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/routes/studentPaperPresentation.routes.ts:167:22)","timestamp":"2026-04-10 16:27:57"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:28:00"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-10 16:28:00"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 16:28:00"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-10 16:28:00"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-11 08:52:42"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-11 08:52:42"}
+{"code":"ENOTFOUND","errno":-3008,"fatal":true,"hostname":"gateway01.ap-northeast-1.prod.aws.tidbcloud.com","level":"warn","message":"MySQL verification failed on startup: getaddrinfo ENOTFOUND gateway01.ap-northeast-1.prod.aws.tidbcloud.com","service":"faculty-tracking-api","stack":"Error: getaddrinfo ENOTFOUND gateway01.ap-northeast-1.prod.aws.tidbcloud.com\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:121:26)","syscall":"getaddrinfo","timestamp":"2026-04-11 08:52:42"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-11 08:53:35"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-11 08:54:27"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-11 08:56:48"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-11 08:56:56"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-11 08:56:56"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-11 08:57:05"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-11 08:57:05"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-11 08:57:07"}
+{"code":"ER_DUP_FIELDNAME","errno":1060,"level":"warn","message":"Could not add internship_tracker.reject_reason column, it may already exist or require manual migration. Duplicate column name 'reject_reason'","service":"faculty-tracking-api","sql":"ALTER TABLE internship_tracker ADD COLUMN reject_reason VARCHAR(255) DEFAULT NULL AFTER iqac_verification;","sqlMessage":"Duplicate column name 'reject_reason'","sqlState":"42S21","stack":"Error: Duplicate column name 'reject_reason'\n    at PromisePool.query (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/node_modules/mysql2/lib/promise/pool.js:36:22)\n    at ensureTableExists (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/internshipTracker.service.ts:54:16)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async InternshipTrackerService.listTrackers (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/internshipTracker.service.ts:237:5)\n    at async <anonymous> (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/routes/internshipTracker.routes.ts:184:22)","timestamp":"2026-04-11 08:57:08"}
+{"code":"ER_DUP_FIELDNAME","errno":1060,"level":"warn","message":"Could not add internship_tracker.tracker_number column, it may already exist or require manual migration. Duplicate column name 'tracker_number'","service":"faculty-tracking-api","sql":"ALTER TABLE internship_tracker ADD COLUMN tracker_number BIGINT UNSIGNED NULL AFTER id;","sqlMessage":"Duplicate column name 'tracker_number'","sqlState":"42S21","stack":"Error: Duplicate column name 'tracker_number'\n    at PromisePool.query (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/node_modules/mysql2/lib/promise/pool.js:36:22)\n    at ensureTableExists (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/internshipTracker.service.ts:60:16)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async InternshipTrackerService.listTrackers (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/internshipTracker.service.ts:237:5)\n    at async <anonymous> (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/routes/internshipTracker.routes.ts:184:22)","timestamp":"2026-04-11 08:57:08"}
+{"level":"info","message":"internship_tracker table is ready","service":"faculty-tracking-api","timestamp":"2026-04-11 08:57:08"}
+{"level":"info","message":"GET /api/industries/active","service":"faculty-tracking-api","timestamp":"2026-04-11 08:57:15"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-11 08:57:16"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-11 08:57:16"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-11 08:57:18"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-11 08:57:18"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-11 08:57:19"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-11 08:57:19"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-11 08:57:19"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-11 08:57:19"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-11 09:02:16"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-11 09:02:16"}
+{"level":"info","message":"GET /api/internship-report","service":"faculty-tracking-api","timestamp":"2026-04-11 09:02:18"}
+{"errno":8200,"level":"warn","message":"Could not add internship_reports.tracker_id column, it may already exist or require manual migration. unsupported add column 'tracker_id' constraint UNIQUE KEY when altering 'ddp.internship_reports'","service":"faculty-tracking-api","sql":"ALTER TABLE internship_reports ADD COLUMN tracker_id INT NOT NULL UNIQUE AFTER id","sqlMessage":"unsupported add column 'tracker_id' constraint UNIQUE KEY when altering 'ddp.internship_reports'","sqlState":"HY000","stack":"Error: unsupported add column 'tracker_id' constraint UNIQUE KEY when altering 'ddp.internship_reports'\n    at PromisePool.query (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/node_modules/mysql2/lib/promise/pool.js:36:22)\n    at ensureTablesExist (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/internshipReport.service.ts:86:16)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async InternshipReportService.listReports (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/internshipReport.service.ts:406:5)\n    at async <anonymous> (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/routes/internshipReport.routes.ts:142:21)","timestamp":"2026-04-11 09:02:19"}
+{"code":"ER_DUP_FIELDNAME","errno":1060,"level":"warn","message":"Could not add internship_reports.report_number column, it may already exist or require manual migration. Duplicate column name 'report_number'","service":"faculty-tracking-api","sql":"ALTER TABLE internship_reports ADD COLUMN report_number BIGINT UNSIGNED NULL AFTER id","sqlMessage":"Duplicate column name 'report_number'","sqlState":"42S21","stack":"Error: Duplicate column name 'report_number'\n    at PromisePool.query (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/node_modules/mysql2/lib/promise/pool.js:36:22)\n    at ensureTablesExist (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/internshipReport.service.ts:92:16)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async InternshipReportService.listReports (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/internshipReport.service.ts:406:5)\n    at async <anonymous> (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/routes/internshipReport.routes.ts:142:21)","timestamp":"2026-04-11 09:02:19"}
+{"code":"ER_DUP_FIELDNAME","errno":1060,"level":"warn","message":"Could not add internship_reports.reject_reason column, it may already exist or require manual migration. Duplicate column name 'reject_reason'","service":"faculty-tracking-api","sql":"ALTER TABLE internship_reports ADD COLUMN reject_reason VARCHAR(255) DEFAULT NULL AFTER iqac_verification","sqlMessage":"Duplicate column name 'reject_reason'","sqlState":"42S21","stack":"Error: Duplicate column name 'reject_reason'\n    at PromisePool.query (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/node_modules/mysql2/lib/promise/pool.js:36:22)\n    at ensureTablesExist (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/internshipReport.service.ts:98:16)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async InternshipReportService.listReports (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/internshipReport.service.ts:406:5)\n    at async <anonymous> (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/routes/internshipReport.routes.ts:142:21)","timestamp":"2026-04-11 09:02:19"}
+{"code":"ER_FK_DUP_NAME","errno":1826,"level":"warn","message":"Could not add internship_reports.fk_tracker constraint, it may already exist or require manual migration. Duplicate foreign key constraint name 'fk_tracker'","service":"faculty-tracking-api","sql":"ALTER TABLE internship_reports ADD CONSTRAINT fk_tracker FOREIGN KEY (tracker_id) REFERENCES internship_tracker(id)","sqlMessage":"Duplicate foreign key constraint name 'fk_tracker'","sqlState":"HY000","stack":"Error: Duplicate foreign key constraint name 'fk_tracker'\n    at PromisePool.query (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/node_modules/mysql2/lib/promise/pool.js:36:22)\n    at ensureTablesExist (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/internshipReport.service.ts:104:16)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async InternshipReportService.listReports (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/internshipReport.service.ts:406:5)\n    at async <anonymous> (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/routes/internshipReport.routes.ts:142:21)","timestamp":"2026-04-11 09:02:19"}
+{"level":"info","message":"internship_reports tables are ready","service":"faculty-tracking-api","timestamp":"2026-04-11 09:02:19"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-11 09:02:21"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-11 09:02:21"}
+{"level":"info","message":"GET /api/internship-report","service":"faculty-tracking-api","timestamp":"2026-04-11 09:02:22"}
+{"level":"info","message":"GET /api/internship-report","service":"faculty-tracking-api","timestamp":"2026-04-11 09:02:22"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-11 09:02:25"}
+{"level":"info","message":"GET /api/internship-tracker","service":"faculty-tracking-api","timestamp":"2026-04-11 09:02:25"}
+{"level":"info","message":"GET /api/internship-report","service":"faculty-tracking-api","timestamp":"2026-04-11 09:02:29"}
+{"level":"info","message":"GET /api/internship-report","service":"faculty-tracking-api","timestamp":"2026-04-11 09:02:29"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-11 09:04:07"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-11 09:04:07"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-11 09:04:09"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-11 09:04:11"}
+{"level":"info","message":"GET /api/internship-report","service":"faculty-tracking-api","timestamp":"2026-04-11 09:04:11"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-11 09:04:12"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-11 09:04:12"}
+{"errno":8200,"level":"warn","message":"Could not add internship_reports.tracker_id column, it may already exist or require manual migration. unsupported add column 'tracker_id' constraint UNIQUE KEY when altering 'ddp.internship_reports'","service":"faculty-tracking-api","sql":"ALTER TABLE internship_reports ADD COLUMN tracker_id INT NOT NULL UNIQUE AFTER id","sqlMessage":"unsupported add column 'tracker_id' constraint UNIQUE KEY when altering 'ddp.internship_reports'","sqlState":"HY000","stack":"Error: unsupported add column 'tracker_id' constraint UNIQUE KEY when altering 'ddp.internship_reports'\n    at PromisePool.query (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/node_modules/mysql2/lib/promise/pool.js:36:22)\n    at ensureTablesExist (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/internshipReport.service.ts:86:16)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async InternshipReportService.listReports (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/internshipReport.service.ts:406:5)\n    at async <anonymous> (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/routes/internshipReport.routes.ts:142:21)","timestamp":"2026-04-11 09:04:14"}
+{"code":"ER_DUP_FIELDNAME","errno":1060,"level":"warn","message":"Could not add internship_reports.report_number column, it may already exist or require manual migration. Duplicate column name 'report_number'","service":"faculty-tracking-api","sql":"ALTER TABLE internship_reports ADD COLUMN report_number BIGINT UNSIGNED NULL AFTER id","sqlMessage":"Duplicate column name 'report_number'","sqlState":"42S21","stack":"Error: Duplicate column name 'report_number'\n    at PromisePool.query (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/node_modules/mysql2/lib/promise/pool.js:36:22)\n    at ensureTablesExist (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/internshipReport.service.ts:92:16)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async InternshipReportService.listReports (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/internshipReport.service.ts:406:5)\n    at async <anonymous> (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/routes/internshipReport.routes.ts:142:21)","timestamp":"2026-04-11 09:04:15"}
+{"code":"ER_DUP_FIELDNAME","errno":1060,"level":"warn","message":"Could not add internship_reports.reject_reason column, it may already exist or require manual migration. Duplicate column name 'reject_reason'","service":"faculty-tracking-api","sql":"ALTER TABLE internship_reports ADD COLUMN reject_reason VARCHAR(255) DEFAULT NULL AFTER iqac_verification","sqlMessage":"Duplicate column name 'reject_reason'","sqlState":"42S21","stack":"Error: Duplicate column name 'reject_reason'\n    at PromisePool.query (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/node_modules/mysql2/lib/promise/pool.js:36:22)\n    at ensureTablesExist (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/internshipReport.service.ts:98:16)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async InternshipReportService.listReports (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/internshipReport.service.ts:406:5)\n    at async <anonymous> (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/routes/internshipReport.routes.ts:142:21)","timestamp":"2026-04-11 09:04:15"}
+{"code":"ER_FK_DUP_NAME","errno":1826,"level":"warn","message":"Could not add internship_reports.fk_tracker constraint, it may already exist or require manual migration. Duplicate foreign key constraint name 'fk_tracker'","service":"faculty-tracking-api","sql":"ALTER TABLE internship_reports ADD CONSTRAINT fk_tracker FOREIGN KEY (tracker_id) REFERENCES internship_tracker(id)","sqlMessage":"Duplicate foreign key constraint name 'fk_tracker'","sqlState":"HY000","stack":"Error: Duplicate foreign key constraint name 'fk_tracker'\n    at PromisePool.query (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/node_modules/mysql2/lib/promise/pool.js:36:22)\n    at ensureTablesExist (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/internshipReport.service.ts:104:16)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async InternshipReportService.listReports (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/internshipReport.service.ts:406:5)\n    at async <anonymous> (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/routes/internshipReport.routes.ts:142:21)","timestamp":"2026-04-11 09:04:15"}
+{"level":"info","message":"internship_reports tables are ready","service":"faculty-tracking-api","timestamp":"2026-04-11 09:04:15"}
+{"level":"info","message":"GET /api/internship-report","service":"faculty-tracking-api","timestamp":"2026-04-11 09:11:45"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-11 09:11:49"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-11 09:11:49"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-11 09:11:59"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-11 09:12:02"}
+{"level":"info","message":"GET /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-11 09:12:03"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-11 09:12:04"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-11 09:12:04"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-11 09:12:04"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-11 09:12:04"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-11 09:23:15"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-11 09:23:15"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-11 09:35:22"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-11 09:35:32"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-11 09:35:35"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-11 09:35:35"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-11 09:35:37"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-11 09:35:37"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-11 09:35:39"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-11 09:35:39"}
+{"level":"info","message":"GET /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-11 09:35:40"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-11 09:35:48"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-11 09:35:48"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-11 09:35:48"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-11 09:35:48"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-11 09:35:58"}
+{"level":"info","message":"No token provided - request allowed without authentication","service":"faculty-tracking-api","timestamp":"2026-04-11 09:35:58"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-11 09:36:09"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-11 09:36:11"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-11 09:36:11"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-11 09:36:14"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-11 09:36:14"}
+{"level":"info","message":"GET /api/sdgs","service":"faculty-tracking-api","timestamp":"2026-04-11 09:36:15"}
+{"level":"info","message":"Fetched 17 SDG goals","service":"faculty-tracking-api","timestamp":"2026-04-11 09:36:15"}
+{"level":"info","message":"POST /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-11 09:36:54"}
+{"level":"info","message":"Paper presentation created with ID: 180001","service":"faculty-tracking-api","timestamp":"2026-04-11 09:36:55"}
+{"level":"info","message":"Paper presentation created: 180001","service":"faculty-tracking-api","timestamp":"2026-04-11 09:36:55"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-11 09:36:55"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-11 09:36:55"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-11 09:36:55"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-11 09:36:55"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-11 09:37:01"}
+{"level":"info","message":"No token provided - request allowed without authentication","service":"faculty-tracking-api","timestamp":"2026-04-11 09:37:01"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-11 09:37:08"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-11 09:37:08"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-11 09:37:09"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-11 09:37:10"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-11 09:37:10"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-11 09:37:10"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-11 09:37:10"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-11 09:41:04"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-11 09:41:04"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-11 09:41:16"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-11 09:41:16"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-11 09:41:19"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-11 09:41:20"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-11 09:41:21"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-11 09:41:21"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-11 09:41:23"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-11 09:41:26"}
+{"level":"info","message":"GET /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-11 09:41:27"}
+{"level":"info","message":"GET /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-11 09:41:33"}
+{"level":"warn","message":"No token provided","service":"faculty-tracking-api","timestamp":"2026-04-11 09:41:33"}
+{"level":"info","message":"GET /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-11 09:41:41"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-11 09:41:44"}
+{"level":"info","message":"GET /api/clubs","service":"faculty-tracking-api","timestamp":"2026-04-11 09:41:44"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-11 09:41:44"}
+{"level":"info","message":"POST /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-11 09:42:32"}
+{"code":"ER_BAD_FIELD_ERROR","errno":1054,"level":"error","message":"Error creating non-technical event record: Unknown column 'organisation_name' in 'field list'","service":"faculty-tracking-api","sql":"\n        INSERT INTO student_non_technical (\n          student_id, student_name, year_of_study, event_attended, club_id, club_events,\n          other_event_specify, event_start_date, event_end_date, event_duration, event_mode, event_location,\n          event_organiser, organisation_name, organisation_location, event_level, country, state, within_bit,\n          home_department, role_in_event, role_specify_organised, role_specify_participated,\n          status, prize_type, prize_amount, social_activity_involved, social_activity_name,\n          time_spent_hours, interdisciplinary, interdisciplinary_dept, other_dept_student_count,\n          certificate_proof_path, iqac_verification, created_by\n        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n      ","sqlMessage":"Unknown column 'organisation_name' in 'field list'","sqlState":"42S22","stack":"Error: Unknown column 'organisation_name' in 'field list'\n    at PromisePoolConnection.execute (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/node_modules/mysql2/lib/promise/connection.js:47:22)\n    at StudentNonTechnicalService.createRecord (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/studentNonTechnical.service.ts:105:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async <anonymous> (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/routes/studentNonTechnical.routes.ts:136:22)","timestamp":"2026-04-11 09:42:32"}
+{"code":"ER_BAD_FIELD_ERROR","errno":1054,"level":"error","message":"Error creating non-technical event record: Unknown column 'organisation_name' in 'field list'","service":"faculty-tracking-api","sql":"\n        INSERT INTO student_non_technical (\n          student_id, student_name, year_of_study, event_attended, club_id, club_events,\n          other_event_specify, event_start_date, event_end_date, event_duration, event_mode, event_location,\n          event_organiser, organisation_name, organisation_location, event_level, country, state, within_bit,\n          home_department, role_in_event, role_specify_organised, role_specify_participated,\n          status, prize_type, prize_amount, social_activity_involved, social_activity_name,\n          time_spent_hours, interdisciplinary, interdisciplinary_dept, other_dept_student_count,\n          certificate_proof_path, iqac_verification, created_by\n        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n      ","sqlMessage":"Unknown column 'organisation_name' in 'field list'","sqlState":"42S22","stack":"Error: Unknown column 'organisation_name' in 'field list'\n    at PromisePoolConnection.execute (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/node_modules/mysql2/lib/promise/connection.js:47:22)\n    at StudentNonTechnicalService.createRecord (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/studentNonTechnical.service.ts:105:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async <anonymous> (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/routes/studentNonTechnical.routes.ts:136:22)","timestamp":"2026-04-11 09:42:32"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-11 09:54:39"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-11 09:54:39"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-11 09:54:45"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-11 09:54:50"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-11 09:54:50"}
+{"level":"info","message":"GET /api/sdgs","service":"faculty-tracking-api","timestamp":"2026-04-11 09:54:51"}
+{"level":"info","message":"Fetched 17 SDG goals","service":"faculty-tracking-api","timestamp":"2026-04-11 09:54:51"}
+{"level":"info","message":"POST /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-11 09:55:17"}
+{"level":"info","message":"Project competition created with ID: 30001","service":"faculty-tracking-api","timestamp":"2026-04-11 09:55:17"}
+{"level":"info","message":"Project competition created: 30001","service":"faculty-tracking-api","timestamp":"2026-04-11 09:55:17"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-11 09:55:17"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-11 09:55:22"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-11 09:55:22"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-11 09:55:46"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-11 09:55:48"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-11 09:55:48"}
+{"level":"info","message":"POST /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-11 09:55:57"}
+{"level":"info","message":"Technical body membership created with ID: 60001","service":"faculty-tracking-api","timestamp":"2026-04-11 09:55:58"}
+{"level":"info","message":"Technical body membership created: 60001","service":"faculty-tracking-api","timestamp":"2026-04-11 09:55:58"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-11 09:55:58"}
+{"level":"info","message":"GET /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-11 09:56:00"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-11 09:56:02"}
+{"level":"info","message":"GET /api/clubs","service":"faculty-tracking-api","timestamp":"2026-04-11 09:56:02"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-11 09:56:02"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-11 09:56:02"}
+{"level":"info","message":"GET /api/verified-students","service":"faculty-tracking-api","timestamp":"2026-04-11 09:56:02"}
+{"level":"info","message":"POST /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-11 10:01:47"}
+{"code":"ECONNRESET","errno":-54,"level":"error","message":"Error creating non-technical event record: read ECONNRESET","service":"faculty-tracking-api","stack":"Error: read ECONNRESET\n    at PromisePoolConnection.execute (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/node_modules/mysql2/lib/promise/connection.js:47:22)\n    at StudentNonTechnicalService.createRecord (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/studentNonTechnical.service.ts:105:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async <anonymous> (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/routes/studentNonTechnical.routes.ts:136:22)","timestamp":"2026-04-11 10:01:47"}
+{"code":"ECONNRESET","errno":-54,"level":"error","message":"Error creating non-technical event record: read ECONNRESET","service":"faculty-tracking-api","stack":"Error: read ECONNRESET\n    at PromisePoolConnection.execute (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/node_modules/mysql2/lib/promise/connection.js:47:22)\n    at StudentNonTechnicalService.createRecord (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/studentNonTechnical.service.ts:105:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async <anonymous> (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/routes/studentNonTechnical.routes.ts:136:22)","timestamp":"2026-04-11 10:01:47"}
+{"level":"info","message":"POST /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-11 10:05:25"}
+{"code":"ECONNRESET","errno":-54,"level":"error","message":"Error creating non-technical event record: read ECONNRESET","service":"faculty-tracking-api","stack":"Error: read ECONNRESET\n    at PromisePoolConnection.execute (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/node_modules/mysql2/lib/promise/connection.js:47:22)\n    at StudentNonTechnicalService.createRecord (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/studentNonTechnical.service.ts:105:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async <anonymous> (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/routes/studentNonTechnical.routes.ts:136:22)","timestamp":"2026-04-11 10:05:25"}
+{"code":"ECONNRESET","errno":-54,"level":"error","message":"Error creating non-technical event record: read ECONNRESET","service":"faculty-tracking-api","stack":"Error: read ECONNRESET\n    at PromisePoolConnection.execute (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/node_modules/mysql2/lib/promise/connection.js:47:22)\n    at StudentNonTechnicalService.createRecord (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/studentNonTechnical.service.ts:105:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async <anonymous> (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/routes/studentNonTechnical.routes.ts:136:22)","timestamp":"2026-04-11 10:05:25"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-11 10:05:53"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-11 10:05:53"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-11 10:05:56"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-11 10:05:57"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-11 10:05:58"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-11 10:05:58"}
+{"level":"info","message":"POST /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-11 10:06:31"}
+{"code":"ER_WRONG_VALUE_COUNT_ON_ROW","errno":1136,"level":"error","message":"Error creating non-technical event record: Column count doesn't match value count at row 1","service":"faculty-tracking-api","sql":"\n        INSERT INTO student_non_technical (\n          student_id, student_name, year_of_study, event_attended, club_id, club_events,\n          other_event_specify, event_start_date, event_end_date, event_duration, event_mode, event_location,\n          event_organiser, organisation_name, organisation_location, event_level, country, state, within_bit,\n          home_department, role_in_event, role_specify_organised, role_specify_participated,\n          status, prize_type, prize_amount, social_activity_involved, social_activity_name,\n          time_spent_hours, interdisciplinary, interdisciplinary_dept, other_dept_student_count,\n          certificate_proof_path, iqac_verification, created_by\n        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n      ","sqlMessage":"Column count doesn't match value count at row 1","sqlState":"21S01","stack":"Error: Column count doesn't match value count at row 1\n    at PromisePoolConnection.execute (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/node_modules/mysql2/lib/promise/connection.js:47:22)\n    at StudentNonTechnicalService.createRecord (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/studentNonTechnical.service.ts:106:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async <anonymous> (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/routes/studentNonTechnical.routes.ts:136:22)","timestamp":"2026-04-11 10:06:32"}
+{"code":"ER_WRONG_VALUE_COUNT_ON_ROW","errno":1136,"level":"error","message":"Error creating non-technical event record: Column count doesn't match value count at row 1","service":"faculty-tracking-api","sql":"\n        INSERT INTO student_non_technical (\n          student_id, student_name, year_of_study, event_attended, club_id, club_events,\n          other_event_specify, event_start_date, event_end_date, event_duration, event_mode, event_location,\n          event_organiser, organisation_name, organisation_location, event_level, country, state, within_bit,\n          home_department, role_in_event, role_specify_organised, role_specify_participated,\n          status, prize_type, prize_amount, social_activity_involved, social_activity_name,\n          time_spent_hours, interdisciplinary, interdisciplinary_dept, other_dept_student_count,\n          certificate_proof_path, iqac_verification, created_by\n        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n      ","sqlMessage":"Column count doesn't match value count at row 1","sqlState":"21S01","stack":"Error: Column count doesn't match value count at row 1\n    at PromisePoolConnection.execute (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/node_modules/mysql2/lib/promise/connection.js:47:22)\n    at StudentNonTechnicalService.createRecord (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/services/studentNonTechnical.service.ts:106:41)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async <anonymous> (/Users/sudhirsivakumar/Documents/college-projects/DDP-Portal/backend/src/routes/studentNonTechnical.routes.ts:136:22)","timestamp":"2026-04-11 10:06:32"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-11 10:07:26"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-11 10:07:26"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-11 10:07:28"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-11 10:07:30"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-11 10:07:31"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-11 10:07:31"}
+{"level":"info","message":"Server running on port 5000","service":"faculty-tracking-api","timestamp":"2026-04-11 10:07:46"}
+{"level":"info","message":"Environment: development","service":"faculty-tracking-api","timestamp":"2026-04-11 10:07:46"}
+{"level":"info","message":"MySQL connection established for bulk import.","service":"faculty-tracking-api","timestamp":"2026-04-11 10:07:48"}
+{"level":"info","message":"Student non-technical table created/verified successfully","service":"faculty-tracking-api","timestamp":"2026-04-11 10:07:50"}
+{"level":"info","message":"POST /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-11 10:07:51"}
+{"level":"info","message":"Database schema verified and initialized","service":"faculty-tracking-api","timestamp":"2026-04-11 10:07:51"}
+{"level":"info","message":"MySQL connection established for database: ddp.","service":"faculty-tracking-api","timestamp":"2026-04-11 10:07:51"}
+{"level":"info","message":"Non-technical event record created with ID: 30001","service":"faculty-tracking-api","timestamp":"2026-04-11 10:07:54"}
+{"level":"info","message":"Non-technical event record created: 30001","service":"faculty-tracking-api","timestamp":"2026-04-11 10:07:54"}
+{"level":"info","message":"GET /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-11 10:07:55"}
+{"level":"info","message":"GET /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-11 10:08:04"}
+{"level":"warn","message":"No token provided","service":"faculty-tracking-api","timestamp":"2026-04-11 10:08:04"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-11 10:08:19"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-11 10:08:19"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-11 10:08:22"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-11 10:08:25"}
+{"level":"info","message":"GET /api/student-non-technical","service":"faculty-tracking-api","timestamp":"2026-04-11 10:08:28"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-11 10:08:31"}
+{"level":"info","message":"GET /api/student-technical-body-memberships","service":"faculty-tracking-api","timestamp":"2026-04-11 10:08:31"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-11 10:08:32"}
+{"level":"info","message":"GET /api/student-project-competitions","service":"faculty-tracking-api","timestamp":"2026-04-11 10:08:32"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-11 10:08:34"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-11 10:08:34"}
+{"level":"info","message":"GET /api/student-paper-presentations","service":"faculty-tracking-api","timestamp":"2026-04-11 10:08:34"}
+{"level":"warn","message":"Invalid token provided:","service":"faculty-tracking-api","timestamp":"2026-04-11 10:08:34"}

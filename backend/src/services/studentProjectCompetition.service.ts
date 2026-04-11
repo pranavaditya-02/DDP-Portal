@@ -18,7 +18,7 @@ export interface StudentProjectCompetitionData {
   status: 'participated' | 'winner' | 'runner';
   winnerPlace?: string;
   prizeType?: string;
-  iqacVerification?: 'initiated' | 'processing' | 'completed';
+  iqacVerification?: 'initiated' | 'approved' | 'rejected';
   iqacRejectionRemarks?: string;
   parentalDepartmentId?: number;
   createdBy?: string;
@@ -272,6 +272,36 @@ class StudentProjectCompetitionService {
       return false;
     } catch (error) {
       logger.error('Error deleting project competition:', error);
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
+
+  /**
+   * Get a project competition record by ID with student email for notifications
+   */
+  async getCompetitionByIdWithEmail(id: number): Promise<any> {
+    const pool = getMysqlPool();
+    const connection = await pool.getConnection();
+
+    try {
+      const query = `
+        SELECT spc.*, s.college_email as student_email
+        FROM student_project_competitions spc
+        LEFT JOIN students s ON spc.student_id = s.roll_no
+        WHERE spc.id = ?
+      `;
+      const [rows] = await connection.execute(query, [id]);
+      const results = rows as any[];
+      
+      if (results.length > 0) {
+        const record = convertToCamelCase(results[0]);
+        return record;
+      }
+      return null;
+    } catch (error) {
+      logger.error('Error fetching project competition with email:', error);
       throw error;
     } finally {
       connection.release();

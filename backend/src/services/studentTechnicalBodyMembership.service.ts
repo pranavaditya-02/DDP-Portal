@@ -17,7 +17,7 @@ export interface StudentTechnicalBodyMembershipData {
   specifyActivity?: string;
   activityStatus?: string;
   certificateProofPath?: string;
-  iqacVerification?: 'initiated' | 'processing' | 'completed';
+  iqacVerification?: 'initiated' | 'approved' | 'rejected';
   iqacRejectionRemarks?: string;
   createdBy?: string;
 }
@@ -237,6 +237,36 @@ class StudentTechnicalBodyMembershipService {
       return affectedRows > 0;
     } catch (error) {
       logger.error('Error deleting technical body membership:', error);
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
+
+  /**
+   * Get a technical body membership record by ID with student email for notifications
+   */
+  async getMembershipByIdWithEmail(id: number): Promise<any> {
+    const pool = getMysqlPool();
+    const connection = await pool.getConnection();
+
+    try {
+      const query = `
+        SELECT stbm.*, s.college_email as student_email
+        FROM student_technical_body_memberships stbm
+        LEFT JOIN students s ON stbm.student_id = s.roll_no
+        WHERE stbm.id = ?
+      `;
+      const [rows] = await connection.execute(query, [id]);
+      const results = rows as any[];
+      
+      if (results.length > 0) {
+        const record = convertToCamelCase(results[0]);
+        return record;
+      }
+      return null;
+    } catch (error) {
+      logger.error('Error fetching technical body membership with email:', error);
       throw error;
     } finally {
       connection.release();
