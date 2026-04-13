@@ -2,20 +2,55 @@ import type { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { logger } from '../utils/logger';
 
+export const AUTH_COOKIE_NAME = 'ddp_auth_token';
+
 export interface AuthRequest extends Request {
   user?: {
     id: number;
+    username: string;
     email: string;
+    name: string;
+    roleId: number;
+    roleName: string;
     roles: string[];
-    departmentId?: number;
+    facultyId?: string | null;
   };
 }
 
 interface JWTPayload {
   id: number;
+  username: string;
   email: string;
+  name: string;
+  roleId: number;
+  roleName: string;
   roles: string[];
-  departmentId?: number;
+  facultyId?: string | null;
+  exp?: number;
+}
+
+const parseCookies = (cookieHeader?: string) => {
+  if (!cookieHeader) return {} as Record<string, string>
+
+  return cookieHeader.split(';').reduce<Record<string, string>>((accumulator, part) => {
+    const index = part.indexOf('=')
+    if (index === -1) return accumulator
+
+    const key = part.slice(0, index).trim()
+    const value = decodeURIComponent(part.slice(index + 1).trim())
+    accumulator[key] = value
+    return accumulator
+  }, {})
+}
+
+const extractToken = (req: Request) => {
+  const authorizationHeader = req.headers['authorization']
+  if (authorizationHeader && authorizationHeader.startsWith('Bearer ')) {
+    return authorizationHeader.slice(7)
+  }
+
+  const cookies = parseCookies(req.headers.cookie)
+  return cookies[AUTH_COOKIE_NAME] || null
 }
 
 export const authenticateToken = (
@@ -23,8 +58,7 @@ export const authenticateToken = (
   res: Response,
   next: NextFunction
 ) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+  const token = extractToken(req);
 
   if (!token) {
     logger.warn('No token provided');

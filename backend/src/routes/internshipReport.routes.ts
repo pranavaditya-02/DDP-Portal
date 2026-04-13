@@ -4,7 +4,8 @@ import fs from 'fs';
 import path from 'path';
 import { z } from 'zod';
 import internshipReportService from '../services/internshipReport.service';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/logger';   
+import { sendEmail } from '../utils/mailer';
 
 const router = express.Router();
 
@@ -25,7 +26,20 @@ const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, uploadDir),
   filename: (_req, file, cb) => {
     const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
-    cb(null, `${Date.now()}-${safeName}`);
+    // Ensure generated filenames are unique within this request (avoid collisions across fields)
+    const reqAny = _req as any;
+    if (!reqAny._generatedFilenames) reqAny._generatedFilenames = new Set<string>();
+    const makeCandidate = () => `${Date.now()}-${Math.random().toString(36).slice(2, 9)}-${safeName}`;
+    let candidate = makeCandidate();
+    while (reqAny._generated_filenames && reqAny._generated_filenames.has && false) {
+      // noop (kept for safety in case of older deployments) - never used
+      break;
+    }
+    while (reqAny._generatedFilenames.has(candidate)) {
+      candidate = makeCandidate();
+    }
+    reqAny._generatedFilenames.add(candidate);
+    cb(null, candidate);
   },
 });
 
@@ -83,6 +97,9 @@ router.post(
       const parsed = internshipReportSchema.parse(req.body);
 
       const files = req.files as Record<string, Express.Multer.File[]> | undefined;
+      // Log received files for debugging duplicate/missing uploads
+      logger.info('Received report upload files:', { keys: Object.keys(files || {}), filesSummary: Object.entries(files || {}).map(([k, arr]) => ({ field: k, count: arr.length, filenames: arr.map(f => f.filename) })) });
+
       const fullDocument = files?.fullDocumentProof?.[0] ?? null;
       const originalCertificate = files?.originalCertificateProof?.[0] ?? null;
       const attestedCertificate = files?.attestedCertificate?.[0] ?? null;
@@ -154,22 +171,46 @@ router.patch(
       const { iqac_verification, reject_reason } = req.body;
 
       const parsed = z.object({
-        iqac_verification: z.enum(['Initiated', 'Approved', 'Rejected']),
+        iqac_verification: z.enum(['initiated', 'approved', 'declined']),
         reject_reason: z.string().trim().min(1).optional(),
       }).parse({ iqac_verification, reject_reason });
 
-      if (parsed.iqac_verification === 'Rejected' && !parsed.reject_reason) {
-        return res.status(400).json({ error: 'Reject reason is required when rejecting a report.' });
+      if (parsed.iqac_verification === 'declined' && !parsed.reject_reason) {
+        return res.status(400).json({ error: 'Reject reason is required when declining a report.' });
+      }
+
+      const searchId = Number(reportId);
+      const existingReport = await internshipReportService.getReportByIdOrNumber(searchId);
+      if (!existingReport) {
+        return res.status(404).json({ error: 'Internship report not found' });
       }
 
       const report = await internshipReportService.updateIqacVerification(
-        Number(reportId),
+        existingReport.id,
         parsed.iqac_verification,
         parsed.reject_reason,
       );
 
       if (!report) {
         return res.status(404).json({ error: 'Internship report not found' });
+      }
+
+      if (report.student_email && parsed.iqac_verification !== 'initiated') {
+        const statusText = parsed.iqac_verification === 'approved' ? 'approved' : 'declined';
+        const subject = `Internship Report ${statusText.toUpperCase()} | BannariAmman College IQAC`;
+        const bodyText = `Hello ${report.student_name ?? 'Student'},\n\nYour internship report submission (ID: ${report.id}) has been ${statusText} by the IQAC team at BannariAmman College.\n\n${parsed.reject_reason ? `Reason: ${parsed.reject_reason}\n\n` : ''}If you have any questions, please reply to this email.\n\nIQAC Team\nSanthosh\n BannariAmman College`;
+        const bodyHtml = `<p>Hello ${report.student_name ?? 'Student'},</p><p>Your internship report submission <strong>(ID: ${report.id})</strong> has been <strong>${statusText}</strong> by the IQAC team at <strong>BannariAmman College</strong>.</p>${parsed.reject_reason ? `<p><strong>Reason:</strong> ${parsed.reject_reason}</p>` : ''}<p>If you have any questions, please reply to this email.</p><p>IQAC Team<br/>BannariAmman College</p>`;
+
+        try {
+          await sendEmail({
+            to: report.student_email,
+            subject,
+            text: bodyText,
+            html: bodyHtml,
+          });
+        } catch (emailError) {
+          logger.error('Failed to send internship report status email:', emailError);
+        }
       }
 
       return res.json({ message: 'IQAC verification updated successfully', report });
@@ -209,7 +250,7 @@ router.get('/sdg-goals', async (_req, res) => {
 router.get('/:reportId(\\d+)', async (req, res) => {
   try {
     const reportId = Number(req.params.reportId);
-    const report = await internshipReportService.getReportById(reportId);
+    const report = await internshipReportService.getReportByIdOrNumber(reportId);
     if (!report) {
       return res.status(404).json({ error: 'Internship report not found' });
     }

@@ -1,8 +1,8 @@
--- Migration: Create event_registrations table for student event registrations and verification workflow
+-- Migration: Create Activity_logger table for student event registrations and verification workflow
 
-CREATE TABLE IF NOT EXISTS `event_registrations` (
+CREATE TABLE IF NOT EXISTS `Activity_logger` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `event_id` INT NOT NULL COMMENT 'FK to event_master.id',
+  `event_id` INT NOT NULL COMMENT 'FK to Activity_Master.id',
   `student_id` INT NULL COMMENT 'User id from auth token when available',
   `student_name` VARCHAR(255) NOT NULL COMMENT 'Display name of student',
   `student_email` VARCHAR(255) NULL COMMENT 'Email from auth token when available',
@@ -20,11 +20,11 @@ CREATE TABLE IF NOT EXISTS `event_registrations` (
   `created_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `idx_event_registrations_event_id` (`event_id`),
-  KEY `idx_event_registrations_status` (`status`),
-  KEY `idx_event_registrations_student_id` (`student_id`),
-  KEY `idx_event_registrations_created_date` (`created_date`),
-  CONSTRAINT `fk_event_registrations_event_id`
-    FOREIGN KEY (`event_id`) REFERENCES `event_master` (`id`)
+  KEY `idx_Activity_logger_event_id` (`event_id`),
+  KEY `idx_Activity_logger_status` (`status`),
+  KEY `idx_Activity_logger_student_id` (`student_id`),
+  KEY `idx_Activity_logger_created_date` (`created_date`),
+  CONSTRAINT `fk_Activity_logger_event_id`
+    FOREIGN KEY (`event_id`) REFERENCES `Activity_Master` (`id`)
     ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Student registrations and verification decisions for event master records';

@@ -1,11 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/store";
+import { apiClient } from "@/lib/api";
 import { useRoles } from "@/hooks/useRoles";
 import { studentNavItems } from "@/lib/student-navigation";
+import { AUTH_COOKIE_NAME } from "@/lib/auth-session";
+import { clearAuthCookie } from "@/app/actions";
 import {
   LayoutDashboard,
   FileText,
@@ -81,8 +84,79 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [owiExpanded, setOwiExpanded] = useState(false);
   const [rndExpanded, setRndExpanded] = useState(false);
   const [studentExpanded, setStudentExpanded] = useState(false);
+  const [verificationQueuePendingCount, setVerificationQueuePendingCount] = useState(0);
+  const [verificationPanelPendingCount, setVerificationPanelPendingCount] = useState(0);
+  const isVerificationUser = isVerification();
+  const canAccessLogger = isFaculty() || isHod() || isDean() || isVerification() || isAdmin();
 
-  const handleLogout = () => {
+  useEffect(() => {
+    if (!isVerificationUser) {
+      setVerificationQueuePendingCount(0);
+      setVerificationPanelPendingCount(0);
+      return;
+    }
+
+    let active = true;
+
+    const getListCount = (value: unknown) => {
+      if (Array.isArray(value)) return value.length;
+      if (!value || typeof value !== "object") return 0;
+
+      const maybeObject = value as {
+        activities?: unknown;
+        registrations?: unknown;
+        data?: unknown;
+        count?: unknown;
+      };
+
+      if (Array.isArray(maybeObject.activities)) return maybeObject.activities.length;
+      if (Array.isArray(maybeObject.registrations)) return maybeObject.registrations.length;
+      if (Array.isArray(maybeObject.data)) return maybeObject.data.length;
+      if (typeof maybeObject.count === "number") return maybeObject.count;
+
+      return 0;
+    };
+
+    const loadPendingCount = async () => {
+      try {
+        const [queueResponse, panelResponse] = await Promise.all([
+          apiClient.getPendingActivities(),
+          apiClient.getVerificationRegistrations("pending"),
+        ]);
+
+        if (!active) return;
+
+        setVerificationQueuePendingCount(getListCount(queueResponse));
+        setVerificationPanelPendingCount(getListCount(panelResponse));
+      } catch {
+        if (!active) return;
+        setVerificationQueuePendingCount(0);
+        setVerificationPanelPendingCount(0);
+      }
+    };
+
+    void loadPendingCount();
+
+    const handlePendingRefresh = () => {
+      void loadPendingCount();
+    };
+
+    window.addEventListener("verification-pending-updated", handlePendingRefresh);
+    const timer = window.setInterval(() => {
+      void loadPendingCount();
+    }, 30000);
+
+    return () => {
+      active = false;
+      window.removeEventListener("verification-pending-updated", handlePendingRefresh);
+      window.clearInterval(timer);
+    };
+  }, [isVerificationUser, pathname]);
+
+  const handleLogout = async () => {
+    await apiClient.logout().catch(() => undefined);
+    await clearAuthCookie().catch(() => undefined);
+    document.cookie = `${AUTH_COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
     logout();
     router.push("/login");
   };
@@ -99,6 +173,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           icon: LayoutDashboard,
           show: !isDean() && !isStudent(),
         },
+         
       ],
     },
     {
@@ -111,12 +186,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           show: isStudent(),
         },
         {
-          label: "Overview",
-          href: "/student/overview",
-          icon: FileText,
-          show: isStudent(),
-        },
-        {
           label: "Activity Master",
           href: "/student/activity/master",
           icon: Clipboard,
@@ -126,7 +195,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           label: "Activity Logger",
           href: "/student/activity/logger",
           icon: PlusCircle,
-          show: isStudent(),
+          show: false,
         },
         {
           label: "Create Event",
@@ -139,8 +208,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
           label: item.label,
           href: `/student/${item.slug}`,
           icon: FileText,
-          show: isStudent(),
+          show: isStudent() && item.slug !== 'activity-logger',
         })),
+      ],
+    },
+    {
+      title: "Logger",
+      items: [
+        {
+          label: "Activity Logger",
+          href: "/student/activity/logger",
+          icon: PlusCircle,
+          show: canAccessLogger,
+        },
       ],
     },
     {
@@ -213,14 +293,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
           label: "Verification Queue",
           href: "/verification",
           icon: ShieldCheck,
-          show: isVerification(),
-          badge: 7,
+          show: isVerificationUser,
+          badge: verificationQueuePendingCount,
         },
         {
           label: "Verification Panel",
           href: "/verification-panel",
           icon: ShieldCheck,
-          show: isVerification(),
+          show: isVerificationUser,
+          badge: verificationPanelPendingCount,
         },
         {
           label: "User Management",
@@ -256,8 +337,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const studentItems = [
     { id: "activityMaster", label: "Activity Master", icon: Clipboard, href: "/student/activity/master" },
     { id: "activityLogger", label: "Activity Logger", icon: PlusCircle, href: "/student/activity/logger" },
+    { id: "industries", label: "Industries", icon: Building2, href: "/student/industries" },
     { id: "internshipTracker", label: "Internship Tracker", icon: GraduationCap, href: "/student/internship/tracker" },
     { id: "internshipReport", label: "Internship Report", icon: ClipboardCheck, href: "/student/internship/report" },
+    { id: "patentTracker", label: "Patent Tracker", icon: ClipboardCheck, href: "/student/patent/tracker" },
+    { id: "patentReport", label: "Patent Report", icon: ClipboardCheck, href: "/student/patent/report" },
   ];
 
   const owiItems = [
@@ -393,12 +477,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     {!collapsed && (
                       <span className="flex-1 truncate">{item.label}</span>
                     )}
-                    {!collapsed && item.badge && (
+                    {!collapsed && typeof item.badge === "number" && item.badge > 0 && (
                       <span className="px-2 py-0.5 text-[10px] font-bold bg-red-500 text-white rounded-full">
                         {item.badge}
                       </span>
                     )}
-                    {collapsed && item.badge && (
+                    {collapsed && typeof item.badge === "number" && item.badge > 0 && (
                       <span className="absolute -top-1 -right-1 w-4 h-4 text-[9px] font-bold bg-red-500 text-white rounded-full flex items-center justify-center">
                         {item.badge}
                       </span>
@@ -419,7 +503,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             >
               <div className="flex items-center gap-3">
                 <Clipboard className="w-5 h-5 flex-shrink-0" />
-                <span>Activity</span>
+                <span>Faculty Achievements</span>
               </div>
               <ChevronDown
                 className={`w-4 h-4 transition-transform ${activityExpanded ? "rotate-180" : ""}`}
@@ -435,7 +519,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   >
                     <div className="flex items-center gap-3">
                       <Trophy className="w-5 h-5 flex-shrink-0" />
-                      <span>Faculty Achievements</span>
+                      <span>Activity</span>
                     </div>
                     <ChevronDown
                       className={`w-4 h-4 transition-transform ${achievementsExpanded ? "rotate-180" : ""}`}
@@ -517,7 +601,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   >
                     <div className="flex items-center gap-3">
                       <Users className="w-5 h-5 flex-shrink-0" />
-                      <span>OWI (Outside World Interaction)</span>
+                      <span>OWI </span>
                     </div>
                     <ChevronDown
                       className={`w-4 h-4 transition-transform ${owiExpanded ? "rotate-180" : ""}`}
@@ -609,7 +693,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   </button>
                   {studentExpanded && (
                     <div className="space-y-1 mt-2 ml-2">
-                      {studentItems.map((item) => {
+                      {studentItems
+                        .filter((item) => item.id !== "activityMaster" || isStudent())
+                        .map((item) => {
                         const Icon = item.icon;
                         const href = item.href;
                         return (

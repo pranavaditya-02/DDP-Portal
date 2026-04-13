@@ -1,11 +1,10 @@
--- Migration: Create event_master table for event intake and management
+-- Migration: Create Activity_Master table for event intake and management
 -- This table stores all event master records used for activity tracking
 
-CREATE TABLE IF NOT EXISTS `event_master` (
+CREATE TABLE IF NOT EXISTS `Activity_Master` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `maximum_count` INT NOT NULL DEFAULT 0 COMMENT 'Maximum seats available for the event',
   `applied_count` INT NOT NULL DEFAULT 0 COMMENT 'Number of applications received',
-  `balance_count` INT NOT NULL DEFAULT 0 COMMENT 'Remaining seats (maximum_count - applied_count)',
   `apply_by_student` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Whether students can apply directly',
   `event_code` VARCHAR(100) NOT NULL UNIQUE COMMENT 'Unique identifier for the event',
   `event_name` VARCHAR(255) NOT NULL COMMENT 'Name of the event',
@@ -27,6 +26,7 @@ CREATE TABLE IF NOT EXISTS `event_master` (
   `total_level_of_competition` VARCHAR(255) NULL COMMENT 'Details about competition level',
   `eligible_for_rewards` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Whether winners are eligible for rewards',
   `winner_rewards` VARCHAR(500) NULL COMMENT 'Details of rewards for winners',
+  `img_link` VARCHAR(500) NULL COMMENT 'Optional image/cover link for the event',
   `created_date` TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Record creation timestamp',
   `updated_date` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Record last update timestamp',
   

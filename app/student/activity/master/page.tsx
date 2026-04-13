@@ -85,6 +85,9 @@ const isCompleted = (event: UiEvent) => {
 }
 
 const getCardImage = (event: UiEvent) => {
+  if (event.imgLink && event.imgLink.trim().length > 0) {
+    return event.imgLink.trim()
+  }
   const idx = Math.abs(Number(event.id || 0)) % cardImages.length
   return cardImages[idx]
 }
@@ -157,8 +160,7 @@ function EventCard({
     >
       <div className="relative h-40 w-full overflow-hidden">
         <img
-          // src={imageUrl}
-          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRxBmFlWhIf--GRoU5qIlQ44AUFg9-opDFC7w&s"
+          src={imageUrl}
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"
         />
@@ -194,7 +196,7 @@ function EventCard({
 }
 
 export default function Page() {
-  const { isStudent, isAdmin, isVerification } = useRoles()
+  const { isStudent, isFaculty, isHod, isDean, isAdmin, isVerification, isMaintenance } = useRoles()
   const user = useAuthStore((state) => state.user)
   const [events, setEvents] = useState<UiEvent[]>([])
   const [myRegistrations, setMyRegistrations] = useState<EventRegistrationRecord[]>([])
@@ -221,12 +223,10 @@ export default function Page() {
         setLoading(true)
         setErrorMessage(null)
         setUsingFallback(false)
-        const token = useAuthStore.getState().token
-        const isDemoSession = !token || token.startsWith('demo-')
 
         const [eventsResponse, myRegistrationsResponse] = await Promise.all([
           apiClient.getEvents({ sort: 'desc' }),
-          isStudent() && !isDemoSession ? apiClient.getMyRegistrations().catch(() => ({ registrations: [] })) : Promise.resolve({ registrations: [] }),
+          isStudent() ? apiClient.getMyRegistrations().catch(() => ({ registrations: [] })) : Promise.resolve({ registrations: [] }),
         ])
 
         if (!isMounted) return
@@ -329,7 +329,15 @@ export default function Page() {
   )
 
   const activeCount = filteredEvents.filter((event) => isActiveStatus(event)).length
-  const isEventAlreadyRegistered = selectedEvent ? myRegistrations.some((item) => item.eventId === selectedEvent.id) : false
+  const selectedEventRegistration = selectedEvent
+    ? myRegistrations.find((item) => item.eventId === selectedEvent.id)
+    : undefined
+  const isEventAlreadyRegistered = Boolean(selectedEventRegistration)
+  const isEventApproved = selectedEventRegistration?.status === 'approved'
+  const registrationStatusLabel = selectedEventRegistration
+    ? selectedEventRegistration.status.charAt(0).toUpperCase() + selectedEventRegistration.status.slice(1)
+    : null
+  const selectedEventImage = selectedEvent ? getCardImage(selectedEvent) : cardImages[0]
 
   const openEventDetails = (event: UiEvent) => {
     setSelectedEvent(event)
@@ -349,59 +357,22 @@ export default function Page() {
     try {
       setRegistrationSubmitting(true)
       setErrorMessage(null)
-      const token = useAuthStore.getState().token
-      const isDemoSession = !token || token.startsWith('demo-')
-      let createdRegistration: EventRegistrationRecord | null = null
-
-      if (!isDemoSession) {
-        const response = await apiClient.registerForEvent({
-          eventId: selectedEvent.id,
-          studentName: registrationForm.student,
-          studentDepartment: null,
-          eventCategory: registrationForm.eventCategory || selectedEvent.eventCategory || null,
-          activityEvent: registrationForm.activityEvent,
-          fromDate: registrationForm.fromDate || null,
-          toDate: registrationForm.toDate || null,
-          modeOfParticipation: registrationForm.modeOfParticipation || null,
-          iqacVerification: registrationForm.iqacVerification || 'Initiated',
-        })
-        createdRegistration = response.registration
-      } else {
-        createdRegistration = {
-          id: Date.now(),
-          eventId: selectedEvent.id,
-          studentId: null,
-          studentName: registrationForm.student,
-          studentEmail: null,
-          studentDepartment: null,
-          eventCategory: registrationForm.eventCategory || selectedEvent.eventCategory || null,
-          activityEvent: registrationForm.activityEvent,
-          fromDate: registrationForm.fromDate || null,
-          toDate: registrationForm.toDate || null,
-          modeOfParticipation: registrationForm.modeOfParticipation || null,
-          iqacVerification: 'Initiated',
-          status: 'pending',
-          rejectionReason: null,
-          verifiedBy: null,
-          verifiedAt: null,
-          createdDate: new Date().toISOString(),
-          updatedDate: new Date().toISOString(),
-          eventName: selectedEvent.eventName,
-          eventCode: selectedEvent.eventCode,
-          eventOrganizer: selectedEvent.eventOrganizer,
-          eventLevel: selectedEvent.eventLevel,
-        }
-      }
+      const response = await apiClient.registerForEvent({
+        eventId: selectedEvent.id,
+        studentName: registrationForm.student,
+        studentDepartment: null,
+        eventCategory: registrationForm.eventCategory || selectedEvent.eventCategory || null,
+        activityEvent: registrationForm.activityEvent,
+        fromDate: registrationForm.fromDate || null,
+        toDate: registrationForm.toDate || null,
+        modeOfParticipation: registrationForm.modeOfParticipation || null,
+        iqacVerification: registrationForm.iqacVerification || 'Initiated',
+      })
+      const createdRegistration = response.registration
 
       setRegistrationSubmitted(true)
       if (createdRegistration) {
         setMyRegistrations((prev) => [createdRegistration as EventRegistrationRecord, ...prev.filter((item) => item.id !== createdRegistration.id)])
-      }
-
-      const updatedEvent = {
-        ...selectedEvent,
-        appliedCount: selectedEvent.appliedCount + 1,
-        balanceCount: Math.max(0, selectedEvent.balanceCount - 1),
       }
 
       setEvents((prev) =>
@@ -427,21 +398,37 @@ export default function Page() {
     }
   }
 
+  const canAccessMaster = isStudent() || isFaculty() || isHod() || isDean() || isAdmin() || isVerification() || isMaintenance()
+
+  if (!canAccessMaster) {
+    return (
+      <div className={`${dmSans.className} min-h-screen w-full bg-[#F4F6F8] p-4 sm:p-6 lg:p-8`}>
+        <div className="mx-auto max-w-3xl rounded-2xl border border-rose-200 bg-rose-50 p-6">
+          <h1 className="text-2xl font-bold text-rose-900">Access denied</h1>
+          <p className="mt-2 text-sm text-rose-800">Activity Master is available for student, faculty, HOD, dean, verification, and admin roles.</p>
+          <Link href="/dashboard" className="mt-4 inline-flex rounded-lg border border-rose-300 px-4 py-2 text-sm font-semibold text-rose-900">
+            Go to Dashboard
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className={`${dmSans.className} mx-auto max-w-[1480px] bg-[#F4F6F8] p-4 sm:p-6 lg:p-8`}>
-      <div>
+    <div className={`${dmSans.className} min-h-screen w-full bg-[#F4F6F8] p-4 sm:p-6 lg:p-8`}>
+      <div className="w-full">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         
 
         <div className="flex flex-wrap gap-3">
           {canCreate ? (
-            <Link href="/students/create-event" className="btn-primary">
+            <Link href="/students/create-event" className="btn-primary whitespace-nowrap">
               Create Event
               <ArrowRight className="h-4 w-4" />
             </Link>
           ) : null}
           {isVerification() ? (
-            <Link href="/students/verification-panel" className="btn-outline">
+            <Link href="/students/verification-panel" className="btn-outline whitespace-nowrap">
               Verification Panel
             </Link>
           ) : null}
@@ -452,7 +439,7 @@ export default function Page() {
       {errorMessage ? <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 shadow-sm">{errorMessage}</div> : null}
 
       {selectedEvent && registrationForm ? (
-        <section>
+        <section className="w-full">
           <button
             type="button"
             onClick={closeEventDetails}
@@ -462,185 +449,172 @@ export default function Page() {
             Back
           </button>
 
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-5">
-            <section className="space-y-5 lg:col-span-3">
-              <div className="rounded-[16px] border border-[#E5E9EF] bg-gradient-to-br from-white via-slate-50 to-slate-100 p-6 shadow-sm">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="inline-flex rounded-md border border-slate-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-700">
-                    {selectedEvent.eventCategory || 'Competition'}
-                  </span>
-                  <span className="inline-flex rounded-md border border-slate-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-700">
-                    {selectedEvent.eventCode || 'No Code'}
-                  </span>
-                </div>
-
-                <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-900">{selectedEvent.eventName}</h1>
-                <p className="mt-2 text-sm font-medium uppercase tracking-wide text-slate-500">
-                  {selectedEvent.eventOrganizer || selectedEvent.eventLocation || 'Organizer TBA'}
-                </p>
-
-                <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <div className="rounded-xl border border-slate-200 bg-white p-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Event Duration</p>
-                    <p className="mt-1 flex items-center gap-2 text-sm font-semibold text-slate-900">
-                      <CalendarDays className="h-4 w-4 text-slate-500" />
-                      {formatEventDate(selectedEvent.startDate, selectedEvent.endDate)}
-                    </p>
-                    <p className="mt-1 text-xs text-slate-500">{selectedEvent.durationDays ? `${selectedEvent.durationDays} day(s)` : 'Duration TBA'}</p>
-                  </div>
-                  <div className="rounded-xl border border-slate-200 bg-white p-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Location</p>
-                    <p className="mt-1 flex items-center gap-2 text-sm font-semibold text-slate-900">
-                      <MapPin className="h-4 w-4 text-slate-500" />
-                      {getDeliveryMode(selectedEvent)} - {selectedEvent.eventLevel || 'General'}
-                    </p>
-                    <p className="mt-1 text-xs text-slate-500">{selectedEvent.state || selectedEvent.country || 'All Regions'}</p>
+          <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6 lg:p-8">
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(240px,1fr)_minmax(0,1.8fr)]">
+              <section className="space-y-4">
+                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+                  <div className="relative h-48 w-full sm:h-56 lg:h-64">
+                    <img
+                      src={selectedEventImage}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
                   </div>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                {[
-                  {
-                    icon: Building2,
-                    label: 'Within BIT',
-                    value: selectedEvent.withinBit ? 'Yes' : 'No',
-                    tone: 'bg-blue-50 border-blue-100',
-                  },
-                  {
-                    icon: Clock3,
-                    label: 'Special Lab',
-                    value: selectedEvent.relatedToSpecialLab ? 'Yes' : 'N/A',
-                    tone: 'bg-violet-50 border-violet-100',
-                  },
-                  {
-                    icon: MapPin,
-                    label: 'Department',
-                    value: selectedEvent.department || 'All Departments',
-                    tone: 'bg-emerald-50 border-emerald-100',
-                  },
-                ].map((item) => {
-                  const Icon = item.icon
-                  return (
-                    <div key={item.label} className={`rounded-[14px] border p-4 ${item.tone}`}>
-                      <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-lg bg-white text-slate-700 shadow-sm">
-                        <Icon className="h-4 w-4" />
+                <div className="min-h-[280px] rounded-2xl border border-slate-200 bg-white p-6 sm:min-h-[340px]">
+                  <h3 className="text-2xl font-semibold text-slate-900">About the Event</h3>
+                  <p className="mt-4 text-base leading-8 text-slate-600">{getAboutText(selectedEvent)}</p>
+                </div>
+              </section>
+
+              <section className="space-y-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                    <h3 className="text-2xl font-semibold text-slate-900">Location & Eligibility</h3>
+                    <p className="mt-4 flex items-start gap-2 text-sm text-slate-700">
+                      <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
+                      {selectedEvent.eventLocation || selectedEvent.state || selectedEvent.country || 'Location TBA'}
+                    </p>
+                    <p className="mt-2 text-sm text-slate-500">
+                      {getDeliveryMode(selectedEvent)} • {selectedEvent.eventOrganizer || 'Organizer TBA'}
+                    </p>
+                    <div className="mt-4 space-y-2 text-sm text-slate-600">
+                      <p className="flex items-center gap-2">
+                        <Building2 className="h-4 w-4 text-slate-500" />
+                        Department: {selectedEvent.department || 'All Departments'}
+                      </p>
+                      <p>Level: {selectedEvent.eventLevel || 'General'}</p>
+                      <p>Within BIT: {selectedEvent.withinBit ? 'Yes' : 'No'}</p>
+                      <p>Special Lab: {selectedEvent.relatedToSpecialLab ? 'Yes' : 'No'}</p>
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                    <h3 className="text-2xl font-semibold text-slate-900">Date and Time</h3>
+                    <div className="mt-4 space-y-2 text-sm text-slate-600">
+                      <p className="flex items-center gap-2">
+                        <CalendarDays className="h-4 w-4 text-slate-500" />
+                        {formatEventDate(selectedEvent.startDate, selectedEvent.endDate)}
+                      </p>
+                      <p>Duration: {selectedEvent.durationDays ? `${selectedEvent.durationDays} day(s)` : 'TBA'}</p>
+                      <p>Starts: {formatDeadline(selectedEvent.startDate)}</p>
+                      <p>Ends: {formatDeadline(selectedEvent.endDate || selectedEvent.startDate)}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-6">
+                  {!registrationSubmitted ? (
+                    <div className="space-y-5">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <h3 className="text-3xl font-semibold text-slate-900">Registration</h3>
+                        {isEventAlreadyRegistered ? (
+                          <span
+                            className={`rounded-full px-3 py-1 text-xs font-semibold border ${
+                              isEventApproved
+                                ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
+                                : selectedEventRegistration?.status === 'pending'
+                                  ? 'border-amber-300 bg-amber-50 text-amber-800'
+                                  : 'border-rose-300 bg-rose-50 text-rose-800'
+                            }`}
+                          >
+                            {registrationStatusLabel}
+                          </span>
+                        ) : null}
                       </div>
-                      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">{item.label}</p>
-                      <p className="mt-1 text-sm font-semibold text-slate-900">{item.value}</p>
+
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                        <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Seats Left</p>
+                          <p className="mt-1 text-lg font-semibold text-slate-900">{Math.max(0, selectedEvent.balanceCount ?? 0)}</p>
+                        </div>
+                        <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Registered</p>
+                          <p className="mt-1 text-lg font-semibold text-slate-900">{Math.max(0, selectedEvent.appliedCount ?? 0)}</p>
+                        </div>
+                        <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Total Seats</p>
+                          <p className="mt-1 text-lg font-semibold text-slate-900">{Math.max(1, selectedEvent.maximumCount || 1)}</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-xs font-medium text-slate-600">
+                          <span>Seat Fill Progress</span>
+                          <span>
+                            {Math.round((Math.max(0, selectedEvent.appliedCount ?? 0) / Math.max(1, selectedEvent.maximumCount || 1)) * 100)}%
+                          </span>
+                        </div>
+                        <div className="h-2 w-full rounded-full bg-slate-200">
+                          <div
+                            className={`h-2 rounded-full ${getSeatsProgressTone(
+                              Math.max(0, selectedEvent.balanceCount ?? 0),
+                              Math.max(1, selectedEvent.maximumCount || 1),
+                            )}`}
+                            style={{
+                              width: `${Math.round(
+                                (Math.max(0, selectedEvent.appliedCount ?? 0) / Math.max(1, selectedEvent.maximumCount || 1)) * 100,
+                              )}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      <div className={`grid gap-3 ${isEventAlreadyRegistered && !isEventApproved ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'}`}>
+                        <a
+                          href={selectedEvent.webLink || '#'}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`inline-flex min-h-[48px] items-center justify-center rounded-[12px] border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 ${!selectedEvent.webLink ? 'pointer-events-none opacity-40' : ''}`}
+                        >
+                          Visit Event Page
+                        </a>
+
+                        {isEventApproved ? (
+                          <Link
+                            href="/activities/submit"
+                            className="inline-flex min-h-[48px] items-center justify-center rounded-[12px] bg-[#7D53F6] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#6A45D6]"
+                          >
+                            Submit
+                          </Link>
+                        ) : isEventAlreadyRegistered ? (
+                          null
+                        ) : (
+                          <button
+                            type="button"
+                            disabled={registrationSubmitting || Math.max(0, selectedEvent.balanceCount ?? 0) === 0}
+                            onClick={handleQuickRegister}
+                            className="min-h-[48px] rounded-[12px] bg-[#7D53F6] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#6A45D6] disabled:cursor-not-allowed disabled:bg-slate-400"
+                          >
+                            {registrationSubmitting ? 'Registering...' : Math.max(0, selectedEvent.balanceCount ?? 0) === 0 ? 'No Seats Left' : 'Register'}
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  )
-                })}
-              </div>
-
-              <div className="rounded-[14px] border border-[#E5E9EF] bg-white p-6">
-                <h3 className="text-3xl font-bold text-slate-900">About This Event</h3>
-                <p className="mt-4 text-lg leading-9 text-slate-600">{getAboutText(selectedEvent)}</p>
-              </div>
-            </section>
-
-            <aside className="space-y-5 lg:sticky lg:top-6 lg:col-span-2 lg:self-start">
-              <div className="rounded-[16px] border border-orange-100 bg-gradient-to-br from-orange-50 to-white p-5">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="rounded-full bg-slate-900 px-2 py-0.5 text-[10px] font-semibold text-white">Active</span>
-                      {!isClosed(selectedEvent) ? (
-                        <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">Registration Open</span>
-                      ) : (
-                        <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-semibold text-rose-800">Registration Closed</span>
-                      )}
+                  ) : (
+                    <div className="rounded-[20px] border border-emerald-300 bg-emerald-50 p-5 text-center">
+                      <CheckCircle2 className="mx-auto h-11 w-11 text-emerald-600" />
+                      <h4 className="mt-3 text-xl font-semibold text-emerald-900">Registration Submitted!</h4>
+                      <p className="mt-1 text-sm text-emerald-700">Your application is under review.</p>
                     </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-5xl font-bold text-orange-500">{Math.max(0, selectedEvent.balanceCount ?? 0)}</p>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Seats Left</p>
-                  </div>
+                  )}
                 </div>
-
-                <p className="mt-4 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Registration Progress</p>
-                <div className="mt-2 h-2 w-full rounded-full bg-slate-200">
-                  <div
-                    className={`h-2 rounded-full ${getSeatsProgressTone(
-                      Math.max(0, selectedEvent.balanceCount ?? 0),
-                      Math.max(1, selectedEvent.maximumCount || 1),
-                    )}`}
-                    style={{
-                      width: `${Math.round(
-                        (Math.max(0, selectedEvent.appliedCount ?? 0) / Math.max(1, selectedEvent.maximumCount || 1)) * 100,
-                      )}%`,
-                    }}
-                  />
-                </div>
-                <div className="mt-2 flex items-center justify-between text-xs text-slate-600">
-                  <span>{Math.max(0, selectedEvent.appliedCount ?? 0)} registered</span>
-                  <span>{Math.max(1, selectedEvent.maximumCount || 1)} total seats</span>
-                </div>
-              </div>
-
-              <div className="rounded-[14px] border border-[#E5E9EF] bg-white p-5">
-                {!registrationSubmitted ? (
-                  <div className="space-y-3">
-                    <h3 className="text-2xl font-semibold text-slate-900">Event Actions</h3>
-                    <p className="text-sm text-slate-500">{isEventAlreadyRegistered ? 'You are already registered. Continue with submission.' : 'Register or visit the official event page.'}</p>
-
-                    <a
-                      href={selectedEvent.webLink || '#'}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`inline-flex w-full items-center justify-center rounded-[12px] border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 ${!selectedEvent.webLink ? 'pointer-events-none opacity-50' : ''}`}
-                    >
-                      Visit Event Page
-                    </a>
-
-                    {isEventAlreadyRegistered ? (
-                      <Link
-                        href="/activities/submit"
-                        className="inline-flex w-full items-center justify-center rounded-[12px] bg-[#0F172A] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#1E293B]"
-                      >
-                        Submit
-                      </Link>
-                    ) : (
-                      <button
-                        type="button"
-                        disabled={registrationSubmitting || Math.max(0, selectedEvent.balanceCount ?? 0) === 0}
-                        onClick={handleQuickRegister}
-                        className="w-full rounded-[12px] bg-[#0F172A] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#1E293B] disabled:cursor-not-allowed disabled:bg-slate-400"
-                      >
-                        {registrationSubmitting ? 'Registering...' : Math.max(0, selectedEvent.balanceCount ?? 0) === 0 ? 'No Seats Left' : 'Register'}
-                      </button>
-                    )}
-                  </div>
-                ) : (
-                  <div className="rounded-[14px] border border-emerald-200 bg-emerald-50 p-5 text-center">
-                    <CheckCircle2 className="mx-auto h-11 w-11 text-emerald-600" />
-                    <h4 className="mt-3 text-xl font-semibold text-emerald-900">Registration Submitted!</h4>
-                    <p className="mt-1 text-sm text-emerald-700">Your application is under review.</p>
-                    <span className="mt-3 inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
-                      Status: Pending Approval
-                    </span>
-                  </div>
-                )}
-
-                <div className="mt-4 border-t border-slate-200 pt-4 text-sm text-slate-700">
-                  <p className="text-right text-slate-500">Start Date: {formatDeadline(selectedEvent.startDate)}</p>
-                  <p className="mt-1 text-right text-slate-500">End Date: {formatDeadline(selectedEvent.endDate || selectedEvent.startDate)}</p>
-                </div>
-              </div>
-            </aside>
+              </section>
+            </div>
           </div>
         </section>
       ) : (
       <>
-      <div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-        <div className="flex flex-wrap gap-2 overflow-x-auto">
+      <div className="mb-4">
+        <div className="flex flex-wrap gap-2">
           {tabs.map((tab) => (
             <button
               key={tab.key}
               type="button"
               onClick={() => setActiveTab(tab.key)}
-              className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
-                activeTab === tab.key ? 'bg-slate-900 text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+              className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
+                activeTab === tab.key ? 'bg-[#7D53F6] text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-600 hover:border-[#7D53F6]/40 hover:bg-[#7D53F6]/5'
               }`}
             >
               {tab.label}
@@ -648,19 +622,21 @@ export default function Page() {
             </button>
           ))}
         </div>
+      </div>
 
-        <div className="grid w-full gap-3 sm:grid-cols-2 xl:max-w-4xl xl:grid-cols-4">
+      <div className="mb-2 rounded-2xl">
+        <div className="grid w-full gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search event name or code"
-              className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm text-slate-700 outline-none transition focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100"
+              className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm text-slate-700 outline-none transition focus:border-[#7D53F6] focus:ring-2 focus:ring-[#7D53F6]/20"
             />
           </div>
 
-          <select value={category} onChange={(e) => setCategory(e.target.value)} className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100">
+          <select value={category} onChange={(e) => setCategory(e.target.value)} className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-[#7D53F6] focus:ring-2 focus:ring-[#7D53F6]/20">
             {categoryOptions.map((item) => (
               <option key={item} value={item}>
                 {item === 'all' ? 'All Categories' : item}
@@ -668,7 +644,7 @@ export default function Page() {
             ))}
           </select>
 
-          <select value={level} onChange={(e) => setLevel(e.target.value)} className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100">
+          <select value={level} onChange={(e) => setLevel(e.target.value)} className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-[#7D53F6] focus:ring-2 focus:ring-[#7D53F6]/20">
             {levelOptions.map((item) => (
               <option key={item} value={item}>
                 {item === 'all' ? 'All Levels' : item}
@@ -676,7 +652,7 @@ export default function Page() {
             ))}
           </select>
 
-          <select value={delivery} onChange={(e) => setDelivery(e.target.value as DeliveryFilter)} className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100">
+          <select value={delivery} onChange={(e) => setDelivery(e.target.value as DeliveryFilter)} className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-[#7D53F6] focus:ring-2 focus:ring-[#7D53F6]/20">
             <option value="all">Online / Offline</option>
             <option value="ONLINE">ONLINE</option>
             <option value="OFFLINE">OFFLINE</option>
@@ -684,10 +660,6 @@ export default function Page() {
         </div>
       </div>
 
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
-        <span>{filteredEvents.length} event{filteredEvents.length === 1 ? '' : 's'} shown</span>
-        {usingFallback ? <span>Showing fallback data</span> : <span>Data loaded from backend</span>}
-      </div>
 
       {loading ? (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">

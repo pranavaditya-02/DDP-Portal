@@ -27,6 +27,7 @@ export interface EventMasterRecord {
   totalLevelOfCompetition: string | null;
   eligibleForRewards: boolean;
   winnerRewards: string | null;
+  imgLink: string | null;
   createdDate: string;
   updatedDate: string;
 }
@@ -57,6 +58,7 @@ interface EventMasterRow extends RowDataPacket {
   total_level_of_competition: string | null;
   eligible_for_rewards: number;
   winner_rewards: string | null;
+  img_link: string | null;
   created_date: string;
   updated_date: string;
 }
@@ -64,7 +66,6 @@ interface EventMasterRow extends RowDataPacket {
 export interface CreateEventMasterInput {
   maximumCount: number;
   appliedCount: number;
-  balanceCount: number;
   applyByStudent: boolean;
   eventCode: string;
   eventName: string;
@@ -86,6 +87,7 @@ export interface CreateEventMasterInput {
   totalLevelOfCompetition?: string | null;
   eligibleForRewards: boolean;
   winnerRewards?: string | null;
+  imgLink?: string | null;
 }
 
 export class EventCodeExistsError extends Error {
@@ -109,7 +111,7 @@ const quoteIdentifier = (identifier: string): string => {
 };
 
 const eventMasterTableRef = `${quoteIdentifier(process.env.MYSQL_DATABASE || 'ddp')}.${quoteIdentifier(
-  process.env.MYSQL_EVENT_MASTER_TABLE || 'event_master',
+  process.env.MYSQL_Activity_Master_TABLE || 'Activity_Master',
 )}`;
 
 const mapRow = (row: EventMasterRow): EventMasterRecord => ({
@@ -138,6 +140,7 @@ const mapRow = (row: EventMasterRow): EventMasterRecord => ({
   totalLevelOfCompetition: row.total_level_of_competition,
   eligibleForRewards: Number(row.eligible_for_rewards ?? 0) === 1,
   winnerRewards: row.winner_rewards,
+  imgLink: row.img_link,
   createdDate: row.created_date,
   updatedDate: row.updated_date,
 });
@@ -150,7 +153,7 @@ class EventMasterService {
         id,
         maximum_count,
         applied_count,
-        balance_count,
+        (maximum_count - applied_count) AS balance_count,
         apply_by_student,
         event_code,
         event_name,
@@ -172,6 +175,7 @@ class EventMasterService {
         total_level_of_competition,
         eligible_for_rewards,
         winner_rewards,
+        img_link,
         created_date,
         updated_date
       FROM ${eventMasterTableRef}
@@ -191,67 +195,71 @@ class EventMasterService {
       throw new EventCodeExistsError(input.eventCode);
     }
 
-    const [result] = await getMysqlPool().execute<ResultSetHeader>(
-      `INSERT INTO ${eventMasterTableRef} (
-        maximum_count,
-        applied_count,
-        balance_count,
-        apply_by_student,
-        event_code,
-        event_name,
-        event_organizer,
-        web_link,
-        event_category,
-        active_status,
-        start_date,
-        end_date,
-        duration_days,
-        event_location,
-        event_level,
-        state,
-        country,
-        within_bit,
-        related_to_special_lab,
-        department,
-        competition_name,
-        total_level_of_competition,
-        eligible_for_rewards,
-        winner_rewards
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        input.maximumCount,
-        input.appliedCount,
-        input.balanceCount,
-        input.applyByStudent ? 1 : 0,
-        input.eventCode,
-        input.eventName,
-        input.eventOrganizer ?? null,
-        input.webLink ?? null,
-        input.eventCategory ?? null,
-        input.status,
-        input.startDate ?? null,
-        input.endDate ?? null,
-        input.durationDays ?? null,
-        input.eventLocation ?? null,
-        input.eventLevel ?? null,
-        input.state ?? null,
-        input.country ?? null,
-        input.withinBit ? 1 : 0,
-        input.relatedToSpecialLab ? 1 : 0,
-        input.department ?? null,
-        input.competitionName ?? null,
-        input.totalLevelOfCompetition ?? null,
-        input.eligibleForRewards ? 1 : 0,
-        input.winnerRewards ?? null,
-      ]
-    );
+    const columns = [
+      'maximum_count',
+      'applied_count',
+      'apply_by_student',
+      'event_code',
+      'event_name',
+      'event_organizer',
+      'web_link',
+      'event_category',
+      'active_status',
+      'start_date',
+      'end_date',
+      'duration_days',
+      'event_location',
+      'event_level',
+      'state',
+      'country',
+      'within_bit',
+      'related_to_special_lab',
+      'department',
+      'competition_name',
+      'total_level_of_competition',
+      'eligible_for_rewards',
+      'winner_rewards',
+      'img_link',
+    ];
+
+    const values = [
+      input.maximumCount,
+      input.appliedCount,
+      input.applyByStudent ? 1 : 0,
+      input.eventCode,
+      input.eventName,
+      input.eventOrganizer ?? null,
+      input.webLink ?? null,
+      input.eventCategory ?? null,
+      input.status,
+      input.startDate ?? null,
+      input.endDate ?? null,
+      input.durationDays ?? null,
+      input.eventLocation ?? null,
+      input.eventLevel ?? null,
+      input.state ?? null,
+      input.country ?? null,
+      input.withinBit ? 1 : 0,
+      input.relatedToSpecialLab ? 1 : 0,
+      input.department ?? null,
+      input.competitionName ?? null,
+      input.totalLevelOfCompetition ?? null,
+      input.eligibleForRewards ? 1 : 0,
+      input.winnerRewards ?? null,
+      input.imgLink ?? null,
+    ];
+
+    const placeholders = columns.map(() => '?').join(', ');
+    const sql = `INSERT INTO ${eventMasterTableRef} (${columns.join(', ')}) VALUES (${placeholders})`;
+
+    const [result] = await getMysqlPool().execute<ResultSetHeader>(sql, values);
 
     const [rows] = await getMysqlPool().query<EventMasterRow[]>(
       `SELECT
         id,
         maximum_count,
         applied_count,
-        balance_count,
+        (maximum_count - applied_count) AS balance_count,
         apply_by_student,
         event_code,
         event_name,
@@ -273,6 +281,7 @@ class EventMasterService {
         total_level_of_competition,
         eligible_for_rewards,
         winner_rewards,
+        img_link,
         created_date,
         updated_date
       FROM ${eventMasterTableRef}

@@ -24,11 +24,11 @@ import { useAuthStore } from '@/lib/store'
 const dmSans = DM_Sans({ subsets: ['latin'] })
 
 type UiEvent = EventMasterRecord
-type TabKey = 'all' | 'registered' | 'completed'
+type TabKey = 'active' | 'completed'
 type DeliveryFilter = 'all' | 'ONLINE' | 'OFFLINE'
 
 const tabs: { key: TabKey; label: string }[] = [
-  { key: 'all', label: 'Avilable Events' },
+  { key: 'active', label: 'Active Events' },
   { key: 'completed', label: 'Completed Events' },
 ]
 
@@ -77,6 +77,9 @@ const isCompleted = (event: UiEvent) => {
 }
 
 const getCardImage = (event: UiEvent) => {
+  if (event.imgLink && event.imgLink.trim().length > 0) {
+    return event.imgLink.trim()
+  }
   const idx = Math.abs(Number(event.id || 0)) % cardImages.length
   return cardImages[idx]
 }
@@ -132,6 +135,7 @@ function EventCard({
   onOpenDetails: (event: UiEvent) => void
 }) {
   const closed = isClosed(event)
+  const imageUrl = getCardImage(event)
 
   return (
     <article
@@ -150,7 +154,7 @@ function EventCard({
     >
       <div className="relative h-40 w-full overflow-hidden">
         <img
-          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRxBmFlWhIf--GRoU5qIlQ44AUFg9-opDFC7w&s"
+          src={imageUrl}
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"
         />
@@ -211,10 +215,10 @@ function RegistrationRow({ registration }: { registration: EventRegistrationReco
 }
 
 export default function Page() {
-  const { isAdmin, isStudent } = useRoles()
+  const { isAdmin, isFaculty, isHod, isDean, isVerification, isMaintenance } = useRoles()
   const [events, setEvents] = useState<UiEvent[]>([])
   const [registrations, setRegistrations] = useState<EventRegistrationRecord[]>([])
-  const [activeTab, setActiveTab] = useState<TabKey>('all')
+  const [activeTab, setActiveTab] = useState<TabKey>('active')
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('all')
   const [level, setLevel] = useState('all')
@@ -224,6 +228,7 @@ export default function Page() {
   const [loadingRegistrations, setLoadingRegistrations] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [registrationSortBy, setRegistrationSortBy] = useState<'status' | 'name' | 'date'>('status')
+  const [registrationStatusFilter, setRegistrationStatusFilter] = useState<'all' | 'approved' | 'rejected' | 'pending'>('all')
 
   const deferredSearch = useDeferredValue(search)
 
@@ -271,11 +276,9 @@ export default function Page() {
   const filteredEvents = useMemo(() => {
     let data = [...events]
 
-    if (activeTab === 'registered') {
-      data = data.filter((event) => event.appliedCount > 0)
-    }
-
-    if (activeTab === 'completed') {
+    if (activeTab === 'active') {
+      data = data.filter((event) => isActiveStatus(event) && !isCompleted(event))
+    } else if (activeTab === 'completed') {
       data = data.filter((event) => isCompleted(event))
     }
 
@@ -305,8 +308,7 @@ export default function Page() {
 
   const counts = useMemo(
     () => ({
-      all: events.length,
-      registered: events.filter((event) => event.appliedCount > 0).length,
+      active: events.filter((event) => isActiveStatus(event) && !isCompleted(event)).length,
       completed: events.filter((event) => isCompleted(event)).length,
     }),
     [events]
@@ -316,6 +318,7 @@ export default function Page() {
     setSelectedEvent(event)
     setLoadingRegistrations(true)
     setErrorMessage(null)
+    setRegistrationStatusFilter('all')
 
     try {
       const response = await apiClient.getRegistrationsByEventId(event.id)
@@ -334,10 +337,15 @@ export default function Page() {
     setRegistrations([])
   }
 
-  const sortedRegistrations = useMemo(() => {
-    if (!registrations) return []
+  const visibleRegistrations = useMemo(() => {
+    if (registrationStatusFilter === 'all') return registrations
+    return registrations.filter((r) => r.status === registrationStatusFilter)
+  }, [registrations, registrationStatusFilter])
 
-    const sorted = [...registrations]
+  const sortedRegistrations = useMemo(() => {
+    if (!visibleRegistrations) return []
+
+    const sorted = [...visibleRegistrations]
     switch (registrationSortBy) {
       case 'name':
         sorted.sort((a, b) => a.studentName.localeCompare(b.studentName))
@@ -353,7 +361,7 @@ export default function Page() {
         })
     }
     return sorted
-  }, [registrations, registrationSortBy])
+  }, [visibleRegistrations, registrationSortBy])
 
   const statusCounts = useMemo(() => {
     return {
@@ -362,13 +370,28 @@ export default function Page() {
       rejected: registrations.filter((r) => r.status === 'rejected').length,
     }
   }, [registrations])
+  const selectedEventImage = selectedEvent ? getCardImage(selectedEvent) : cardImages[0]
+  const canAccessLogger = isFaculty() || isHod() || isDean() || isVerification() || isMaintenance()
+
+  if (!canAccessLogger) {
+    return (
+      <div className={`${dmSans.className} min-h-screen w-full bg-[#F4F6F8] p-4 sm:p-6 lg:p-8`}>
+        <div className="mx-auto max-w-3xl rounded-2xl border border-rose-200 bg-rose-50 p-6">
+          <h1 className="text-2xl font-bold text-rose-900">Access denied</h1>
+          <p className="mt-2 text-sm text-rose-800">Activity Logger is available for faculty, HOD, dean, verification, and admin roles only.</p>
+          <Link href="/student/activity/master" className="mt-4 inline-flex rounded-lg border border-rose-300 px-4 py-2 text-sm font-semibold text-rose-900">
+            Go to Activity Master
+          </Link>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className={`${dmSans.className} mx-auto max-w-[1480px] bg-[#F4F6F8] p-4 sm:p-6 lg:p-8`}>
-      {errorMessage ? <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 shadow-sm">{errorMessage}</div> : null}
-
+    <div className={`${dmSans.className} min-h-screen w-full bg-[#F4F6F8] p-4 sm:p-6 lg:p-8`}>
+      
       {selectedEvent ? (
-        <section>
+        <section className="w-full">
           <button
             type="button"
             onClick={closeEventDetails}
@@ -378,196 +401,179 @@ export default function Page() {
             Back
           </button>
 
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-5">
-            <section className="space-y-5 lg:col-span-3">
-              <div className="rounded-[16px] border border-[#E5E9EF] bg-gradient-to-br from-white via-slate-50 to-slate-100 p-6 shadow-sm">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="inline-flex rounded-md border border-slate-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-700">
-                    {selectedEvent.eventCategory || 'Competition'}
-                  </span>
-                  <span className="inline-flex rounded-md border border-slate-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-700">
-                    {selectedEvent.eventCode || 'No Code'}
-                  </span>
-                </div>
-
-                <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-900">{selectedEvent.eventName}</h1>
-                <p className="mt-2 text-sm font-medium uppercase tracking-wide text-slate-500">
-                  {selectedEvent.eventOrganizer || selectedEvent.eventLocation || 'Organizer TBA'}
-                </p>
-
-                <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <div className="rounded-xl border border-slate-200 bg-white p-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Event Duration</p>
-                    <p className="mt-1 flex items-center gap-2 text-sm font-semibold text-slate-900">
-                      <CalendarDays className="h-4 w-4 text-slate-500" />
-                      {formatEventDate(selectedEvent.startDate, selectedEvent.endDate)}
-                    </p>
-                    <p className="mt-1 text-xs text-slate-500">{selectedEvent.durationDays ? `${selectedEvent.durationDays} day(s)` : 'Duration TBA'}</p>
-                  </div>
-                  <div className="rounded-xl border border-slate-200 bg-white p-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Location</p>
-                    <p className="mt-1 flex items-center gap-2 text-sm font-semibold text-slate-900">
-                      <MapPin className="h-4 w-4 text-slate-500" />
-                      {getDeliveryMode(selectedEvent)} - {selectedEvent.eventLevel || 'General'}
-                    </p>
-                    <p className="mt-1 text-xs text-slate-500">{selectedEvent.state || selectedEvent.country || 'All Regions'}</p>
+          <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6 lg:p-8">
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(240px,1fr)_minmax(0,1.8fr)]">
+              <section className="space-y-4">
+                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+                  <div className="relative h-48 w-full sm:h-56 lg:h-64">
+                    <img
+                      src={selectedEventImage}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
                   </div>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                {[
-                  {
-                    icon: Building2,
-                    label: 'Within BIT',
-                    value: selectedEvent.withinBit ? 'Yes' : 'No',
-                    tone: 'bg-blue-50 border-blue-100',
-                  },
-                  {
-                    icon: Clock3,
-                    label: 'Special Lab',
-                    value: selectedEvent.relatedToSpecialLab ? 'Yes' : 'N/A',
-                    tone: 'bg-violet-50 border-violet-100',
-                  },
-                  {
-                    icon: Users,
-                    label: 'Department',
-                    value: selectedEvent.department || 'All Departments',
-                    tone: 'bg-emerald-50 border-emerald-100',
-                  },
-                ].map((item) => {
-                  const Icon = item.icon
-                  return (
-                    <div key={item.label} className={`rounded-[14px] border p-4 ${item.tone}`}>
-                      <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-lg bg-white text-slate-700 shadow-sm">
-                        <Icon className="h-4 w-4" />
-                      </div>
-                      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">{item.label}</p>
-                      <p className="mt-1 text-sm font-semibold text-slate-900">{item.value}</p>
-                    </div>
-                  )
-                })}
-              </div>
+                <div className="min-h-[280px] rounded-2xl border border-slate-200 bg-white p-6 ">
+                  <h3 className="text-3xl font-semibold text-slate-900">About the Event</h3>
+                  <p className="mt-4 text-base leading-8 text-slate-600">{getAboutText(selectedEvent)}</p>
+                </div>
+              </section>
 
-              <div className="rounded-[14px] border border-[#E5E9EF] bg-white p-6">
-                <h3 className="text-3xl font-bold text-slate-900">About This Event</h3>
-                <p className="mt-4 text-lg leading-9 text-slate-600">{getAboutText(selectedEvent)}</p>
-              </div>
-            </section>
-
-            <aside className="space-y-5 lg:sticky lg:top-6 lg:col-span-2 lg:self-start">
-              <div className="rounded-[16px] border border-orange-100 bg-gradient-to-br from-orange-50 to-white p-5">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="rounded-full bg-slate-900 px-2 py-0.5 text-[10px] font-semibold text-white">
-                        {isClosed(selectedEvent) ? 'Closed' : 'Active'}
-                      </span>
-                      <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-semibold text-indigo-700">Logger View</span>
+              <section className="space-y-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                    <h3 className="text-2xl font-semibold text-slate-900">Location & Eligibility</h3>
+                    <p className="mt-4 flex items-start gap-2 text-sm text-slate-700">
+                      <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
+                      {selectedEvent.eventLocation || selectedEvent.state || selectedEvent.country || 'Location TBA'}
+                    </p>
+                    <p className="mt-2 text-sm text-slate-500">
+                      {getDeliveryMode(selectedEvent)} • {selectedEvent.eventOrganizer || 'Organizer TBA'}
+                    </p>
+                    <div className="mt-4 space-y-2 text-sm text-slate-600">
+                      <p className="flex items-center gap-2">
+                        <Building2 className="h-4 w-4 text-slate-500" />
+                        Department: {selectedEvent.department || 'All Departments'}
+                      </p>
+                      <p>Level: {selectedEvent.eventLevel || 'General'}</p>
+                      <p>Within BIT: {selectedEvent.withinBit ? 'Yes' : 'No'}</p>
+                      <p>Special Lab: {selectedEvent.relatedToSpecialLab ? 'Yes' : 'No'}</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-5xl font-bold text-orange-500">{registrations.length}</p>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Total Registered</p>
+
+                  <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                    <h3 className="text-2xl font-semibold text-slate-900">Date and Time</h3>
+                    <div className="mt-4 space-y-2 text-sm text-slate-600">
+                      <p className="flex items-center gap-2">
+                        <CalendarDays className="h-4 w-4 text-slate-500" />
+                        {formatEventDate(selectedEvent.startDate, selectedEvent.endDate)}
+                      </p>
+                      <p>Duration: {selectedEvent.durationDays ? `${selectedEvent.durationDays} day(s)` : 'TBA'}</p>
+                      <p>Starts: {formatDeadline(selectedEvent.startDate)}</p>
+                      <p>Ends: {formatDeadline(selectedEvent.endDate || selectedEvent.startDate)}</p>
+                    </div>
                   </div>
                 </div>
 
-                <p className="mt-4 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Verification Progress</p>
-                <div className="mt-2 h-2 w-full rounded-full bg-slate-200">
-                  <div
-                    className="h-2 rounded-full bg-indigo-500"
-                    style={{
-                      width: `${Math.round((statusCounts.approved / Math.max(1, registrations.length)) * 100)}%`,
-                    }}
-                  />
-                </div>
-                <div className="mt-2 flex items-center justify-between text-xs text-slate-600">
-                  <span>{statusCounts.approved} approved</span>
-                  <span>{statusCounts.pending} pending</span>
-                </div>
-              </div>
+                <div className="rounded-2xl border border-slate-200 bg-white p-6">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <h3 className="text-3xl font-semibold text-slate-900">Registration</h3>
+                    <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
+                      Logger View
+                    </span>
+                  </div>
 
-              <div className="rounded-[14px] border border-[#E5E9EF] bg-white p-5">
-                <h3 className="text-2xl font-semibold text-slate-900">Event Actions</h3>
-                <p className="mt-1 text-sm text-slate-500">Open the event page or review timeline details.</p>
+                  <div className="mt-4 flex flex-wrap items-center gap-2">
+                    <span className="rounded-full border border-slate-300 bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-800">
+                      {isClosed(selectedEvent) ? 'Closed' : 'Active'}
+                    </span>
+                  </div>
 
-                <a
-                  href={selectedEvent.webLink || '#'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`mt-4 inline-flex w-full items-center justify-center rounded-[12px] border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 ${!selectedEvent.webLink ? 'pointer-events-none opacity-50' : ''}`}
-                >
-                  Visit Event Page
-                </a>
+                  <div className="mt-4 grid grid-cols-3 gap-3">
+                    <div className="rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50 to-slate-100 p-3">
+                      <p className="text-xs font-semibold uppercase text-slate-600">Total Registered</p>
+                      <p className="mt-2 text-2xl font-bold text-slate-900">{registrations.length}</p>
+                    </div>
+                    <div className="rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100 p-3">
+                      <p className="text-xs font-semibold uppercase text-emerald-700">Approved</p>
+                      <p className="mt-2 text-2xl font-bold text-emerald-900">{statusCounts.approved}</p>
+                    </div>
+                    <div className="rounded-xl border border-rose-200 bg-gradient-to-br from-rose-50 to-rose-100 p-3">
+                      <p className="text-xs font-semibold uppercase text-rose-700">Rejected</p>
+                      <p className="mt-2 text-2xl font-bold text-rose-900">{statusCounts.rejected}</p>
+                    </div>
+                  </div>
 
-                <div className="mt-4 border-t border-slate-200 pt-4 text-sm text-slate-700">
-                  <p className="text-right text-slate-500">Start Date: {formatDeadline(selectedEvent.startDate)}</p>
-                  <p className="mt-1 text-right text-slate-500">End Date: {formatDeadline(selectedEvent.endDate || selectedEvent.startDate)}</p>
-                </div>
-              </div>
-
-              <div className="rounded-[14px] border border-[#E5E9EF] bg-white p-5">
-                <div className="mb-4 flex items-center justify-between">
-                  <h3 className="text-xl font-semibold text-slate-900">Registrations</h3>
-                  <div className="flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1">
-                    <Users className="h-4 w-4 text-slate-600" />
-                    <span className="text-sm font-semibold text-slate-700">{registrations.length}</span>
+                  <p className="mt-4 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Verification Progress</p>
+                  <div className="mt-2 flex h-2 w-full overflow-hidden rounded-full bg-slate-200">
+                    <div
+                      className="h-2 bg-emerald-500"
+                      style={{
+                        width: `${Math.round((statusCounts.approved / Math.max(1, registrations.length)) * 100)}%`,
+                      }}
+                    />
+                    <div
+                      className="h-2 bg-rose-500"
+                      style={{
+                        width: `${Math.round((statusCounts.rejected / Math.max(1, registrations.length)) * 100)}%`,
+                      }}
+                    />
+                    <div
+                      className="h-2 bg-amber-400"
+                      style={{
+                        width: `${Math.round((statusCounts.pending / Math.max(1, registrations.length)) * 100)}%`,
+                      }}
+                    />
+                  </div>
+                  <div className="mt-2 flex items-center justify-between text-xs">
+                    <span className="text-amber-700">{statusCounts.pending} pending</span>
+                    <span className="text-emerald-700">{statusCounts.approved} approved</span>
+                    <span className="text-rose-700">{statusCounts.rejected} rejected</span>
                   </div>
                 </div>
+              </section>
+            </div>
 
-                <div className="grid grid-cols-3 gap-3 text-xs">
-                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-center">
-                    <p className="font-semibold text-amber-900">{statusCounts.pending}</p>
-                    <p className="text-amber-700">Pending</p>
-                  </div>
-                  <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-center">
-                    <p className="font-semibold text-emerald-900">{statusCounts.approved}</p>
-                    <p className="text-emerald-700">Approved</p>
-                  </div>
-                  <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-center">
-                    <p className="font-semibold text-rose-900">{statusCounts.rejected}</p>
-                    <p className="text-rose-700">Rejected</p>
-                  </div>
-                </div>
+            <div className="mt-5 w-full rounded-2xl border border-slate-200 bg-white p-5">
+              <h3 className="text-2xl font-semibold text-slate-900">Event Actions</h3>
+              <p className="mt-1 text-sm text-slate-500">Open the event page.</p>
 
-                {!loadingRegistrations && registrations.length > 0 && (
-                  <div className="mt-4">
-                    <label className="mb-2 block text-xs font-semibold text-slate-600">Sort by:</label>
-                    <select
-                      value={registrationSortBy}
-                      onChange={(e) => setRegistrationSortBy(e.target.value as 'status' | 'name' | 'date')}
-                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100"
-                    >
-                      <option value="status">Status</option>
-                      <option value="name">Student Name</option>
-                      <option value="date">Registration Date</option>
-                    </select>
-                  </div>
-                )}
-              </div>
-            </aside>
-          </div>
+              <a
+                href={selectedEvent.webLink || '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`mt-4 inline-flex w-full items-center justify-center rounded-[12px] border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 ${!selectedEvent.webLink ? 'pointer-events-none opacity-50' : ''}`}
+              >
+                Visit Event Page
+              </a>
 
-          <div className="mt-5">
-            {loadingRegistrations ? (
-              <div className="space-y-3">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="h-24 animate-pulse rounded-[14px] border border-slate-200 bg-white p-4" />
+              
+            </div>
+
+            <div className="mt-5">
+              <div className="mb-3 flex flex-wrap items-center gap-2">
+                {([
+                  { key: 'all', label: 'All', count: registrations.length },
+                  { key: 'approved', label: 'Approved', count: statusCounts.approved },
+                  { key: 'rejected', label: 'Rejected', count: statusCounts.rejected },
+                  { key: 'pending', label: 'Pending', count: statusCounts.pending },
+                ] as const).map((option) => (
+                  <button
+                    key={option.key}
+                    type="button"
+                    onClick={() => setRegistrationStatusFilter(option.key)}
+                    className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
+                      registrationStatusFilter === option.key
+                        ? 'border-slate-900 bg-slate-900 text-white'
+                        : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    {option.label} ({option.count})
+                  </button>
                 ))}
               </div>
-            ) : registrations.length === 0 ? (
-              <div className="rounded-[14px] border border-slate-200 bg-white p-8 text-center">
-                <Users className="mx-auto h-10 w-10 text-slate-300" />
-                <h4 className="mt-4 text-lg font-semibold text-slate-900">No Registrations</h4>
-                <p className="mt-2 text-sm text-slate-500">No students have registered for this event yet.</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {sortedRegistrations.map((registration) => (
-                  <RegistrationRow key={registration.id} registration={registration} />
-                ))}
-              </div>
-            )}
+
+              {loadingRegistrations ? (
+                <div className="space-y-3">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="h-24 animate-pulse rounded-[14px] border border-slate-200 bg-white p-4" />
+                  ))}
+                </div>
+              ) : sortedRegistrations.length === 0 ? (
+                <div className="rounded-[14px] border border-slate-200 bg-white p-8 text-center">
+                  <Users className="mx-auto h-10 w-10 text-slate-300" />
+                  <h4 className="mt-4 text-lg font-semibold text-slate-900">No Matching Registrations</h4>
+                  <p className="mt-2 text-sm text-slate-500">No registrations found for the selected status filter.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {sortedRegistrations.map((registration) => (
+                    <RegistrationRow key={registration.id} registration={registration} />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </section>
       ) : (
@@ -579,15 +585,15 @@ export default function Page() {
             </div>
           </div>
 
-          <div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-            <div className="flex flex-wrap gap-2 overflow-x-auto">
+          <div className="mb-4">
+            <div className="flex flex-wrap gap-2">
               {tabs.map((tab) => (
                 <button
                   key={tab.key}
                   type="button"
                   onClick={() => setActiveTab(tab.key)}
-                  className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition whitespace-nowrap ${
-                    activeTab === tab.key ? 'bg-slate-900 text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                  className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
+                    activeTab === tab.key ? 'bg-[#7D53F6] text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-600 hover:border-[#7D53F6]/40 hover:bg-[#7D53F6]/5'
                   }`}
                 >
                   {tab.label}
@@ -597,18 +603,19 @@ export default function Page() {
             </div>
           </div>
 
-          <div className="mb-6 grid w-full gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mb-2 rounded-2xl">
+          <div className="grid w-full gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search event name or code"
-                className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm text-slate-700 outline-none transition focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100"
+                className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm text-slate-700 outline-none transition focus:border-[#7D53F6] focus:ring-2 focus:ring-[#7D53F6]/20"
               />
             </div>
 
-            <select value={category} onChange={(e) => setCategory(e.target.value)} className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100">
+            <select value={category} onChange={(e) => setCategory(e.target.value)} className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-[#7D53F6] focus:ring-2 focus:ring-[#7D53F6]/20">
               {categoryOptions.map((item) => (
                 <option key={item} value={item}>
                   {item === 'all' ? 'All Categories' : item}
@@ -616,7 +623,7 @@ export default function Page() {
               ))}
             </select>
 
-            <select value={level} onChange={(e) => setLevel(e.target.value)} className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100">
+            <select value={level} onChange={(e) => setLevel(e.target.value)} className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-[#7D53F6] focus:ring-2 focus:ring-[#7D53F6]/20">
               {levelOptions.map((item) => (
                 <option key={item} value={item}>
                   {item === 'all' ? 'All Levels' : item}
@@ -624,11 +631,12 @@ export default function Page() {
               ))}
             </select>
 
-            <select value={delivery} onChange={(e) => setDelivery(e.target.value as DeliveryFilter)} className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100">
+            <select value={delivery} onChange={(e) => setDelivery(e.target.value as DeliveryFilter)} className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-[#7D53F6] focus:ring-2 focus:ring-[#7D53F6]/20">
               <option value="all">Online / Offline</option>
               <option value="ONLINE">ONLINE</option>
               <option value="OFFLINE">OFFLINE</option>
             </select>
+          </div>
           </div>
 
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">

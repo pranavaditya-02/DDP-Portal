@@ -2,12 +2,13 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Search, PlusCircle, Filter, ChevronDown, ChevronRight, ChevronUp } from "lucide-react";
+import { Search, PlusCircle, Filter, ChevronDown, ChevronRight, ChevronUp, FileText, ExternalLink, User, CheckCircle, XCircle, Clipboard } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import { useRoles } from "@/hooks/useRoles";
 
 interface InternshipTracker {
   id: number;
+  tracker_number?: number;
   student_name: string;
   student_roll_no?: string | null;
   industry_name: string;
@@ -20,10 +21,35 @@ interface InternshipTracker {
 }
 
 const BACKEND_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/api$/, '');
+const resolveFileUrl = (p?: string | null) => {
+  if (!p) return '';
+  if (p.startsWith('http://') || p.startsWith('https://')) return p;
+  if (p.startsWith('/')) return `${BACKEND_BASE}${p}`;
+  return `${BACKEND_BASE}/${p}`;
+};
 
 const formatShortDate = (value: string) => {
   if (!value) return '';
   return value.slice(0, 10);
+};
+
+const getInitials = (name = '') => {
+  return name.split(' ').map(s => s[0]).slice(0,2).join('').toUpperCase();
+};
+
+const renderStatusBadge = (status: InternshipTracker['iqac_verification']) => {
+  const map: Record<string, { label: string; className: string }> = {
+    initiated: { label: 'Initiated', className: 'bg-yellow-50 text-yellow-700 ring-yellow-100' },
+    approved: { label: 'Approved', className: 'bg-emerald-50 text-emerald-700 ring-emerald-100' },
+    declined: { label: 'Declined', className: 'bg-rose-50 text-rose-700 ring-rose-100' },
+  };
+  const info = map[status] || { label: status, className: 'bg-slate-50 text-slate-700' };
+  return (
+    <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ring-1 ${info.className}`}>
+      {status === 'approved' ? <CheckCircle className="w-3 h-3" /> : status === 'declined' ? <XCircle className="w-3 h-3" /> : <ChevronRight className="w-3 h-3 rotate-90" />}
+      <span className="capitalize">{info.label}</span>
+    </span>
+  );
 };
 
 const getPeriodLabel = (startDate: string, endDate: string) => {
@@ -92,6 +118,19 @@ export default function Page() {
   const roleUtils = useRoles();
   const isVerification = roleUtils.isVerification();
 
+  const [copyMessage, setCopyMessage] = useState<string | null>(null);
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopyMessage('Copied to clipboard');
+      setTimeout(() => setCopyMessage(null), 2000);
+    } catch (err) {
+      setCopyMessage('Failed to copy');
+      setTimeout(() => setCopyMessage(null), 2000);
+    }
+  };
+
   const normalizeErrorMessage = (error: unknown): string => {
     if (!error) return 'An unknown error occurred.';
 
@@ -159,12 +198,19 @@ export default function Page() {
     [trackers],
   );
 
+  const statusCounts = useMemo(() => ({
+    initiated: trackers.filter(t => t.iqac_verification === 'initiated').length,
+    approved: trackers.filter(t => t.iqac_verification === 'approved').length,
+    declined: trackers.filter(t => t.iqac_verification === 'declined').length,
+  }), [trackers]);
+
   const filteredTrackers = useMemo(() => {
     let data = trackers;
     const normalized = query.trim().toLowerCase();
 
     if (normalized) {
       data = data.filter((item) =>
+        item.tracker_number?.toString().includes(normalized) ||
         item.id.toString().includes(normalized) ||
         item.student_name.toLowerCase().includes(normalized) ||
         item.student_roll_no?.toLowerCase().includes(normalized) ||
@@ -268,17 +314,30 @@ export default function Page() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold">Internship Tracker</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Keep track of your student internship records.
-          </p>
+          <p className="text-sm text-slate-500 mt-1">Keep track of your student internship records.</p>
+
+          <div className="mt-3 flex items-center gap-3 text-sm">
+            <div className="inline-flex items-center gap-2">
+              <span className="text-xs text-slate-400">Initiated</span>
+              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-800">{statusCounts.initiated}</span>
+            </div>
+            <div className="inline-flex items-center gap-2">
+              <span className="text-xs text-slate-400">Approved</span>
+              <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-800">{statusCounts.approved}</span>
+            </div>
+            <div className="inline-flex items-center gap-2">
+              <span className="text-xs text-slate-400">Declined</span>
+              <span className="rounded-full bg-rose-50 px-2 py-0.5 text-xs font-medium text-rose-800">{statusCounts.declined}</span>
+            </div>
+          </div>
         </div>
 
         <Link
           href="/student/internship/tracker/create"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg shadow-md hover:from-blue-700 hover:to-indigo-700 transition"
         >
           <PlusCircle className="w-4 h-4" />
-          Create Internship Tracker
+          Create Internship
         </Link>
       </div>
 
@@ -302,6 +361,22 @@ export default function Page() {
               <Filter className="w-4 h-4" />
               Filters
             </button>
+            <div className="flex items-center gap-2">
+              {(['', 'initiated', 'approved', 'declined'] as const).map((s) => {
+                if (s === '') return (
+                  <button key="all" onClick={() => setFilterIqacStatus('')} className="text-xs text-slate-500 px-2 py-1">All</button>
+                );
+                return (
+                  <button
+                    key={s}
+                    onClick={() => setFilterIqacStatus(s)}
+                    className={`text-xs px-2 py-1 rounded-full font-medium ${filterIqacStatus === s ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-700'}`}
+                  >
+                    {s}
+                  </button>
+                );
+              })}
+            </div>
             <span className="text-xs text-slate-400">{filteredTrackers.length} items</span>
           </div>
         </div>
@@ -481,9 +556,7 @@ export default function Page() {
                         <table className="min-w-full divide-y divide-slate-200 text-sm">
                           <thead className="bg-slate-50 text-slate-700">
                             <tr>
-                              <th className="px-4 py-3 text-left">
-                                <button type="button" className="inline-flex items-center gap-1 font-medium" onClick={() => handleSort("student_name")}>ID{computeSortIcon("student_name")}</button>
-                              </th>
+                              <th className="px-4 py-3 text-left">Student</th>
                               <th className="px-4 py-3 text-left">
                                 <button type="button" className="inline-flex items-center gap-1 font-medium" onClick={() => handleSort("industry_name")}>Industry{computeSortIcon("industry_name")}</button>
                               </th>
@@ -491,6 +564,8 @@ export default function Page() {
                                 <button type="button" className="inline-flex items-center gap-1 font-medium" onClick={() => handleSort("start_date")}>Period{computeSortIcon("start_date")}</button>
                               </th>
                               <th className="px-4 py-3 text-left">Documents</th>
+                              <th className="px-4 py-3 text-left">Status</th>
+                              <th className="px-4 py-3 text-left">Actions</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-200 bg-white">
@@ -500,39 +575,54 @@ export default function Page() {
                                 className="hover:bg-slate-50 cursor-pointer"
                                 onClick={() => setSelectedTracker(tracker)}
                               >
-                                <td className="px-4 py-3 text-slate-700">{tracker.id}</td>
                                 <td className="px-4 py-3">
-                                  <div className="font-medium text-slate-900">{tracker.student_name}</div>
-                                  <div className="text-xs text-slate-500">{tracker.student_roll_no}</div>
+                                  <div className="flex items-center gap-3">
+                                    <div className="h-10 w-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-800 font-semibold">{getInitials(tracker.student_name)}</div>
+                                    <div>
+                                      <div className="font-medium text-slate-900">{tracker.student_name}</div>
+                                      <div className="text-xs text-slate-500">{tracker.student_roll_no} • #{tracker.tracker_number ?? tracker.id}</div>
+                                    </div>
+                                  </div>
                                 </td>
-                                <td className="px-4 py-3">{tracker.industry_name}</td>
+                                <td className="px-4 py-3"><div className="text-sm font-medium">{tracker.industry_name}</div></td>
                                 <td className="px-4 py-3">
                                   <div>{formatShortDate(tracker.start_date)} → {formatShortDate(tracker.end_date)}</div>
                                   <div className="text-xs text-slate-500">({getPeriodLabel(tracker.start_date, tracker.end_date)})</div>
                                 </td>
-                                <td className="px-4 py-3 space-y-1">
+                                <td className="px-4 py-3 space-x-3">
                                   {tracker.aim_objectives_link ? (
-                                    <a
-                                      href={`${BACKEND_BASE}${tracker.aim_objectives_link}`}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                      className="text-blue-600 hover:underline"
-                                    >
-                                      Aim/Objective&nbsp;&nbsp;
-                                    </a>
+                                    <span className="inline-flex items-center gap-2">
+                                      <a title={resolveFileUrl(tracker.aim_objectives_link)} href={resolveFileUrl(tracker.aim_objectives_link)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-blue-600 hover:underline" onClick={(e) => e.stopPropagation()}>
+                                        <FileText className="w-4 h-4" />
+                                        <span className="text-xs">Aim</span>
+                                      </a>
+                                      <button title="Copy link" type="button" onClick={(e) => { e.stopPropagation(); copyToClipboard(resolveFileUrl(tracker.aim_objectives_link)); }} className="text-slate-500 hover:text-slate-700">
+                                        <Clipboard className="w-3 h-3" />
+                                      </button>
+                                    </span>
                                   ) : (
-                                    <span className="text-slate-400">No file</span>
+                                    <span className="text-xs text-slate-400">-</span>
                                   )}
                                   {tracker.offer_letter_link ? (
-                                    <a
-                                      href={`${BACKEND_BASE}${tracker.offer_letter_link}`}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                      className="text-blue-600 hover:underline"
-                                    >
-                                      Offer Letter
-                                    </a>
+                                    <span className="inline-flex items-center gap-2">
+                                      <a title={resolveFileUrl(tracker.offer_letter_link)} href={resolveFileUrl(tracker.offer_letter_link)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-blue-600 hover:underline" onClick={(e) => e.stopPropagation()}>
+                                        <ExternalLink className="w-4 h-4" />
+                                        <span className="text-xs">Offer</span>
+                                      </a>
+                                      <button title="Copy link" type="button" onClick={(e) => { e.stopPropagation(); copyToClipboard(resolveFileUrl(tracker.offer_letter_link)); }} className="text-slate-500 hover:text-slate-700">
+                                        <Clipboard className="w-3 h-3" />
+                                      </button>
+                                    </span>
                                   ) : null}
+                                </td>
+                                <td className="px-4 py-3">{renderStatusBadge(tracker.iqac_verification)}</td>
+                                <td className="px-4 py-3">
+                                  <div className="flex gap-2">
+                                    <button onClick={(e)=>{e.stopPropagation(); setSelectedTracker(tracker);}} className="inline-flex items-center gap-2 rounded border border-slate-200 px-3 py-1 text-sm text-slate-700 bg-white">Details</button>
+                                    {tracker.offer_letter_link ? (
+                                      <a onClick={(e)=>e.stopPropagation()} href={`${BACKEND_BASE}${tracker.offer_letter_link}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded bg-slate-50 px-2 py-1 text-sm text-slate-700"><ExternalLink className="w-3 h-3"/></a>
+                                    ) : null}
+                                  </div>
                                 </td>
                               </tr>
                             ))}
@@ -568,7 +658,7 @@ export default function Page() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <div className="text-xs uppercase tracking-wide text-slate-500">Request ID</div>
-                  <div className="mt-1 font-medium text-slate-900">{selectedTracker.id}</div>
+                  <div className="mt-1 font-medium text-slate-900">{selectedTracker.tracker_number ?? selectedTracker.id}</div>
                 </div>
                 <div>
                   <div className="text-xs uppercase tracking-wide text-slate-500">Student</div>
@@ -588,8 +678,8 @@ export default function Page() {
                 </div>
                 <div>
                   <div className="text-xs uppercase tracking-wide text-slate-500">IQAC status</div>
-                  <div className="mt-1 inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-sm font-medium capitalize text-slate-700">
-                    {selectedTracker.iqac_verification}
+                  <div className="mt-1">
+                    {renderStatusBadge(selectedTracker.iqac_verification)}
                   </div>
                   {selectedTracker.reject_reason ? (
                     <div className="mt-3 rounded-2xl border border-rose-200 bg-rose-50 p-3">
@@ -604,8 +694,8 @@ export default function Page() {
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                   <div className="text-xs uppercase tracking-wide text-slate-500">Aim / Objective</div>
                   {selectedTracker.aim_objectives_link ? (
-                    <a
-                      href={`${BACKEND_BASE}${selectedTracker.aim_objectives_link}`}
+                                    <a
+                      href={resolveFileUrl(selectedTracker.aim_objectives_link)}
                       target="_blank"
                       rel="noreferrer"
                       className="mt-2 block text-sm font-medium text-blue-600 hover:underline"
@@ -620,7 +710,7 @@ export default function Page() {
                   <div className="text-xs uppercase tracking-wide text-slate-500">Offer Letter</div>
                   {selectedTracker.offer_letter_link ? (
                     <a
-                      href={`${BACKEND_BASE}${selectedTracker.offer_letter_link}`}
+                      href={resolveFileUrl(selectedTracker.offer_letter_link)}
                       target="_blank"
                       rel="noreferrer"
                       className="mt-2 block text-sm font-medium text-blue-600 hover:underline"

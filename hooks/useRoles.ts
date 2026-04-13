@@ -2,45 +2,46 @@ import { useAuthStore } from '@/lib/store';
 
 export const useRoles = () => {
   const user = useAuthStore((state) => state.user);
+  const normalizedRoles = (user?.roles ?? []).map((role) => role.toLowerCase());
 
   return {
     // Check single role
     hasRole: (role: string): boolean => {
-      return user?.roles.includes(role) ?? false;
+      return normalizedRoles.includes(role.toLowerCase());
     },
 
     // Check multiple roles (ANY)
     hasAnyRole: (roles: string[]): boolean => {
-      return user?.roles.some((role) => roles.includes(role)) ?? false;
+      return roles.map((role) => role.toLowerCase()).some((role) => normalizedRoles.includes(role));
     },
 
     // Check multiple roles (ALL)
     hasAllRoles: (roles: string[]): boolean => {
-      return roles.every((role) => user?.roles.includes(role)) ?? false;
+      return roles.map((role) => role.toLowerCase()).every((role) => normalizedRoles.includes(role));
     },
 
     // Role shortcuts
-    isFaculty: (): boolean => user?.roles.includes('faculty') ?? false,
-    isHod: (): boolean => user?.roles.includes('hod') ?? false,
-    isDean: (): boolean => user?.roles.includes('dean') ?? false,
-    isStudent: (): boolean => user?.roles.includes('student') ?? false,
-    isVerification: (): boolean => user?.roles.includes('verification') ?? false,
-    isMaintenance: (): boolean => user?.roles.includes('maintenance') ?? false,
+    isFaculty: (): boolean => normalizedRoles.includes('faculty'),
+    isHod: (): boolean => normalizedRoles.includes('hod'),
+    isDean: (): boolean => normalizedRoles.includes('dean'),
+    isStudent: (): boolean => normalizedRoles.includes('student'),
+    isVerification: (): boolean => normalizedRoles.includes('verification'),
+    isMaintenance: (): boolean => normalizedRoles.includes('maintenance') || normalizedRoles.includes('admin'),
 
     // Combined checks
-    isAdmin: (): boolean => user?.roles.includes('maintenance') ?? false,
+    isAdmin: (): boolean => normalizedRoles.includes('maintenance') || normalizedRoles.includes('admin'),
     isLeadership: (): boolean => {
-      return user?.roles.some((role) => ['hod', 'dean', 'maintenance'].includes(role)) ?? false;
+      return normalizedRoles.some((role) => ['hod', 'dean', 'maintenance', 'admin'].includes(role));
     },
     canApprove: (): boolean => {
-      return user?.roles.includes('verification') ?? false;
+      return normalizedRoles.includes('verification');
     },
     canManageUsers: (): boolean => {
-      return user?.roles.includes('maintenance') ?? false;
+      return normalizedRoles.includes('maintenance') || normalizedRoles.includes('admin');
     },
 
     // Get user roles
-    roles: user?.roles ?? [],
-    hasMultipleRoles: (): boolean => (user?.roles.length ?? 0) > 1,
+    roles: normalizedRoles,
+    hasMultipleRoles: (): boolean => normalizedRoles.length > 1,
   };
 };

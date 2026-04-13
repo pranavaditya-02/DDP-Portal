@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Country, State, City } from "country-state-city";
 import { apiClient } from "@/lib/api";
 
 interface StudentOption {
@@ -80,10 +81,14 @@ export default function InternshipReportCreatePage() {
   const [sector, setSector] = useState("");
   const [address1, setAddress1] = useState("");
   const [address2, setAddress2] = useState("");
-  const [city, setCity] = useState("");
-  const [stateValue, setStateValue] = useState("");
-  const [postalCode, setPostalCode] = useState("");
+  const [countryCode, setCountryCode] = useState("");
   const [country, setCountry] = useState("");
+  const [states, setStates] = useState<Array<{ name: string; isoCode: string }>>([]);
+  const [stateCode, setStateCode] = useState("");
+  const [stateValue, setStateValue] = useState("");
+  const [cities, setCities] = useState<Array<{ name: string }>>([]);
+  const [city, setCity] = useState("");
+  const [postalCode, setPostalCode] = useState("");
   const [industryWebsite, setIndustryWebsite] = useState("");
   const [industryContact, setIndustryContact] = useState("");
   const [referredBy, setReferredBy] = useState("");
@@ -101,6 +106,7 @@ export default function InternshipReportCreatePage() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [countries, setCountries] = useState<Array<{ name: string; isoCode: string }>>([]);
 
   useEffect(() => {
     const loadMetadata = async () => {
@@ -119,6 +125,40 @@ export default function InternshipReportCreatePage() {
 
     loadMetadata();
   }, []);
+
+  useEffect(() => {
+    setCountries(Country.getAllCountries().map((country) => ({ name: country.name, isoCode: country.isoCode })));
+  }, []);
+
+  useEffect(() => {
+    if (!countryCode) {
+      setStates([]);
+      setStateCode("");
+      setStateValue("");
+      setCities([]);
+      setCity("");
+      return;
+    }
+
+    const nextStates = State.getStatesOfCountry(countryCode).map((state) => ({ name: state.name, isoCode: state.isoCode }));
+    setStates(nextStates);
+    setStateCode("");
+    setStateValue("");
+    setCities([]);
+    setCity("");
+  }, [countryCode]);
+
+  useEffect(() => {
+    if (!countryCode || !stateCode) {
+      setCities([]);
+      setCity("");
+      return;
+    }
+
+    const nextCities = City.getCitiesOfState(countryCode, stateCode).map((city) => ({ name: city.name }));
+    setCities(nextCities);
+    setCity("");
+  }, [countryCode, stateCode]);
 
   useEffect(() => {
     let cancelled = false;
@@ -220,13 +260,13 @@ export default function InternshipReportCreatePage() {
       yearOfStudy &&
       specialLab &&
       sector &&
-      address1.trim().length > 0 &&
-      city.trim().length > 0 &&
-      stateValue.trim().length > 0 &&
-      postalCode.trim().length > 0 &&
       country.trim().length > 0 &&
+      stateValue.trim().length > 0 &&
+      city.trim().length > 0 &&
+      address1.trim().length > 0 &&
+      postalCode.trim().length > 0 && /^[0-9]+$/.test(postalCode) &&
       industryWebsite.trim().length > 0 &&
-      industryContact.trim().length > 0 &&
+      industryContact.trim().length > 0 && /^[0-9]+$/.test(industryContact) &&
       referredBy &&
       refereeValid &&
       stipendReceived &&
@@ -253,7 +293,7 @@ export default function InternshipReportCreatePage() {
     setMessage(null);
 
     if (!canSubmit) {
-      setError('Please fill all required fields and upload all required files.');
+      setError('Please fill all required fields and upload all required files. Ensure postal code and industry contact are numeric.');
       return;
     }
 
@@ -452,52 +492,83 @@ export default function InternshipReportCreatePage() {
           </label>
 
           <label className="block">
-            <span className="text-sm font-medium text-slate-700">City *</span>
-            <input
-              type="text"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              placeholder="City"
+            <span className="text-sm font-medium text-slate-700">Country *</span>
+            <select
+              value={countryCode}
+              onChange={(e) => {
+                const newCode = e.target.value;
+                const selected = countries.find((item) => item.isoCode === newCode);
+                setCountryCode(newCode);
+                setCountry(selected?.name ?? '');
+              }}
               className="input-base mt-1 w-full"
               required
-            />
+            >
+              <option value="">Choose a country</option>
+              {countries.map((countryItem) => (
+                <option key={countryItem.isoCode} value={countryItem.isoCode}>
+                  {countryItem.name}
+                </option>
+              ))}
+            </select>
           </label>
 
           <label className="block">
             <span className="text-sm font-medium text-slate-700">State *</span>
-            <input
-              type="text"
-              value={stateValue}
-              onChange={(e) => setStateValue(e.target.value)}
-              placeholder="State"
+            <select
+              value={stateCode}
+              onChange={(e) => {
+                const newCode = e.target.value;
+                const selected = states.find((item) => item.isoCode === newCode);
+                setStateCode(newCode);
+                setStateValue(selected?.name ?? '');
+              }}
               className="input-base mt-1 w-full"
               required
-            />
+              disabled={!countryCode}
+            >
+              <option value="">{countryCode ? 'Choose a state' : 'Select country first'}</option>
+              {states.map((stateItem) => (
+                <option key={stateItem.isoCode} value={stateItem.isoCode}>
+                  {stateItem.name}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="block">
+            <span className="text-sm font-medium text-slate-700">City *</span>
+            <select
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              className="input-base mt-1 w-full"
+              required
+              disabled={!stateCode}
+            >
+              <option value="">{stateCode ? 'Choose a city' : 'Select state first'}</option>
+              {cities.map((cityItem) => (
+                <option key={cityItem.name} value={cityItem.name}>
+                  {cityItem.name}
+                </option>
+              ))}
+            </select>
           </label>
 
           <label className="block">
             <span className="text-sm font-medium text-slate-700">Postal Code *</span>
             <input
               type="text"
+              inputMode="numeric"
+              pattern="\d*"
               value={postalCode}
-              onChange={(e) => setPostalCode(e.target.value)}
-              placeholder="Postal Code"
+              onChange={(e) => setPostalCode(e.target.value.replace(/\D/g, ''))}
+              placeholder="Postal Code (numbers only)"
               className="input-base mt-1 w-full"
               required
             />
           </label>
 
-          <label className="block">
-            <span className="text-sm font-medium text-slate-700">Country *</span>
-            <input
-              type="text"
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
-              placeholder="Country"
-              className="input-base mt-1 w-full"
-              required
-            />
-          </label>
+          
 
           <label className="block lg:col-span-2">
             <span className="text-sm font-medium text-slate-700">Industry Website *</span>
@@ -514,10 +585,12 @@ export default function InternshipReportCreatePage() {
           <label className="block lg:col-span-2">
             <span className="text-sm font-medium text-slate-700">Industry Contact Details *</span>
             <input
-              type="text"
+              type="tel"
+              inputMode="numeric"
+              pattern="\d*"
               value={industryContact}
-              onChange={(e) => setIndustryContact(e.target.value)}
-              placeholder="Industry Contact Details"
+              onChange={(e) => setIndustryContact(e.target.value.replace(/\D/g, ''))}
+              placeholder="Contact number (digits only)"
               className="input-base mt-1 w-full"
               required
             />

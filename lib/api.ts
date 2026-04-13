@@ -1,5 +1,4 @@
 import axios, { AxiosInstance } from 'axios';
-import { useAuthStore } from './store';
 
 export interface EventMasterRecord {
   id: number;
@@ -27,6 +26,7 @@ export interface EventMasterRecord {
   totalLevelOfCompetition: string | null;
   eligibleForRewards: boolean;
   winnerRewards: string | null;
+  imgLink: string | null;
   createdDate: string;
   updatedDate: string;
 }
@@ -34,7 +34,6 @@ export interface EventMasterRecord {
 export interface CreateEventPayload {
   maximumCount: number;
   appliedCount: number;
-  balanceCount: number;
   applyByStudent: boolean;
   eventCode: string;
   eventName: string;
@@ -56,6 +55,7 @@ export interface CreateEventPayload {
   totalLevelOfCompetition?: string | null;
   eligibleForRewards: boolean;
   winnerRewards?: string | null;
+  imgLink?: string | null;
 }
 
 export interface EventRegistrationRecord {
@@ -161,19 +161,8 @@ const client: AxiosInstance = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 });
-
-// Request interceptor to add token
-client.interceptors.request.use(
-  (config) => {
-    const token = useAuthStore.getState().token;
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
 
 // Response interceptor to handle errors
 client.interceptors.response.use(
@@ -181,14 +170,15 @@ client.interceptors.response.use(
   (error) => {
     const status = error.response?.status;
     const message = error.response?.data?.error;
-    const token = useAuthStore.getState().token;
 
-    if ((status === 401 || status === 403) && token && !token.startsWith('demo-')) {
+    if ((status === 401 || status === 403) && typeof window !== 'undefined') {
+      void fetch(`${apiBaseURL}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      }).catch(() => undefined)
+
       if (message?.toString().toLowerCase().includes('invalid') || message?.toString().toLowerCase().includes('expired') || status === 401) {
-        useAuthStore.getState().logout();
-        if (typeof window !== 'undefined') {
-          window.location.href = '/login';
-        }
+        window.location.href = '/login';
       }
     }
 
@@ -208,11 +198,15 @@ export const apiClient = {
     return response.data;
   },
 
-  login: async (email: string, password: string) => {
-    const response = await client.post('/auth/login', {
-      email,
-      password,
+  loginWithGoogle: async (credential: string) => {
+    const response = await client.post('/auth/google', {
+      credential,
     });
+    return response.data;
+  },
+
+  logout: async () => {
+    const response = await client.post('/auth/logout');
     return response.data;
   },
 
@@ -331,6 +325,34 @@ export const apiClient = {
     return response.data;
   },
 
+  createPatentTracker: async (formData: FormData) => {
+    const response = await client.post('/patent-tracker', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  createPatentReport: async (formData: FormData) => {
+    const response = await client.post('/patent-report', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  getPatentTrackers: async () => {
+    const response = await client.get('/patent-tracker');
+    return response.data;
+  },
+
+  getPatentReports: async () => {
+    const response = await client.get('/patent-report');
+    return response.data;
+  },
+
   getInternshipTrackers: async () => {
     const response = await client.get('/internship-tracker');
     return response.data;
@@ -362,7 +384,7 @@ export const apiClient = {
     return response.data;
   },
 
-  updateInternshipReportIqac: async (id: number, iqac_verification: 'Initiated' | 'Approved' | 'Rejected', reject_reason?: string) => {
+  updateInternshipReportIqac: async (id: number, iqac_verification: 'initiated' | 'approved' | 'declined', reject_reason?: string) => {
     const payload: Record<string, unknown> = { iqac_verification };
     if (reject_reason) payload.reject_reason = reject_reason;
     const response = await client.patch(`/internship-report/${id}/iqac`, payload);
@@ -417,14 +439,6 @@ export const apiClient = {
 
   getEvents: async (params?: { sort?: 'asc' | 'desc' }): Promise<{ events: EventMasterRecord[] }> => {
     const searchParams = new URLSearchParams();
-    const token = useAuthStore.getState().token;
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    };
-
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
 
     if (params?.sort) {
       searchParams.set('sort', params.sort);
@@ -432,7 +446,7 @@ export const apiClient = {
 
     const response = await fetch(`/api/events${searchParams.toString() ? `?${searchParams.toString()}` : ''}`, {
       method: 'GET',
-      headers,
+      credentials: 'include',
       cache: 'no-store',
     });
 
@@ -445,18 +459,12 @@ export const apiClient = {
   },
 
   createEvent: async (data: CreateEventPayload): Promise<{ message: string; event: EventMasterRecord }> => {
-    const token = useAuthStore.getState().token;
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    };
-
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
-
     const response = await fetch('/api/events', {
       method: 'POST',
-      headers,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
       body: JSON.stringify(data),
     });
 

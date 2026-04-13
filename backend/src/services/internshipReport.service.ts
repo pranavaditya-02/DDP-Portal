@@ -34,6 +34,7 @@ const CREATE_SDG_GOALS_SQL = `CREATE TABLE IF NOT EXISTS sdg_goals (
 
 const CREATE_REPORT_SQL = `CREATE TABLE IF NOT EXISTS internship_reports (
   id INT AUTO_INCREMENT PRIMARY KEY,
+  report_number BIGINT UNSIGNED NOT NULL,
   tracker_id INT NOT NULL UNIQUE,
   student_id INT NOT NULL,
   special_lab_id INT NOT NULL,
@@ -58,7 +59,8 @@ const CREATE_REPORT_SQL = `CREATE TABLE IF NOT EXISTS internship_reports (
   full_document_proof_url VARCHAR(255) NOT NULL,
   original_certificate_url VARCHAR(255) NOT NULL,
   attested_certificate_url VARCHAR(255) NOT NULL,
-  iqac_verification ENUM('Initiated', 'Approved', 'Rejected') DEFAULT 'Initiated',
+  iqac_verification ENUM('initiated', 'approved', 'declined') DEFAULT 'initiated',
+  
   reject_reason VARCHAR(255) DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -85,6 +87,12 @@ async function ensureTablesExist(): Promise<void> {
     await pool.query(`ALTER TABLE internship_reports ADD COLUMN tracker_id INT NOT NULL UNIQUE AFTER id`);
   } catch (error) {
     logger.warn('Could not add internship_reports.tracker_id column, it may already exist or require manual migration.', error);
+  }
+
+  try {
+    await pool.query(`ALTER TABLE internship_reports ADD COLUMN report_number BIGINT UNSIGNED NULL AFTER id`);
+  } catch (error) {
+    logger.warn('Could not add internship_reports.report_number column, it may already exist or require manual migration.', error);
   }
 
   try {
@@ -141,15 +149,17 @@ export interface InternshipReportCreateInput {
   full_document_proof_url: string;
   original_certificate_url: string;
   attested_certificate_url: string;
-  iqac_verification?: 'Initiated' | 'Approved' | 'Rejected';
+  iqac_verification?: 'initiated' | 'approved' | 'declined';
   reject_reason?: string | null;
 }
 
 export interface InternshipReportRecord {
   id: number;
+  report_number?: number;
   tracker_id: number;
   student_id: number;
   student_name?: string | null;
+  student_email?: string | null;
   special_lab_id: number;
   special_lab_name?: string | null;
   year_of_study: number;
@@ -174,13 +184,20 @@ export interface InternshipReportRecord {
   full_document_proof_url: string;
   original_certificate_url: string;
   attested_certificate_url: string;
-  iqac_verification: 'Initiated' | 'Approved' | 'Rejected';
+  iqac_verification: 'initiated' | 'approved' | 'declined';
   reject_reason?: string | null;
   created_at: string;
   updated_at: string;
 }
 
 export class InternshipReportService {
+  private async getNextReportNumber(): Promise<number> {
+    const pool = getMysqlPool();
+    const [rows] = await pool.query<RowDataPacket[]>(`SELECT COALESCE(MAX(report_number), 0) AS max_number FROM internship_reports`);
+    const maxNumber = Number((rows[0] as any)?.max_number ?? 0);
+    return maxNumber + 1;
+  }
+
   async createReport(data: InternshipReportCreateInput): Promise<InternshipReportRecord> {
     await ensureTablesExist();
 
@@ -195,8 +212,10 @@ export class InternshipReportService {
       throw new Error('A report already exists for this tracker.');
     }
 
+    const reportNumber = await this.getNextReportNumber();
     const [result] = await pool.query<OkPacket>(
       `INSERT INTO internship_reports (
+        report_number,
         tracker_id,
         student_id,
         special_lab_id,
@@ -223,8 +242,9 @@ export class InternshipReportService {
         attested_certificate_url,
         iqac_verification,
         reject_reason
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
       [
+        reportNumber,
         data.tracker_id,
         data.student_id,
         data.special_lab_id,
@@ -249,7 +269,7 @@ export class InternshipReportService {
         data.full_document_proof_url,
         data.original_certificate_url,
         data.attested_certificate_url,
-        data.iqac_verification ?? 'Initiated',
+          data.iqac_verification ?? 'initiated',
         data.reject_reason ?? null,
       ],
     );
@@ -262,11 +282,11 @@ export class InternshipReportService {
     return report;
   }
 
-  async updateIqacVerification(id: number, iqac_verification: 'Initiated' | 'Approved' | 'Rejected', reject_reason?: string | null): Promise<InternshipReportRecord | null> {
+  async updateIqacVerification(id: number, iqac_verification: 'initiated' | 'approved' | 'declined', reject_reason?: string | null): Promise<InternshipReportRecord | null> {
     await ensureTablesExist();
 
     const pool = getMysqlPool();
-    if (iqac_verification === 'Rejected') {
+    if (iqac_verification === 'declined') {
       await pool.query('UPDATE internship_reports SET iqac_verification = ?, reject_reason = ? WHERE id = ?', [iqac_verification, reject_reason ?? null, id]);
     } else {
       await pool.query('UPDATE internship_reports SET iqac_verification = ?, reject_reason = NULL WHERE id = ?', [iqac_verification, id]);
@@ -281,9 +301,11 @@ export class InternshipReportService {
     const [rows] = await pool.query<RowDataPacket[]>(
       `SELECT
         ir.id,
+        ir.report_number,
         ir.tracker_id,
         ir.student_id,
         s.student_name,
+        s.college_email AS student_email,
         ir.special_lab_id,
         sl.name AS special_lab_name,
         ir.year_of_study,
@@ -323,6 +345,64 @@ export class InternshipReportService {
     return (rows as InternshipReportRecord[])[0] ?? null;
   }
 
+  async getReportByNumber(reportNumber: number): Promise<InternshipReportRecord | null> {
+    await ensureTablesExist();
+
+    const pool = getMysqlPool();
+    const [rows] = await pool.query<RowDataPacket[]>(
+      `SELECT
+        ir.id,
+        ir.report_number,
+        ir.tracker_id,
+        ir.student_id,
+        s.student_name,
+        s.college_email AS student_email,
+        ir.special_lab_id,
+        sl.name AS special_lab_name,
+        ir.year_of_study,
+        ir.sector,
+        ir.industry_address_line_1,
+        ir.industry_address_line_2,
+        ir.city,
+        ir.state,
+        ir.postal_code,
+        ir.country,
+        ir.industry_website,
+        ir.industry_contact_details,
+        ir.referred_by,
+        ir.referee_name,
+        ir.referee_mobile_number,
+        ir.stipend_received,
+        ir.stipend_amount,
+        ir.is_through_aicte,
+        ir.claim_type,
+        ir.sdg_goal_id,
+        sg.goal_name AS sdg_goal_name,
+        ir.full_document_proof_url,
+        ir.original_certificate_url,
+        ir.attested_certificate_url,
+        ir.iqac_verification,
+        ir.reject_reason,
+        ir.created_at,
+        ir.updated_at
+      FROM internship_reports ir
+      LEFT JOIN students s ON ir.student_id = s.id
+      LEFT JOIN special_labs sl ON ir.special_lab_id = sl.id
+      LEFT JOIN sdg_goals sg ON ir.sdg_goal_id = sg.id
+      WHERE ir.report_number = ?`,
+      [reportNumber],
+    );
+
+    return (rows as InternshipReportRecord[])[0] ?? null;
+  }
+
+  async getReportByIdOrNumber(idOrNumber: number): Promise<InternshipReportRecord | null> {
+    await ensureTablesExist();
+    const report = await this.getReportById(idOrNumber);
+    if (report) return report;
+    return this.getReportByNumber(idOrNumber);
+  }
+
   async listReports(): Promise<InternshipReportRecord[]> {
     await ensureTablesExist();
 
@@ -330,9 +410,11 @@ export class InternshipReportService {
     const [rows] = await pool.query<RowDataPacket[]>(
       `SELECT
         ir.id,
+        ir.report_number,
         ir.tracker_id,
         ir.student_id,
         s.student_name,
+        s.college_email AS student_email,
         ir.special_lab_id,
         sl.name AS special_lab_name,
         ir.year_of_study,

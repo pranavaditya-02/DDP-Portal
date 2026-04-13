@@ -18,6 +18,7 @@ const CREATE_STUDENTS_SQL = `CREATE TABLE IF NOT EXISTS students (
 
 const CREATE_TRACKER_SQL = `CREATE TABLE IF NOT EXISTS internship_tracker (
   id INT AUTO_INCREMENT PRIMARY KEY,
+  tracker_number BIGINT UNSIGNED NOT NULL,
   student_id INT NOT NULL,
   industry_id INT NOT NULL,
   start_date DATE NOT NULL,
@@ -55,6 +56,12 @@ async function ensureTableExists(): Promise<void> {
     logger.warn('Could not add internship_tracker.reject_reason column, it may already exist or require manual migration.', error);
   }
 
+  try {
+    await pool.query(`ALTER TABLE internship_tracker ADD COLUMN tracker_number BIGINT UNSIGNED NULL AFTER id;`);
+  } catch (error) {
+    logger.warn('Could not add internship_tracker.tracker_number column, it may already exist or require manual migration.', error);
+  }
+
   tableReady = true;
   logger.info("internship_tracker table is ready");
 }
@@ -72,9 +79,11 @@ export interface InternshipTrackerCreateInput {
 
 export interface InternshipTrackerRecord {
   id: number;
+  tracker_number?: number;
   student_id: number;
   student_name?: string | null;
   student_roll_no?: string | null;
+  student_email?: string | null;
   industry_id: number;
   industry_name?: string | null;
   start_date: string;
@@ -86,14 +95,23 @@ export interface InternshipTrackerRecord {
 }
 
 export class InternshipTrackerService {
+  private async getNextTrackerNumber(): Promise<number> {
+    const pool = getMysqlPool();
+    const [rows] = await pool.query<RowDataPacket[]>(`SELECT COALESCE(MAX(tracker_number), 0) AS max_number FROM internship_tracker`);
+    const maxNumber = Number((rows[0] as any)?.max_number ?? 0);
+    return maxNumber + 1;
+  }
+
   async createTracker(
     data: InternshipTrackerCreateInput,
   ): Promise<InternshipTrackerRecord> {
     await ensureTableExists();
 
     const pool = getMysqlPool();
+    const trackerNumber = await this.getNextTrackerNumber();
     const [result] = await pool.query<OkPacket>(
       `INSERT INTO internship_tracker (
+          tracker_number,
           student_id,
           industry_id,
           start_date,
@@ -102,8 +120,9 @@ export class InternshipTrackerService {
           offer_letter_link,
           iqac_verification,
           reject_reason
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?);`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);`,
       [
+        trackerNumber,
         data.student_id,
         data.industry_id,
         data.start_date,
@@ -154,8 +173,10 @@ export class InternshipTrackerService {
     const [rows] = await pool.query<RowDataPacket[]>(
       `SELECT
         it.id,
+        it.tracker_number,
         it.student_id,
         s.student_name,
+        s.college_email AS student_email,
         s.roll_no AS student_roll_no,
         it.industry_id,
         i.industry AS industry_name,
@@ -175,6 +196,43 @@ export class InternshipTrackerService {
     return (rows as InternshipTrackerRecord[])[0] ?? null;
   }
 
+  async getTrackerByNumber(trackerNumber: number): Promise<InternshipTrackerRecord | null> {
+    await ensureTableExists();
+
+    const pool = getMysqlPool();
+    const [rows] = await pool.query<RowDataPacket[]>(
+      `SELECT
+        it.id,
+        it.tracker_number,
+        it.student_id,
+        s.student_name,
+        s.college_email AS student_email,
+        s.roll_no AS student_roll_no,
+        it.industry_id,
+        i.industry AS industry_name,
+        it.start_date,
+        it.end_date,
+        it.aim_objectives_link,
+        it.offer_letter_link,
+        it.iqac_verification,
+        it.reject_reason
+      FROM internship_tracker it
+      LEFT JOIN students s ON it.student_id = s.id
+      LEFT JOIN internship_industries i ON it.industry_id = i.id
+      WHERE it.tracker_number = ?`,
+      [trackerNumber],
+    );
+
+    return (rows as InternshipTrackerRecord[])[0] ?? null;
+  }
+
+  async getTrackerByIdOrNumber(idOrNumber: number): Promise<InternshipTrackerRecord | null> {
+    await ensureTableExists();
+    const tracker = await this.getTrackerById(idOrNumber);
+    if (tracker) return tracker;
+    return this.getTrackerByNumber(idOrNumber);
+  }
+
   async listTrackers(): Promise<InternshipTrackerRecord[]> {
     await ensureTableExists();
 
@@ -182,8 +240,10 @@ export class InternshipTrackerService {
     const [rows] = await pool.query<RowDataPacket[]>(
       `SELECT
         it.id,
+        it.tracker_number,
         it.student_id,
         s.student_name,
+        s.college_email AS student_email,
         s.roll_no AS student_roll_no,
         it.industry_id,
         i.industry AS industry_name,
@@ -210,8 +270,10 @@ export class InternshipTrackerService {
     const [rows] = await pool.query<RowDataPacket[]>(
       `SELECT
         it.id,
+        it.tracker_number,
         it.student_id,
         s.student_name,
+        s.college_email AS student_email,
         s.roll_no AS student_roll_no,
         it.industry_id,
         i.industry AS industry_name,

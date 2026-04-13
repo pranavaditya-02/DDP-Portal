@@ -26,10 +26,15 @@ async function proxyToBackend(request: NextRequest, method: 'GET' | 'POST') {
 
   const headers: HeadersInit = {}
   const authorization = request.headers.get('authorization')
+  const cookie = request.headers.get('cookie')
   const contentType = request.headers.get('content-type')
 
   if (authorization) {
     headers.authorization = authorization
+  }
+
+  if (cookie) {
+    headers.cookie = cookie
   }
 
   if (contentType) {
