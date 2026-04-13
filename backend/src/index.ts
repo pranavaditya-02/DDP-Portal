@@ -21,11 +21,27 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+const normalizeOrigin = (value?: string) => {
+  const candidate = value?.trim()
+  if (!candidate) return null
+
+  try {
+    return new URL(candidate).origin
+  } catch {
+    return null
+  }
+}
+
 const parseAllowedOrigins = () => {
   const configuredOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000')
     .split(',')
-    .map((origin) => origin.trim())
-    .filter(Boolean)
+    .map((origin) => normalizeOrigin(origin))
+    .filter((origin): origin is string => Boolean(origin))
+
+  const frontendOrigin = normalizeOrigin(process.env.FRONTEND_URL)
+  if (frontendOrigin) {
+    configuredOrigins.push(frontendOrigin)
+  }
 
   if ((process.env.NODE_ENV || 'development').toLowerCase() !== 'production') {
     configuredOrigins.push(
@@ -40,6 +56,7 @@ const parseAllowedOrigins = () => {
 }
 
 const allowedOrigins = parseAllowedOrigins()
+const isDevelopment = (process.env.NODE_ENV || 'development').toLowerCase() !== 'production'
 
 // Middleware
 app.use(cors({
@@ -51,6 +68,11 @@ app.use(cors({
     }
 
     if (allowedOrigins.includes(origin)) {
+      callback(null, true)
+      return
+    }
+
+    if (isDevelopment && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin)) {
       callback(null, true)
       return
     }

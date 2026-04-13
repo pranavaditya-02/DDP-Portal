@@ -156,6 +156,8 @@ function normalizeApiUrl(rawUrl?: string) {
 
 const apiBaseURL = normalizeApiUrl(process.env.NEXT_PUBLIC_API_URL) || DEFAULT_API_URL;
 
+const API_UNREACHABLE_MESSAGE = `Cannot reach API server at ${apiBaseURL}. Start the backend and verify NEXT_PUBLIC_API_URL/ALLOWED_ORIGINS.`
+
 const client: AxiosInstance = axios.create({
   baseURL: apiBaseURL,
   headers: {
@@ -185,6 +187,25 @@ client.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+export const getApiErrorMessage = (error: unknown, fallback = 'Request failed') => {
+  if (axios.isAxiosError(error)) {
+    const responseMessage = error.response?.data?.error
+    if (typeof responseMessage === 'string' && responseMessage.trim().length > 0) {
+      return responseMessage
+    }
+
+    if (error.code === 'ERR_NETWORK') {
+      return API_UNREACHABLE_MESSAGE
+    }
+
+    if (typeof error.message === 'string' && error.message.trim().length > 0) {
+      return error.message
+    }
+  }
+
+  return fallback
+}
 
 export const apiClient = {
   // Auth endpoints

@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/lib/store'
-import { apiClient } from '@/lib/api'
+import { apiClient, getApiErrorMessage } from '@/lib/api'
 import { getPostLoginRoute, AUTH_COOKIE_NAME } from '@/lib/auth-session'
 import { Loader2 } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -60,7 +60,7 @@ export default function LoginPage() {
             toast.success('Signed in successfully')
             router.replace(getPostLoginRoute(response.user.roles || []))
           } catch (error: any) {
-            const message = error.response?.data?.error || 'Google sign-in failed'
+            const message = getApiErrorMessage(error, 'Google sign-in failed')
             toast.error(message)
             console.error('Google login error:', error)
           } finally {
