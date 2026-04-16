@@ -214,10 +214,19 @@ router.patch(
 router.get('/special-labs', async (_req, res) => {
   try {
     const labs = await internshipReportService.listSpecialLabs();
-    return res.json({ specialLabs: labs });
+    return res.json({ success: true, specialLabs: labs, data: labs });
   } catch (error) {
     logger.error('Error listing special labs:', error);
-    return res.status(500).json({ error: 'Failed to list special labs' });
+    const errorMessage = (error as any).message || 'Failed to list special labs';
+    const isDatabaseError = errorMessage.includes('Table') || errorMessage.includes('table');
+    
+    return res.status(500).json({ 
+      success: false,
+      error: isDatabaseError
+        ? 'Special labs table not found. Please ensure database is initialized with patent_complete_schema.sql'
+        : 'Failed to list special labs',
+      details: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
+    });
   }
 });
 

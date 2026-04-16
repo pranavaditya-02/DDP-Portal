@@ -22,6 +22,19 @@ import clubsRoutes from './routes/clubs.routes';
 import verifiedStudentsRoutes from './routes/verifiedStudents.routes';
 import sdgRoutes from './routes/sdg.routes';
 import registrationRoutes from './routes/registration.routes';
+import patentRoutes from './routes/patent.routes';
+import patentFiledRoutes from './routes/patentFiled.routes';
+import patentPublishedRoutes from './routes/patentPublished.routes';
+import patentGrantedRoutes from './routes/patentGranted.routes';
+import patentPreliminaryDataRoutes from './routes/patentPreliminaryData.routes';
+import facultyRoutes from './routes/faculty.routes';
+import coeRoutes from './routes/coe.routes';
+import facultyIndustryProjectsRoutes from './routes/facultyIndustryProjects.routes';
+import irpVisitRoutes from './routes/irpVisit.routes';
+import labDevelopedByIndustryRoutes from './routes/labDevelopedByIndustry.routes';
+import mouRoutes from './routes/mou.routes';
+import professionalBodyMembershipRoutes from './routes/professionalBodyMembership.routes';
+import studentsIndustrialVisitRoutes from './routes/studentsIndustrialVisit.routes';
 import { verifyMysqlConnection } from './database/mysql';
 
 dotenv.config();
@@ -76,6 +89,19 @@ app.use('/api/clubs', clubsRoutes);
 app.use('/api/verified-students', verifiedStudentsRoutes);
 app.use('/api/sdgs', sdgRoutes);
 app.use('/api/registrations', registrationRoutes);
+app.use('/api/patents/filed', patentFiledRoutes);
+app.use('/api/patents/published', patentPublishedRoutes);
+app.use('/api/patents/granted', patentGrantedRoutes);
+app.use('/api/patents/preliminary-data', patentPreliminaryDataRoutes);
+app.use('/api/patents', patentRoutes);
+app.use('/api/faculty', facultyRoutes);
+app.use('/api/coe', coeRoutes);
+app.use('/api/faculty-industry-projects', facultyIndustryProjectsRoutes);
+app.use('/api/irp-visits', irpVisitRoutes);
+app.use('/api/lab-developed-by-industry', labDevelopedByIndustryRoutes);
+app.use('/api/mou', mouRoutes);
+app.use('/api/professional-body-membership', professionalBodyMembershipRoutes);
+app.use('/api/students-industrial-visit', studentsIndustrialVisitRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
