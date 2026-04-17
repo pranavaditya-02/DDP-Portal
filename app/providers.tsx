@@ -3,7 +3,6 @@
 import React from "react"
 
 import { useEffect } from 'react'
-import { usePathname } from 'next/navigation'
 import { useAuthStore } from '@/lib/store'
 import { apiClient } from '@/lib/api'
 import type { AuthUser } from '@/lib/auth-session'
@@ -12,8 +11,6 @@ import { Toaster } from 'react-hot-toast'
 const PUBLIC_PATHS = ['/', '/login', '/register']
 
 export function Providers({ children, initialUser }: { children: React.ReactNode; initialUser: AuthUser | null }) {
-  const pathname = usePathname()
-
   useEffect(() => {
     const shouldLoadRoleAccess = () => {
       const state = useAuthStore.getState()
@@ -31,7 +28,12 @@ export function Providers({ children, initialUser }: { children: React.ReactNode
       }
     }
 
-    const currentUser = useAuthStore.getState().user
+    const state = useAuthStore.getState()
+    const currentUser = state.user
+
+    if (state._hasHydrated && (state.isAuthenticated || PUBLIC_PATHS.includes(window.location.pathname))) {
+      return
+    }
 
     if (initialUser) {
       useAuthStore.setState({
@@ -56,7 +58,7 @@ export function Providers({ children, initialUser }: { children: React.ReactNode
       return
     }
 
-    if (PUBLIC_PATHS.includes(pathname)) {
+    if (PUBLIC_PATHS.includes(window.location.pathname)) {
       useAuthStore.setState({
         _hasHydrated: true,
         allowedRoutes: [],
@@ -82,9 +84,8 @@ export function Providers({ children, initialUser }: { children: React.ReactNode
       }
     }
 
-    void
-    verifyAuth()
-  }, [initialUser, pathname])
+    void verifyAuth()
+  }, [initialUser])
 
   return (
     <>

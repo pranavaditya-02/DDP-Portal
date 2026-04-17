@@ -11,6 +11,11 @@ export const normalizePath = (value: string) => {
 
 export const isDynamicPatternRoute = (value: string) => /\[[^\]]+\]/.test(value)
 
+export const shouldHideInNavigation = (route: string) => {
+  const normalizedRoute = normalizePath(route)
+  return normalizedRoute.endsWith('/submit')
+}
+
 export const routeToGroup = (route: string) => {
   if (route.startsWith('/student')) return 'Student'
   if (route.startsWith('/achievements') || route.startsWith('/activities') || route.startsWith('/action-plan') || route.startsWith('/faculty')) return 'Faculty'
@@ -59,6 +64,7 @@ const buildVisibleRouteItems = ({
     }))
     .filter((route) => route.href !== '/' && route.href !== '/login' && route.href !== '/register')
     .filter((route) => !isDynamicPatternRoute(route.href))
+    .filter((route) => !shouldHideInNavigation(route.href))
 
   if (fromResources.length > 0) {
     return sortLikeSidebar(fromResources)
@@ -68,6 +74,7 @@ const buildVisibleRouteItems = ({
     .map((route) => normalizePath(route))
     .filter((route) => route !== '/' && route !== '/login' && route !== '/register')
     .filter((route) => !isDynamicPatternRoute(route))
+    .filter((route) => !shouldHideInNavigation(route))
     .map((route) => ({ href: route, label: routeToLabel(route), group: routeToGroup(route) }))
     .sort((a, b) => {
       const ai = GROUP_ORDER.indexOf(a.group)
@@ -105,6 +112,14 @@ export const hasRouteAccess = (pathname: string, allowedRoutes: string[]) => {
   if (allowedRoutes.length === 0) return true
 
   const normalizedPath = normalizePath(pathname)
+
+  if (normalizedPath.endsWith('/submit')) {
+    const parentPath = normalizedPath.replace(/\/submit$/, '') || '/'
+    if (allowedRoutes.some((route) => normalizePath(route) === parentPath)) {
+      return true
+    }
+  }
+
   return allowedRoutes.some((route) => {
     const normalizedRoute = normalizePath(route)
     if (normalizedRoute === normalizedPath) return true

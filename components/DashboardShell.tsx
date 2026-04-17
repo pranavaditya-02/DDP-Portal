@@ -1,16 +1,17 @@
 'use client'
 
-import React, { useState } from 'react'
-import { usePathname } from 'next/navigation'
+import React, { useEffect, useState } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
 import { useAuthStore } from '@/lib/store'
 import { Sidebar } from '@/components/Sidebar'
-import { AlertTriangle, Menu } from 'lucide-react'
+import { Menu } from 'lucide-react'
 import Link from 'next/link'
 import { hasRouteAccess, pickFirstAccessibleRoute } from '@/lib/route-access'
 
 const PUBLIC_PATHS = ['/login', '/register', '/']
 
 export const DashboardShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const router = useRouter()
   const pathname = usePathname()
   const { isAuthenticated, _hasHydrated, allowedRoutes, allowedResources } = useAuthStore()
   const [collapsed, setCollapsed] = useState(false)
@@ -23,6 +24,14 @@ export const DashboardShell: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const isPublicPage = PUBLIC_PATHS.includes(pathname)
   const canAccessCurrentPage = isPublicPage || hasRouteAccess(pathname, allowedRoutes)
+
+  useEffect(() => {
+    if (!_hasHydrated || !isAuthenticated || isPublicPage || canAccessCurrentPage) {
+      return
+    }
+
+    router.replace(firstAccessibleRoute)
+  }, [_hasHydrated, isAuthenticated, isPublicPage, canAccessCurrentPage, firstAccessibleRoute, router])
 
   // Wait for zustand to rehydrate from localStorage before deciding layout
   if (!_hasHydrated) {
@@ -40,19 +49,9 @@ export const DashboardShell: React.FC<{ children: React.ReactNode }> = ({ childr
   }
 
   if (!canAccessCurrentPage) {
-    const fallbackPath = firstAccessibleRoute
     return (
-      <main className="min-h-screen bg-slate-50 p-6 flex items-center justify-center">
-        <div className="max-w-md w-full bg-white border border-slate-200 rounded-xl p-6 text-center shadow-sm">
-          <div className="mx-auto w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-3">
-            <AlertTriangle className="w-6 h-6 text-red-500" />
-          </div>
-          <h1 className="text-lg font-semibold text-slate-900">Unauthorized</h1>
-          <p className="text-sm text-slate-500 mt-1">You do not have access to this page for your assigned role.</p>
-          <Link href={fallbackPath} className="inline-flex mt-4 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors">
-            Go to Allowed Page
-          </Link>
-        </div>
+      <main className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
       </main>
     )
   }

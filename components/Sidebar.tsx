@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/store";
 import { apiClient } from "@/lib/api";
 import { AUTH_COOKIE_NAME } from "@/lib/auth-session";
 import { clearAuthCookie } from "@/app/actions";
-import { pickFirstAccessibleRoute } from "@/lib/route-access";
+import { pickFirstAccessibleRoute, shouldHideInNavigation } from "@/lib/route-access";
 import {
   LayoutDashboard,
   FileText,
@@ -64,6 +64,8 @@ const iconMap: Record<string, React.ElementType> = {
 };
 
 const groupOrder = ["Overview", "Student", "Faculty", "Department", "College", "Management", "Other"];
+const VERIFICATION_REFRESH_INTERVAL_MS = 120000;
+const MIN_MANUAL_REFRESH_GAP_MS = 10000;
 
 const normalizePath = (value: string) => {
   if (!value || value === "/") return "/";
@@ -117,12 +119,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [profileOpen, setProfileOpen] = useState(false);
   const [verificationQueuePendingCount, setVerificationQueuePendingCount] = useState(0);
   const [verificationPanelPendingCount, setVerificationPanelPendingCount] = useState(0);
+  const pendingCountLastFetchedAtRef = useRef(0);
 
   const baseItems = useMemo<DynamicNavItem[]>(() => {
     if (allowedResources.length > 0) {
       return allowedResources
         .filter((resource) => Boolean(resource.href))
         .filter((resource) => !isDynamicPatternRoute(resource.href))
+        .filter((resource) => !shouldHideInNavigation(resource.href))
         .map((resource) => ({
           id: resource.id,
           label: resource.label,
@@ -136,6 +140,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     return Array.from(new Set(allowedRoutes.map((route) => normalizePath(route))))
       .filter((href) => href !== "/" && href !== "/login" && href !== "/register")
       .filter((href) => !isDynamicPatternRoute(href))
+      .filter((href) => !shouldHideInNavigation(href))
       .map((href) => ({
         id: href.slice(1).replace(/\//g, ".") || "dashboard",
         label: routeToLabel(href),
@@ -155,6 +160,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
     const roles = (user?.roles || []).map((role) => role.toLowerCase());
     return roles.includes("verification") || roles.includes("maintenance") || roles.includes("admin");
   }, [user]);
+
+  useEffect(() => {
+    for (const item of baseItems.slice(0, 12)) {
+      router.prefetch(item.href);
+    }
+  }, [baseItems, router]);
 
   useEffect(() => {
     if (!hasVerificationPages || !canReadVerificationQueues) {
@@ -184,7 +195,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
       return 0;
     };
 
-    const loadPendingCount = async () => {
+    const loadPendingCount = async (force = false) => {
+      if (!force && document.visibilityState !== "visible") {
+        return;
+      }
+
+      const now = Date.now();
+      if (!force && now - pendingCountLastFetchedAtRef.current < MIN_MANUAL_REFRESH_GAP_MS) {
+        return;
+      }
+
       try {
         const [queueResponse, panelResponse] = await Promise.all([
           apiClient.getPendingActivities(),
@@ -195,6 +215,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         setVerificationQueuePendingCount(getListCount(queueResponse));
         setVerificationPanelPendingCount(getListCount(panelResponse));
+        pendingCountLastFetchedAtRef.current = now;
       } catch {
         if (!active) return;
         setVerificationQueuePendingCount(0);
@@ -202,20 +223,28 @@ export const Sidebar: React.FC<SidebarProps> = ({
       }
     };
 
-    void loadPendingCount();
+    void loadPendingCount(true);
 
     const handlePendingRefresh = () => {
-      void loadPendingCount();
+      void loadPendingCount(true);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        void loadPendingCount(true);
+      }
     };
 
     window.addEventListener("verification-pending-updated", handlePendingRefresh);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
     const timer = window.setInterval(() => {
       void loadPendingCount();
-    }, 30000);
+    }, VERIFICATION_REFRESH_INTERVAL_MS);
 
     return () => {
       active = false;
       window.removeEventListener("verification-pending-updated", handlePendingRefresh);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.clearInterval(timer);
     };
   }, [canReadVerificationQueues, hasVerificationPages]);
@@ -349,6 +378,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <Link
                     key={item.id}
                     href={item.href}
+                    prefetch
                     onClick={() => setMobileOpen(false)}
                     className={`group flex items-center gap-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 relative ${
                       collapsed ? "justify-center px-2" : "px-3"
