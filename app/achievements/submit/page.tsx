@@ -176,41 +176,6 @@ export default function AchievementsPage() {
                   ))}
                 </select>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="form-label">Title *</label>
-                  <input
-                    type="text"
-                    value={achievement.title}
-                    onChange={(e) => handleAchievementChange(achievement.id, 'title', e.target.value)}
-                    placeholder="Enter achievement title"
-                    className="form-input"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="form-label">Date *</label>
-                  <input
-                    type="date"
-                    value={achievement.date}
-                    onChange={(e) => handleAchievementChange(achievement.id, 'date', e.target.value)}
-                    className="form-input"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="form-label">Description</label>
-                <textarea
-                  value={achievement.description}
-                  onChange={(e) => handleAchievementChange(achievement.id, 'description', e.target.value)}
-                  placeholder="Enter description"
-                  rows={3}
-                  className="form-input resize-vertical"
-                />
-              </div>
             </div>
 
             {/* Category-Specific Forms */}

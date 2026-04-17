@@ -23,6 +23,7 @@ export const EventsAttendedForm: React.FC<EventsAttendedFormProps> = ({ achievem
     date: '',
     taskId: '',
     specialLabsInvolved: '',
+    specialLabName: '',
     eventType: '',
     organizerType: '',
     eventLevel: '',
@@ -89,6 +90,19 @@ export const EventsAttendedForm: React.FC<EventsAttendedFormProps> = ({ achievem
           />
         </div>
       </div>
+
+      {data.specialLabsInvolved === 'Yes' && (
+        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <SelectInput
+            label="Special Lab Name"
+            name="specialLabName"
+            value={data.specialLabName || ''}
+            onChange={handleChange}
+            options={EVENTS_ATTENDED_OPTIONS.SPECIAL_LAB_NAMES}
+            required
+          />
+        </div>
+      )}
 
       {/* Organizer and Level */}
       <div className="space-y-4">

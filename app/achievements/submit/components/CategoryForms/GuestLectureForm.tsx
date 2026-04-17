@@ -24,6 +24,7 @@ export const GuestLectureForm: React.FC<GuestLectureFormProps> = ({ achievement,
     taskId: '',
     faculty: '',
     specialLabsInvolved: '',
+    specialLabName: '',
     eventType: '',
     topic: '',
     modeOfConduct: '',
@@ -35,7 +36,7 @@ export const GuestLectureForm: React.FC<GuestLectureFormProps> = ({ achievement,
     typeOfOrganization: '',
     noOfParticipants: '',
     typeOfAudienceCovered: '',
-    iqacVerification: '',
+    iqacVerification: 'Initiated',
     documentProofPreview: '',
     apexProofPreview: '',
     samplePhotographsPreview: '',
@@ -99,6 +100,19 @@ export const GuestLectureForm: React.FC<GuestLectureFormProps> = ({ achievement,
           />
         </div>
       </div>
+
+      {data.specialLabsInvolved === 'Yes' && (
+        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <SelectInput
+            label="Special Lab Name"
+            name="specialLabName"
+            value={data.specialLabName || ''}
+            onChange={handleChange}
+            options={GUEST_LECTURE_OPTIONS.SPECIAL_LAB_NAMES}
+            required
+          />
+        </div>
+      )}
 
       {/* Event Details */}
       <div className="space-y-4">
@@ -228,14 +242,12 @@ export const GuestLectureForm: React.FC<GuestLectureFormProps> = ({ achievement,
 
       {/* IQAC Verification */}
       <div className="border-t pt-6">
-        <SelectInput
-          label="IQAC Verification"
-          name="iqacVerification"
-          value={data.iqacVerification}
-          onChange={handleChange}
-          options={COMMON_OPTIONS.YES_NO}
-          required
-        />
+        <div className="flex items-center justify-between">
+          <label className="block text-sm font-semibold text-slate-900">IQAC Verification *</label>
+          <span className="inline-block px-4 py-2 bg-blue-100 text-blue-800 text-sm font-semibold rounded-lg border border-blue-300 shadow-sm">
+            ◐ Initiated
+          </span>
+        </div>
       </div>
     </div>
   )

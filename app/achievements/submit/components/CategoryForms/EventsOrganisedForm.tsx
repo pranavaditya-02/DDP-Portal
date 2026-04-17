@@ -50,6 +50,7 @@ export const EventsOrganisedForm: React.FC<EventsOrganisedFormProps> = ({
     facultyRole: '',
     claimedDepartment: '',
     specialLabsInvolved: '',
+    specialLabName: '',
     iicEvent: '',
     iicEventUpload: '',
     iicBipId: '',
@@ -121,6 +122,27 @@ export const EventsOrganisedForm: React.FC<EventsOrganisedFormProps> = ({
           placeholder="Enter task ID"
           required
         />
+
+        <SelectInput
+          label="Special Labs Involved"
+          name="specialLabsInvolved"
+          value={data.specialLabsInvolved || ''}
+          onChange={handleChange}
+          options={[{ label: 'Yes', value: 'Yes' }, { label: 'No', value: 'No' }]}
+        />
+
+        {data.specialLabsInvolved === 'Yes' && (
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <SelectInput
+              label="Special Lab Name"
+              name="specialLabName"
+              value={data.specialLabName || ''}
+              onChange={handleChange}
+              options={EVENTS_ORGANIZED_OPTIONS.SPECIAL_LAB_NAMES}
+              required
+            />
+          </div>
+        )}
 
         <TextInput
           label="Event Name"

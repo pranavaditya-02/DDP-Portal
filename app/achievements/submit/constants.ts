@@ -281,6 +281,7 @@ export const EVENTS_ATTENDED_OPTIONS = {
 
 export const EVENTS_ORGANIZED_OPTIONS = {
   ROLES: ['Convener', 'Co-Convener', 'Co-ordinator', 'Organizing Secretary'],
+  SPECIAL_LAB_NAMES: ['Lab 1', 'Lab 2', 'Lab 3', 'Lab 4', 'Lab 5'],
   EVENT_CATEGORIES: [
     'Awareness of Trends in Technology',
     'IPR',
@@ -328,6 +329,7 @@ export const GUEST_LECTURE_OPTIONS = {
 // ============================================
 
 export const ONLINE_COURSE_OPTIONS = {
+  SPECIAL_LAB_NAMES: ['Lab 1', 'Lab 2', 'Lab 3', 'Lab 4', 'Lab 5'],
   ORGANIZERS: ['Private', 'Government'],
   LEVELS: ['State', 'National', 'International'],
   DURATIONS: ['1 Week', '2 Weeks', '1 Month', '2 Months', '3 Months', '6 Months', '1 Year'],
@@ -341,6 +343,7 @@ export const ONLINE_COURSE_OPTIONS = {
 // ============================================
 
 export const PAPER_PRESENTATION_OPTIONS = {
+  SPECIAL_LAB_NAMES: ['Lab 1', 'Lab 2', 'Lab 3', 'Lab 4', 'Lab 5'],
   EVENT_MODES: ['Online', 'Offline'],
   ORGANIZERS: ['BIT', 'Industry', 'Foreign Institute', 'Others', 'Institute'],
   LEVELS: ['International', 'National'],

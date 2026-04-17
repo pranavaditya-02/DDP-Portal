@@ -25,6 +25,7 @@ export const PaperPresentationForm: React.FC<PaperPresentationFormProps> = ({ ac
     faculty: '',
     taskId: '',
     specialLabsInvolved: '',
+    specialLabName: '',
     otherAuthorsFromBIT: '',
     externalFacultyInvolved: '',
     industrialPersonInvolved: '',
@@ -42,7 +43,7 @@ export const PaperPresentationForm: React.FC<PaperPresentationFormProps> = ({ ac
     studentsInvolved: '',
     registrationAmount: '',
     awardPrizeReceived: '',
-    iqacVerification: '',
+    iqacVerification: 'Initiated',
     documentProofPreview: '',
     awardProofPreview: '',
   }
@@ -104,6 +105,19 @@ export const PaperPresentationForm: React.FC<PaperPresentationFormProps> = ({ ac
             options={COMMON_OPTIONS.YES_NO}
           />
         </div>
+
+      {data.specialLabsInvolved === 'Yes' && (
+        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <SelectInput
+            label="Special Lab Name"
+            name="specialLabName"
+            value={data.specialLabName || ''}
+            onChange={handleChange}
+            options={PAPER_PRESENTATION_OPTIONS.SPECIAL_LAB_NAMES}
+            required
+          />
+        </div>
+      )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <SelectInput
@@ -280,14 +294,12 @@ export const PaperPresentationForm: React.FC<PaperPresentationFormProps> = ({ ac
 
       {/* IQAC Verification */}
       <div className="border-t pt-6">
-        <SelectInput
-          label="IQAC Verification"
-          name="iqacVerification"
-          value={data.iqacVerification}
-          onChange={handleChange}
-          options={COMMON_OPTIONS.YES_NO}
-          required
-        />
+        <div className="flex items-center justify-between">
+          <label className="block text-sm font-semibold text-slate-900">IQAC Verification *</label>
+          <span className="inline-block px-4 py-2 bg-blue-100 text-blue-800 text-sm font-semibold rounded-lg border border-blue-300 shadow-sm">
+            ◐ Initiated
+          </span>
+        </div>
       </div>
     </div>
   )

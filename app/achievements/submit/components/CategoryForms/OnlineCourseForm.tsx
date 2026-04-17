@@ -22,6 +22,8 @@ export const OnlineCourseForm: React.FC<OnlineCourseFormProps> = ({ achievement,
     description: '',
     date: '',
     taskId: '',
+    specialLabsInvolved: '',
+    specialLabName: '',
     courseName: '',
     typeOfOrganizer: '',
     organizationName: '',
@@ -34,7 +36,7 @@ export const OnlineCourseForm: React.FC<OnlineCourseFormProps> = ({ achievement,
     gradeObtained: '',
     typeOfSponsorship: '',
     claimedFor: '',
-    iqacVerification: '',
+    iqacVerification: 'Initiated',
     certificateProofPreview: '',
   }
 
@@ -67,6 +69,27 @@ export const OnlineCourseForm: React.FC<OnlineCourseFormProps> = ({ achievement,
           placeholder="Enter task ID"
           required
         />
+
+        <SelectInput
+          label="Special Labs Involved"
+          name="specialLabsInvolved"
+          value={data.specialLabsInvolved || ''}
+          onChange={handleChange}
+          options={[{ label: 'Yes', value: 'Yes' }, { label: 'No', value: 'No' }]}
+        />
+
+        {data.specialLabsInvolved === 'Yes' && (
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <SelectInput
+              label="Special Lab Name"
+              name="specialLabName"
+              value={data.specialLabName || ''}
+              onChange={handleChange}
+              options={ONLINE_COURSE_OPTIONS.SPECIAL_LAB_NAMES}
+              required
+            />
+          </div>
+        )}
 
         <TextInput
           label="Course Name"
@@ -201,14 +224,12 @@ export const OnlineCourseForm: React.FC<OnlineCourseFormProps> = ({ achievement,
 
       {/* IQAC Verification */}
       <div className="border-t pt-6">
-        <SelectInput
-          label="IQAC Verification"
-          name="iqacVerification"
-          value={data.iqacVerification}
-          onChange={handleChange}
-          options={COMMON_OPTIONS.YES_NO}
-          required
-        />
+        <div className="flex items-center justify-between">
+          <label className="block text-sm font-semibold text-slate-900">IQAC Verification *</label>
+          <span className="inline-block px-4 py-2 bg-blue-100 text-blue-800 text-sm font-semibold rounded-lg border border-blue-300 shadow-sm">
+            ◐ Initiated
+          </span>
+        </div>
       </div>
     </div>
   )
