@@ -26,6 +26,7 @@ interface SdgGoalOption {
 
 interface InternshipTrackerOption {
   id: number;
+  tracker_number?: number;
   industry_name?: string | null;
   start_date: string;
   end_date: string;
@@ -105,6 +106,7 @@ export default function InternshipReportCreatePage() {
   const [attestedCertificate, setAttestedCertificate] = useState<File | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [fileErrors, setFileErrors] = useState<{ fullDocument?: string; original?: string; attested?: string }>({});
   const [submitting, setSubmitting] = useState(false);
   const [countries, setCountries] = useState<Array<{ name: string; isoCode: string }>>([]);
 
@@ -201,14 +203,14 @@ export default function InternshipReportCreatePage() {
 
     const loadTrackers = async () => {
       try {
-        const response = await apiClient.getApprovedTrackersByStudent(selectedStudentId);
+        const response = await apiClient.getAvailableTrackersByStudent(selectedStudentId);
         if (!cancelled) {
           setTrackers(response?.trackers || []);
         }
       } catch (loadError: any) {
-        console.error('Failed to load approved trackers:', loadError);
+        console.error('Failed to load available trackers:', loadError);
         if (!cancelled) {
-          setTrackersError('Unable to load approved trackers for this student.');
+          setTrackersError('Unable to load available trackers for this student.');
         }
       } finally {
         if (!cancelled) {
@@ -291,6 +293,7 @@ export default function InternshipReportCreatePage() {
     event.preventDefault();
     setError(null);
     setMessage(null);
+    setFileErrors({});
 
     if (!canSubmit) {
       setError('Please fill all required fields and upload all required files. Ensure postal code and industry contact are numeric.');
@@ -335,27 +338,54 @@ export default function InternshipReportCreatePage() {
       router.push('/student/internship/report');
     } catch (submitError: any) {
       console.error('Internship report submit failed:', submitError);
-      setError(submitError?.response?.data?.error || 'Failed to submit internship report.');
+      const serverMsg = submitError?.response?.data?.error;
+      // If server indicates a filename/filetype problem, show it inline for file fields
+      if (typeof serverMsg === 'string' && (serverMsg.toLowerCase().includes('file name') || serverMsg.toLowerCase().includes('file type') || serverMsg.toLowerCase().includes('upload'))) {
+        setFileErrors({ fullDocument: serverMsg, original: serverMsg, attested: serverMsg });
+        setError(null);
+      } else {
+        setError(serverMsg || 'Failed to submit internship report.');
+      }
     } finally {
       setSubmitting(false);
     }
   };
 
+  const validateFileName = (name: string) => {
+    // Require a 4-digit year and no trailing space before extension; examples accepted: "7376251cs389-internship-04052019.pdf" or "201CS111-ITI-08.06.2025.pdf"
+    const cleaned = name.trim();
+    const hasYear = /(?:19|20)\d{2}/.test(cleaned);
+    const noSpaceBeforeExt = !/\s+\.[a-zA-Z0-9]{1,5}$/.test(cleaned);
+    return hasYear && noSpaceBeforeExt;
+  };
+
   return (
-    <div className="p-6">
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold">Internship Report</h1>
-          <p className="text-sm text-slate-500 mt-1">Fill in the internship report details below.</p>
+    <div className="min-h-screen bg-slate-50 p-4 md:p-6">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 mb-6">
+          <div>
+            <h1 className="text-3xl font-semibold text-slate-900">Internship Report</h1>
+            <p className="text-sm text-slate-500 mt-1">Fill in the internship report details below.</p>
+          </div>
+          <Link href="/student/internship/report" className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:border-slate-400 hover:bg-slate-50 transition">Back</Link>
         </div>
-        <Link href="/student/internship/report" className="btn-outline">Back</Link>
-      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6 mt-6 p-5 card-base">
-        {message && <div className="rounded border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">{message}</div>}
-        {error && <div className="rounded border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
+        <div className="bg-white border border-slate-200 shadow-sm rounded-3xl overflow-hidden">
+          <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-6">
+            {message && (
+              <div className="fixed inset-x-4 top-6 z-50 flex items-start justify-between rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">
+                <div className="flex-1">{message}</div>
+                <button aria-label="close" onClick={() => setMessage(null)} className="ml-4 text-emerald-700 hover:text-emerald-900">✕</button>
+              </div>
+            )}
+            {error && (
+              <div className="fixed inset-x-4 top-6 z-50 flex items-start justify-between rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+                <div className="flex-1">{error}</div>
+                <button aria-label="close" onClick={() => setError(null)} className="ml-4 text-rose-700 hover:text-rose-900">✕</button>
+              </div>
+            )}
 
-        <div className="grid gap-4 lg:grid-cols-2">
+            <div className="grid gap-6 lg:grid-cols-2">
           <div className="block lg:col-span-2 space-y-2 relative">
             <label className="block text-sm font-medium text-slate-700">Student *</label>
             <input
@@ -402,7 +432,7 @@ export default function InternshipReportCreatePage() {
           </div>
 
           <label className="block lg:col-span-2">
-            <span className="text-sm font-medium text-slate-700">Approved Tracker *</span>
+            <span className="text-sm font-medium text-slate-700">Tracker *</span>
             <select
               value={selectedTrackerId ?? ''}
               onChange={(e) => setSelectedTrackerId(Number(e.target.value) || null)}
@@ -410,16 +440,16 @@ export default function InternshipReportCreatePage() {
               required
               disabled={!selectedStudentId || trackersLoading}
             >
-              <option value="">{trackersLoading ? 'Loading approved trackers...' : 'Choose an approved tracker'}</option>
+              <option value="">{trackersLoading ? 'Loading available trackers...' : 'Choose a tracker'}</option>
               {trackers.map((tracker) => (
                 <option key={tracker.id} value={tracker.id}>
-                  {`${tracker.id} ${tracker.industry_name || 'Tracker'} (${new Date(tracker.start_date).toLocaleDateString()} → ${new Date(tracker.end_date).toLocaleDateString()})`}
+                  {`#${tracker.tracker_number ?? tracker.id} ${tracker.industry_name || 'Tracker'} (${new Date(tracker.start_date).toLocaleDateString()} → ${new Date(tracker.end_date).toLocaleDateString()})`}
                 </option>
               ))}
             </select>
             {trackersError && <p className="mt-2 text-xs text-red-600">{trackersError}</p>}
             {!trackersLoading && selectedStudentId && trackers.length === 0 && !trackersError && (
-              <p className="mt-2 text-xs text-slate-500">This student has no approved trackers available for report submission.</p>
+              <p className="mt-2 text-xs text-slate-500">This student has no available trackers for report submission.</p>
             )}
           </label>
 
@@ -580,6 +610,7 @@ export default function InternshipReportCreatePage() {
               className="input-base mt-1 w-full"
               required
             />
+            <p className="mt-2 text-xs text-rose-600">Website must include the full URL format, including https:// (for example, https://example.com).</p>
           </label>
 
           <label className="block lg:col-span-2">
@@ -720,10 +751,21 @@ export default function InternshipReportCreatePage() {
             <input
               type="file"
               accept="application/pdf,image/*"
-              onChange={(e) => setFullDocumentProof(e.target.files?.[0] ?? null)}
+              onChange={(e) => {
+                const file = e.target.files?.[0] ?? null;
+                if (!file) return setFullDocumentProof(null);
+                if (!validateFileName(file.name)) {
+                  setFileErrors((s) => ({ ...s, fullDocument: 'File name must be in the expected format, for example 7376251CS492-internship-04072026.pdf or 201CS111-ITI-08.06.2025.pdf' }));
+                  setFullDocumentProof(null);
+                } else {
+                  setFileErrors((s) => ({ ...s, fullDocument: undefined }));
+                  setFullDocumentProof(file);
+                }
+              }}
               className="input-base mt-1 w-full"
               required
             />
+            {fileErrors.fullDocument && <p className="mt-2 text-xs text-rose-600">{fileErrors.fullDocument}</p>}
           </label>
 
           <label className="block lg:col-span-2">
@@ -731,10 +773,21 @@ export default function InternshipReportCreatePage() {
             <input
               type="file"
               accept="application/pdf,image/*"
-              onChange={(e) => setOriginalCertificateProof(e.target.files?.[0] ?? null)}
+              onChange={(e) => {
+                const file = e.target.files?.[0] ?? null;
+                if (!file) return setOriginalCertificateProof(null);
+                if (!validateFileName(file.name)) {
+                  setFileErrors((s) => ({ ...s, original: 'File name must be in the expected format, for example 7376251CS492-internship-04072026.pdf or 201CS111-ITI-08.06.2025.pdf' }));
+                  setOriginalCertificateProof(null);
+                } else {
+                  setFileErrors((s) => ({ ...s, original: undefined }));
+                  setOriginalCertificateProof(file);
+                }
+              }}
               className="input-base mt-1 w-full"
               required
             />
+            {fileErrors.original && <p className="mt-2 text-xs text-rose-600">{fileErrors.original}</p>}
           </label>
 
           <label className="block lg:col-span-2">
@@ -742,31 +795,48 @@ export default function InternshipReportCreatePage() {
             <input
               type="file"
               accept="application/pdf,image/*"
-              onChange={(e) => setAttestedCertificate(e.target.files?.[0] ?? null)}
+              onChange={(e) => {
+                const file = e.target.files?.[0] ?? null;
+                if (!file) return setAttestedCertificate(null);
+                if (!validateFileName(file.name)) {
+                  setFileErrors((s) => ({ ...s, attested: 'File name must be in the expected format, for example 7376251CS492-internship-04072026.pdf or 201CS111-ITI-08.06.2025.pdf' }));
+                  setAttestedCertificate(null);
+                } else {
+                  setFileErrors((s) => ({ ...s, attested: undefined }));
+                  setAttestedCertificate(file);
+                }
+              }}
               className="input-base mt-1 w-full"
               required
             />
+            {fileErrors.attested && <p className="mt-2 text-xs text-rose-600">{fileErrors.attested}</p>}
+            <p className="text-xs text-red-500">
+              * File names should follow the expected student format, for example &nbsp;
+              <b className="text-blue-700">7376251CS492-internship-04072026.pdf.</b>
+            </p>
           </label>
 
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-slate-200">
-          <button
-            type="submit"
-            disabled={submitting}
-            className="btn-primary"
-          >
-            {submitting ? 'Submitting...' : 'Submit Internship Report'}
-          </button>
+        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t border-slate-200">
           <button
             type="button"
             onClick={() => router.push('/student/internship/report')}
-            className="btn-outline"
+            className="inline-flex justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition"
           >
             Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={submitting}
+            className="inline-flex justify-center rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 transition"
+          >
+            {submitting ? 'Submitting...' : 'Submit Internship Report'}
           </button>
         </div>
       </form>
     </div>
+  </div>
+</div>
   );
 }

@@ -370,11 +370,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const rndItems = [
     {
       label: "Journal Publications - Applied",
-      slug: "journal-publications-applied",
+      slug: "journal-publications/applied",
     },
     {
       label: "Journal Publications - Published",
-      slug: "journal-publications-published",
+      slug: "journal-publications/published",
     },
     {
       label: "Book Publications Proposal Applied Proposal Sanctionaed",

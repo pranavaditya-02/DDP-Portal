@@ -236,37 +236,26 @@ export default function CreateTrackerPage() {
   };
 
   return (
-    <div className="p-6">
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold p-2">Create Internship Tracker</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Fill in details and upload proof documents to submit an internship
-            tracker.
-          </p>
+    <div className="min-h-screen bg-slate-50 p-4 md:p-6">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 mb-6">
+          <div>
+            <h1 className="text-3xl font-semibold text-slate-900">Create Internship Tracker</h1>
+            <p className="text-sm text-slate-500 mt-1">Fill in details and upload proof documents to submit an internship tracker.</p>
+          </div>
+          <Link href="/student/internship/tracker" className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:border-slate-400 hover:bg-slate-50 transition">Back</Link>
         </div>
-        <Link href="/student/internship/tracker" className="btn-outline">
-          Back
-        </Link>
-      </div>
 
-      <form
-        onSubmit={(e) => handleSubmit(e, false)}
-        className="space-y-6 mt-6 p-5"
-      >
-        <div className="card-base p-10 space-y-5">
-          {message && (
-            <div className="rounded border border-green-200 bg-green-50 p-3 text-sm text-green-800">
-              {message}
-            </div>
-          )}
-          {error && (
-            <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800">
-              {error}
-            </div>
-          )}
+        <div className="bg-white border border-slate-200 shadow-sm rounded-3xl overflow-hidden">
+          <form onSubmit={(e) => handleSubmit(e, false)} className="p-6 md:p-8 space-y-6">
+            {message && (
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">{message}</div>
+            )}
+            {error && (
+              <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{error}</div>
+            )}
 
-          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-6 sm:grid-cols-2">
             {/* Student autocomplete */}
             <div className="sm:col-span-2 relative">
               <label className="block text-md font-medium text-slate-700 mb-2">
@@ -463,26 +452,25 @@ export default function CreateTrackerPage() {
               * File names should follow the expected student format, for example &nbsp;
               <b className="text-blue-700">7376251CS492-internship-04072026.pdf.</b>
             </p>
-          </div>
+            </div>
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-slate-200">
-            <Link href="/student/internship/tracker" className="btn-outline">
-              Cancel
-            </Link>
-            <button
-              type="button"
-              onClick={(e) => handleSubmit(e as any, true)}
-              className="btn-secondary"
-              disabled={submitting}
-            >
-              {submitting ? "Submitting..." : "Create & Add Another"}
-            </button>
-            <button type="submit" className="btn-primary" disabled={submitting}>
-              {submitting ? "Submitting..." : "Create Internship Tracker"}
-            </button>
-          </div>
+            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t border-slate-200">
+              <Link href="/student/internship/tracker" className="inline-flex justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition">Cancel</Link>
+              <button
+                type="button"
+                onClick={(e) => handleSubmit(e as any, true)}
+                className="inline-flex justify-center rounded-lg border border-slate-300 bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 transition"
+                disabled={submitting}
+              >
+                {submitting ? "Submitting..." : "Create & Add Another"}
+              </button>
+              <button type="submit" className="inline-flex justify-center rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 transition" disabled={submitting}>
+                {submitting ? "Submitting..." : "Create Internship Tracker"}
+              </button>
+            </div>
+          </form>
         </div>
-      </form>
+      </div>
     </div>
   );
 }

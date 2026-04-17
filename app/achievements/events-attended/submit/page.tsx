@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, UploadCloud, FileText, X } from "lucide-react";
+import { buildFormData, submitAchievement } from "../../facultyActivitiesApi";
 
 const RequiredAst = () => <span className="text-red-500 ml-0.5">*</span>;
 
@@ -233,6 +234,7 @@ type FileField = "apexProof" | "certificateProof" | "geotagPhotos";
 interface FormDataShape {
   taskID: string;
   specialLabsInvolved: string;
+  specialLabName: string;
   specialLab: string;
   eventType: string;
   otherEventType: string;
@@ -487,17 +489,51 @@ export default function EventsAttendedForm() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const fillTestData = () => {
+    setFormData({
+      taskID: "TASK-EVENTS-001",
+      specialLabsInvolved: "no",
+      specialLabName: "",
+      eventType: "Conference attended-without presentation",
+      organizerType: "Institute",
+      industryNameSelect: "",
+      industryAddress: "",
+      instituteName: "Test Institute",
+      eventLevel: "National",
+      eventTitle: "Test Event",
+      organizationSector: "Private",
+      eventOrganizer: "Test Organizer",
+      eventMode: "Online",
+      eventLocation: "Online",
+      eventDuration: "DAYS",
+      eventDurationValue: "1",
+      startDate: "2026-04-16",
+      endDate: "2026-04-17",
+      durationInDays: "1",
+      otherOrganizerName: "",
+      sponsorshipType: "Self-Sponsored",
+      fundingAgencyName: "",
+      amount: "0",
+      outcome: "Certificate Received",
+      otherOutcome: "",
+      certificateProof: null,
+      geotagPhotos: null,
+    });
+    setErrors({});
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validate()) return;
 
     setIsSubmitting(true);
     try {
-      alert("Events Attended submitted successfully");
+      const payload = buildFormData(formData);
+      await submitAchievement("events-attended", payload);
       router.push("/achievements/events-attended");
     } catch (error) {
       console.error("Error submitting form:", error);
-      alert("Failed to submit form");
+      alert("Failed to submit form. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -595,6 +631,16 @@ export default function EventsAttendedForm() {
               Record events, workshops, seminars and trainings attended
             </p>
           </div>
+        </div>
+
+        <div className="mb-4 flex justify-end">
+          <button
+            type="button"
+            onClick={fillTestData}
+            className="rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-200"
+          >
+            Auto fill test data
+          </button>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">

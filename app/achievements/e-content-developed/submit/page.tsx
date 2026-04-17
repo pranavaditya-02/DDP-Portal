@@ -11,6 +11,7 @@ import {
   X,
   Link as LinkIcon,
 } from "lucide-react";
+import { buildFormData, submitAchievement } from "../../facultyActivitiesApi";
 
 const RequiredAst = () => <span className="text-red-500 ml-0.5">*</span>;
 
@@ -144,18 +145,36 @@ export default function EContentForm() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const fillTestData = () => {
+    setFormData({
+      taskID: "TASK-ECONTENT-001",
+      specialLabsInvolved: "no",
+      specialLab: "",
+      eContentType: "TUTORIAL",
+      otherEContentType: "",
+      topicName: "React Form Submission Test",
+      publisherName: "Test Publisher",
+      publisherAddress: "123 Test Street, Test City",
+      contactNo: "9876543210",
+      urlOfContent: "https://example.com/test-content",
+      dateOfPublication: "2026-04-16",
+      documentProof: null,
+    });
+    setErrors({});
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validate()) return;
 
     setIsSubmitting(true);
     try {
-      // API integration intentionally skipped as requested.
-      alert("E-Content submitted successfully");
+      const payload = buildFormData(formData);
+      await submitAchievement("e-content-developed", payload);
       router.push("/achievements/e-content-developed");
     } catch (error) {
       console.error("Error submitting form:", error);
-      alert("Failed to submit form");
+      alert("Failed to submit form. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -179,6 +198,16 @@ export default function EContentForm() {
               Create E-Content Developed Record
             </p>
           </div>
+        </div>
+
+        <div className="mb-4 flex justify-end">
+          <button
+            type="button"
+            onClick={fillTestData}
+            className="rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-200"
+          >
+            Auto fill test data
+          </button>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">

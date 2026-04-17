@@ -9,6 +9,7 @@ import { useRoles } from "@/hooks/useRoles";
 
 interface InternshipTracker {
   id: number;
+  tracker_number?: number;
   student_name: string;
   student_roll_no?: string | null;
   industry_name: string;
@@ -21,6 +22,13 @@ interface InternshipTracker {
 }
 
 const BACKEND_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/api$/, '');
+
+const resolveFileUrl = (p?: string | null) => {
+  if (!p) return '';
+  if (p.startsWith('http://') || p.startsWith('https://')) return p;
+  if (p.startsWith('/')) return `${BACKEND_BASE}${p}`;
+  return `${BACKEND_BASE}/${p}`;
+};
 
 const formatShortDate = (value: string) => {
   if (!value) return '';
@@ -102,7 +110,7 @@ export default function Page() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-semibold">Tracker Detail</h1>
-          <p className="mt-1 text-slate-500">View internship tracker details for ID {trackerId}.</p>
+          <p className="mt-1 text-slate-500">View internship tracker details for request {tracker?.tracker_number ?? trackerId}.</p>
         </div>
         <div className="flex items-center gap-3">
           <button
@@ -129,8 +137,8 @@ export default function Page() {
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="grid gap-4 sm:grid-cols-3">
               <div>
-                <div className="text-xs uppercase tracking-wide text-slate-500">Tracker ID</div>
-                <div className="mt-1 text-lg font-semibold text-slate-900">{tracker.id}</div>
+                <div className="text-xs uppercase tracking-wide text-slate-500">Request ID</div>
+                <div className="mt-1 text-lg font-semibold text-slate-900">{tracker.tracker_number ?? tracker.id}</div>
               </div>
               <div>
                 <div className="text-xs uppercase tracking-wide text-slate-500">Student</div>
@@ -166,7 +174,7 @@ export default function Page() {
                 <div className="text-xs uppercase tracking-wide text-slate-500">Aim / Objective</div>
                 {tracker.aim_objectives_link ? (
                   <a
-                    href={`${BACKEND_BASE}${tracker.aim_objectives_link}`}
+                    href={resolveFileUrl(tracker.aim_objectives_link)}
                     target="_blank"
                     rel="noreferrer"
                     className="mt-2 block text-sm font-medium text-blue-600 hover:underline"
@@ -181,7 +189,7 @@ export default function Page() {
                 <div className="text-xs uppercase tracking-wide text-slate-500">Offer Letter</div>
                 {tracker.offer_letter_link ? (
                   <a
-                    href={`${BACKEND_BASE}${tracker.offer_letter_link}`}
+                    href={resolveFileUrl(tracker.offer_letter_link)}
                     target="_blank"
                     rel="noreferrer"
                     className="mt-2 block text-sm font-medium text-blue-600 hover:underline"

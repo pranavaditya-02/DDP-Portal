@@ -10,6 +10,7 @@ import {
   X,
   Image as ImageIcon,
 } from "lucide-react";
+import { buildFormData, submitAchievement } from "../../facultyActivitiesApi";
 
 const RequiredAst = () => <span className="text-red-500 ml-0.5">*</span>;
 
@@ -342,13 +343,37 @@ export default function GuestLectureDeliveredSubmitPage() {
     return Object.keys(nextErrors).length === 0;
   };
 
+  const fillTestData = () => {
+    setFormData({
+      taskID: "TASK-GUEST-001",
+      specialLabsInvolved: "no",
+      specialLab: "",
+      eventType: "Guest Lecture",
+      topic: "Test Guest Lecture",
+      eventMode: "Online",
+      eventLevel: "National",
+      eventName: "Guest Lecture on Testing",
+      fromDate: "2026-04-16",
+      toDate: "2026-04-17",
+      numberOfDays: "2",
+      numberOfParticipants: "50",
+      companyName: "Test Organization",
+      companyAddress: "123 Test Rd",
+      typeOfAudience: "Students",
+      typeOfOrganisation: "Institute",
+      documentProof: null,
+    });
+    setErrors({});
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validate()) return;
 
     setIsSubmitting(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const payload = buildFormData(formData);
+      await submitAchievement("guest-lecture-delivered", payload);
       router.push("/achievements/guest-lecture-delivered");
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -376,6 +401,13 @@ export default function GuestLectureDeliveredSubmitPage() {
               Create record for Guest Lecture Delivered
             </p>
           </div>
+          <button
+            type="button"
+            onClick={fillTestData}
+            className="rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-200"
+          >
+            Auto fill test data
+          </button>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">

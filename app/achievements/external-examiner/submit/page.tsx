@@ -3,6 +3,7 @@
 import { useState, ChangeEvent, DragEvent } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, UploadCloud, FileText, X } from "lucide-react";
+import { buildFormData, submitAchievement } from "../../facultyActivitiesApi";
 
 const RequiredAst = () => <span className="text-red-500 ml-0.5">*</span>;
 
@@ -218,6 +219,25 @@ export default function ExternalExaminerSubmitPage() {
     return Object.keys(nextErrors).length === 0;
   };
 
+  const fillTestData = () => {
+    setFormData({
+      taskID: "TASK-EXTEXAM-001",
+      specialLabsInvolved: "no",
+      specialLab: "",
+      collegeName: "Test College",
+      instituteAddress: "123 Test Street",
+      purposeOfVisit: "QP Setter",
+      nameOfExamination: "QP Setter",
+      departmentOfQP: "1",
+      subjectOfQP: "Test Subject",
+      numberOfDays: "1",
+      fromDate: "2026-04-16",
+      toDate: "2026-04-17",
+      documentProof: null,
+    });
+    setErrors({});
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -227,7 +247,8 @@ export default function ExternalExaminerSubmitPage() {
 
     setIsSubmitting(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const payload = buildFormData(formData);
+      await submitAchievement("external-examiner", payload);
       router.push("/achievements/external-examiner");
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -255,6 +276,13 @@ export default function ExternalExaminerSubmitPage() {
               Create record for External Examiner activities
             </p>
           </div>
+          <button
+            type="button"
+            onClick={fillTestData}
+            className="rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-200"
+          >
+            Auto fill test data
+          </button>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">

@@ -249,9 +249,21 @@ export default function CreateCompetitionReport() {
   useEffect(() => { loadRecords(); }, []);
 
   useEffect(() => {
-    fetch(`${API}/sdg`)
+    fetch(`${API}/api/internship-report/sdg-goals`)
       .then((r) => r.json())
-      .then(setSdgList)
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setSdgList(data);
+          return;
+        }
+
+        if (Array.isArray((data as { sdgGoals?: unknown }).sdgGoals)) {
+          setSdgList((data as { sdgGoals: typeof sdgList }) .sdgGoals);
+          return;
+        }
+
+        setSdgList([]);
+      })
       .catch(() => setSdgList([]));
   }, []);
 

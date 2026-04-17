@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, ChangeEvent, DragEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Save, UploadCloud, FileText, X } from "lucide-react";
+import { buildFormData, submitAchievement } from "../../facultyActivitiesApi";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 
@@ -299,43 +300,11 @@ export default function NewsletterSubmitPage() {
 
     setIsSubmitting(true);
     try {
-      const submitData = new FormData();
-      (Object.keys(formData) as Array<keyof FormData>).forEach((key) => {
-        const value = formData[key];
-        if (value !== null) {
-          submitData.append(key, value);
-        }
-      });
-
+      const submitData = buildFormData(formData);
       if (isEditMode && editId) {
         submitData.append("id", editId);
       }
-
-      if (!API_URL) {
-        throw new Error("NEXT_PUBLIC_API_URL is not configured");
-      }
-
-      const endpoint = isEditMode
-        ? `${API_URL}/api/faculty/newsLetterFormsUpdate`
-        : `${API_URL}/api/faculty/newsLetterFormsPost`;
-
-      const response = await fetch(endpoint, {
-        method: isEditMode ? "PUT" : "POST",
-        credentials: "include",
-        body: submitData,
-      });
-
-      if (!response.ok) {
-        let message = "Unknown error";
-        try {
-          const body = await response.json();
-          message = body.error || body.details || message;
-        } catch {
-          message = `${response.status} ${response.statusText}`;
-        }
-        throw new Error(message);
-      }
-
+      await submitAchievement("newsletter", submitData);
       router.push("/achievements/newsletter");
     } catch (error) {
       const msg = error instanceof Error ? error.message : "Unknown error";
@@ -356,14 +325,15 @@ export default function NewsletterSubmitPage() {
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-6">
       <div className="max-w-4xl mx-auto">
-        <div className="mb-6 flex items-center">
-          <button
-            onClick={() => router.back()}
-            className="mr-4 p-2 rounded-full hover:bg-slate-200 transition-colors"
-          >
-            <ArrowLeft className="h-5 w-5 text-slate-600" />
-          </button>
-          <div>
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => router.back()}
+              className="mr-4 p-2 rounded-full hover:bg-slate-200 transition-colors"
+            >
+              <ArrowLeft className="h-5 w-5 text-slate-600" />
+            </button>
+            <div>
             <h1 className="text-2xl font-bold text-slate-900">
               {isEditMode
                 ? "Edit & Resubmit Newsletter"
@@ -375,6 +345,27 @@ export default function NewsletterSubmitPage() {
                 : "Create record for department or institution newsletters"}
             </p>
           </div>
+          <button
+            type="button"
+            onClick={() => {
+              setFormData({
+                newsletterCategory: "institution-newsletter",
+                department: "CSE",
+                academicYear: "2024-2025",
+                dateOfPublication: "2026-04-16",
+                volumeNumber: "1",
+                issueNumber: "1",
+                issueMonth: "January",
+                facultyEditorCount: "2",
+                studentEditorCount: "3",
+                proofDocument: null,
+              });
+              setErrors({});
+            }}
+            className="rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-200"
+          >
+            Auto fill test data
+          </button>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">

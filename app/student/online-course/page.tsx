@@ -124,6 +124,11 @@ const STATUS_MAP: Record<string, { cls: string; dot: string }> = {
   Initiated: { cls: "bg-amber-50 text-amber-700 border border-amber-200", dot: "bg-amber-400" },
 };
 
+const ONLINE_COURSE_API_ROOT =
+  process.env.NEXT_PUBLIC_ONLINE_COURSE_API_URL?.replace(/\/$/, '') ||
+  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') ||
+  'http://localhost:5000/api';
+
 const fmtDate = (d: string) =>
   new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
@@ -239,10 +244,13 @@ export default function CreateOnlineCoursePage() {
       formData.append("originalProof", files.originalProof);
       formData.append("attendedProof", files.attendedProof);
 
-      const response = await fetch("http://localhost:5000/api/online/course/student-online-courses", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        `${ONLINE_COURSE_API_ROOT}/online/course/student-online-courses`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Failed to create online course");
 
@@ -280,11 +288,11 @@ export default function CreateOnlineCoursePage() {
         };
 
         const [courseRes, labRes, deptRes, recordRes, studentRes] = await Promise.all([
-          fetchJson<{ id: number; name: string }[]>("http://localhost:5000/courses/active"),
-          fetchJson<{ id: number; specialLabName: string }[]>("http://localhost:5000/speciallabs/active"),
-          fetchJson<Department[]>("http://localhost:5000/departments"),
-          fetchJson<CourseRecord[]>("http://localhost:5000/api/online/course/student-online-courses"),
-          fetchJson<Student[]>("http://localhost:5000/students"),
+          fetchJson<{ id: number; name: string }[]>(`${ONLINE_COURSE_API_ROOT}/courses/active`),
+          fetchJson<{ id: number; specialLabName: string }[]>(`${ONLINE_COURSE_API_ROOT}/speciallabs/active`),
+          fetchJson<Department[]>(`${ONLINE_COURSE_API_ROOT}/departments`),
+          fetchJson<CourseRecord[]>(`${ONLINE_COURSE_API_ROOT}/online/course/student-online-courses`),
+          fetchJson<{ students: Student[] }>(`${ONLINE_COURSE_API_ROOT}/students`),
         ]);
 
         setCourses(courseRes);
@@ -292,7 +300,7 @@ export default function CreateOnlineCoursePage() {
         setDepartments(deptRes);
         setRecords(recordRes);
         setStudents(
-          studentRes.map((student) => ({
+          studentRes.students.map((student) => ({
             ...student,
             student_name: getStudentLabel(student),
           }))

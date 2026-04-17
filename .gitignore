@@ -13,3 +13,4 @@ node_modules/
 # Backend local secrets and logs
 backend/.env
 backend/logs/*.log
+.env.local

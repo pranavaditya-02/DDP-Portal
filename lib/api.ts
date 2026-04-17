@@ -403,8 +403,8 @@ export const apiClient = {
     return response.data;
   },
 
-  getApprovedTrackersByStudent: async (studentId: number) => {
-    const response = await client.get(`/internship-tracker/student/${studentId}/approved`);
+  getAvailableTrackersByStudent: async (studentId: number) => {
+    const response = await client.get(`/internship-tracker/student/${studentId}/available`);
     return response.data;
   },
 

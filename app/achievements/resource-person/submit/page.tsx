@@ -195,12 +195,33 @@ export default function ResourcePersonSubmitPage() {
     return Object.keys(e).length === 0;
   };
 
+  const fillTestData = () => {
+    setFormData({
+      taskID: "TASK-RESOURCE-001",
+      specialLabsInvolved: "no",
+      specialLab: "",
+      resourcePersonCategory: "Seminar",
+      purposeOfInteraction: "Guest session",
+      nameOfPanel: "Test Panel",
+      typeOfOrganisation: "Institute",
+      organisationNameAndAddress: "Test Institute, 123 Main St",
+      visitingDepartmentIndustry: "",
+      visitingDepartmentInstitute: "",
+      numberOfDays: "1",
+      fromDate: "2026-04-16",
+      toDate: "2026-04-17",
+      documentProof: null,
+    });
+    setErrors({});
+  };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validate()) return;
     setIsSubmitting(true);
     try {
-      await new Promise((r) => setTimeout(r, 1000));
+      const payload = buildFormData(formData);
+      await submitAchievement("resource-person", payload);
       router.push("/achievements/resource-person");
     } catch (err) {
       console.error(err);
@@ -214,14 +235,15 @@ export default function ResourcePersonSubmitPage() {
     <div className="min-h-screen bg-slate-50 p-4 md:p-6">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="mb-6 flex items-center">
-          <button
-            onClick={() => router.back()}
-            className="mr-4 p-2 rounded-full hover:bg-slate-200 transition-colors"
-          >
-            <ArrowLeft className="h-5 w-5 text-slate-600" />
-          </button>
-          <div>
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => router.back()}
+              className="mr-4 p-2 rounded-full hover:bg-slate-200 transition-colors"
+            >
+              <ArrowLeft className="h-5 w-5 text-slate-600" />
+            </button>
+            <div>
             <h1 className="text-2xl font-bold text-slate-900">
               Add Resource Person Details
             </h1>
@@ -229,6 +251,13 @@ export default function ResourcePersonSubmitPage() {
               Create record for acting as a Resource Person
             </p>
           </div>
+          <button
+            type="button"
+            onClick={fillTestData}
+            className="rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-200"
+          >
+            Auto fill test data
+          </button>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">

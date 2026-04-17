@@ -64,9 +64,6 @@ export default function PatentReportCreatePage() {
 	const [faculty3, setFaculty3] = useState<string>("");
 	const [faculty4, setFaculty4] = useState<string>("");
 
-	const [priorArt, setPriorArt] = useState("");
-	const [novelty, setNovelty] = useState("");
-
 	const [message, setMessage] = useState<string | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [submitting, setSubmitting] = useState(false);
@@ -159,8 +156,6 @@ export default function PatentReportCreatePage() {
 			formData.append('student_id', String(selectedStudent.id));
 			formData.append('patent_status', patentStatus);
 			if (patentTrackerId) formData.append('patent_tracker_id', String(patentTrackerId));
-			formData.append('prior_art', priorArt);
-			formData.append('novelty', novelty);
 			formData.append('number_of_faculty', String(numberOfFaculty));
 			if (yuktiProof) formData.append('yukti_proof', yuktiProof);
 			if (fullDocumentProof) formData.append('full_document_proof', fullDocumentProof);
@@ -251,7 +246,29 @@ export default function PatentReportCreatePage() {
 						<label className="block sm:col-span-2">
 							<span className="text-sm font-medium text-slate-700">Yukti Portal Registration Proof *</span>
 							<input ref={yuktiRef} type="file" accept="application/pdf,image/*" onChange={(e) => setYuktiProof(e.target.files?.[0] ?? null)} className="input-base mt-1 w-full" />
-							<p className="text-xs text-slate-500">Yukti Registration Procedure: Download linked procedure if needed.</p>
+							<p>
+								<button
+									type="button"
+									onClick={() => {
+										if (!yuktiProof) {
+											// no file selected
+											setError('No linked procedure file selected to download.');
+											return;
+										}
+										const url = URL.createObjectURL(yuktiProof);
+										const a = document.createElement('a');
+										a.href = url;
+										a.download = yuktiProof.name || 'yukti-procedure';
+										document.body.appendChild(a);
+										a.click();
+										a.remove();
+										URL.revokeObjectURL(url);
+									}}
+									className="text-xs text-slate-500 underline hover:text-slate-700"
+								>
+									Yukti Registration Procedure: Download linked procedure if needed.
+								</button>
+							</p>
 						</label>
 						<label className="block">
 							<span className="text-sm font-medium text-slate-700">Position of Student in Patent *</span>
@@ -494,15 +511,7 @@ export default function PatentReportCreatePage() {
 							</>
 						)}
 
-						<label className="block sm:col-span-2">
-							<span className="text-sm font-medium text-slate-700">Prior art(references)</span>
-							<textarea value={priorArt} onChange={(e) => setPriorArt(e.target.value)} className="input-base h-28 w-full" />
-						</label>
 
-						<label className="block sm:col-span-2">
-							<span className="text-sm font-medium text-slate-700">Novelty</span>
-							<textarea value={novelty} onChange={(e) => setNovelty(e.target.value)} className="input-base h-28 w-full" />
-						</label>
 
                         
 

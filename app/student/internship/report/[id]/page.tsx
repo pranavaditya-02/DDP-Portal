@@ -106,7 +106,7 @@ export default function Page() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-semibold">Report Detail</h1>
-          <p className="mt-1 text-slate-500">View internship report details for ID {reportId}.</p>
+          <p className="mt-1 text-slate-500">View internship report details for request {report?.report_number ?? reportId}.</p>
         </div>
         <div className="flex items-center gap-3">
           <button

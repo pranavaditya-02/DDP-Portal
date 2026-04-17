@@ -3,6 +3,7 @@
 import { useState, ChangeEvent, DragEvent, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, UploadCloud, FileText, X } from "lucide-react";
+import { buildFormData, submitAchievement } from "../../facultyActivitiesApi";
 
 const RequiredAst = () => <span className="text-red-500 ml-0.5">*</span>;
 
@@ -345,13 +346,44 @@ export default function OnlineCourseSubmitPage() {
     return Object.keys(nextErrors).length === 0;
   };
 
+  const fillTestData = () => {
+    setFormData({
+      taskID: "TASK-ONLINE-001",
+      modeOfCourse: "Online",
+      courseType: "NPTEL",
+      courseName: "Testing Course",
+      organizationName: "Test Organization",
+      organizationAddress: "123 Test Street",
+      levelOfEvent: "National",
+      duration: "Hours",
+      numberOfHours: "10",
+      numberOfWeeks: "",
+      numberOfDays: "",
+      startDate: "2026-04-16",
+      endDate: "2026-04-20",
+      courseCategory: "Proctored-Exam",
+      dateOfExamination: "2026-05-01",
+      gradeObtained: "A",
+      isApprovedFDP: "no",
+      typeOfSponsorship: "Self-Sponsored",
+      fundingAgencyName: "",
+      claimedFor: "Not-Applicable",
+      marksheetProof: null,
+      fdpProof: null,
+      apexProof: null,
+      certificateProof: null,
+    });
+    setErrors({});
+  };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validate()) return;
 
     setIsSubmitting(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const payload = buildFormData(formData);
+      await submitAchievement("online-course", payload);
       router.push("/achievements/online-course");
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -379,6 +411,13 @@ export default function OnlineCourseSubmitPage() {
               Create record for Online Courses completed
             </p>
           </div>
+          <button
+            type="button"
+            onClick={fillTestData}
+            className="rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-200"
+          >
+            Auto fill test data
+          </button>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">

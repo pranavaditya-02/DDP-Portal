@@ -485,12 +485,44 @@ export default function PaperPresentationSubmitPage() {
     return Object.keys(e).length === 0;
   };
 
+  const fillTestData = () => {
+    setFormData({
+      taskID: "TASK-PAPER-001",
+      specialLabsInvolved: "no",
+      specialLab: "",
+      hasIntlInstituteCollab: "no",
+      instituteName: "",
+      conferenceName: "Test Conference",
+      eventMode: "Online",
+      eventLocation: "Online",
+      eventOrganizer: "Test Organizer",
+      eventLevel: "National",
+      paperTitle: "Test Paper",
+      eventStartDate: "2026-04-16",
+      eventEndDate: "2026-04-17",
+      eventDurationDays: "2",
+      publishedInProceedings: "no",
+      pageFrom: "1",
+      pageTo: "5",
+      typeOfSponsorship: "Self-Sponsored",
+      fundingAgencyName: "",
+      fundingAmount: "0",
+      registrationAmount: "0",
+      awardReceived: "no",
+      apexProof: null,
+      documentProof: null,
+      awardProof: null,
+    });
+    setErrors({});
+  };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validate()) return;
     setIsSubmitting(true);
     try {
-      await new Promise((r) => setTimeout(r, 1000));
+      const payload = buildFormData(formData);
+      await submitAchievement("paper-presentation", payload);
       router.push("/achievements/paper-presentation");
     } catch (err) {
       console.error(err);
@@ -527,6 +559,13 @@ export default function PaperPresentationSubmitPage() {
               Create record for Paper Presentations in Conferences
             </p>
           </div>
+          <button
+            type="button"
+            onClick={fillTestData}
+            className="rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-200"
+          >
+            Auto fill test data
+          </button>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">

@@ -12,6 +12,7 @@ import {
   Trophy,
   Image as ImageIcon,
 } from "lucide-react";
+import { buildFormData, submitAchievement } from "../../facultyActivitiesApi";
 
 const RequiredAst = () => <span className="text-red-500 ml-0.5">*</span>;
 
@@ -284,23 +285,41 @@ export default function NotableAchievementsForm() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const fillTestData = () => {
+    setFormData({
+      taskID: "TASK-NOTABLE-001",
+      specialLabsInvolved: "no",
+      specialLab: "",
+      technicalSocietyChapter: "ACM",
+      technicalSocietyInvolved: "no",
+      typeOfRecognition: "Award",
+      awardType: "Faculty Award",
+      achievementType: "Best Performer",
+      awardName: "Test Award",
+      organizationType: "Government",
+      otherOrganizationName: "",
+      organizationName: "Test Organization",
+      awardingAgency: "Test Agency",
+      level: "1",
+      receivedDate: "2026-04-16",
+      natureOfRecognition: "Certificate",
+      prizeAmount: "1000",
+      specialLab: "",
+      specialLabsInvolved: "no",
+      photoProofs: null,
+      documentProof: null,
+      typeOfRecognition: "Award",
+    });
+    setErrors({});
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (validate()) {
       setIsSubmitting(true);
       try {
-        // TODO: Implement API call here
-        // const data = new FormData()
-        // data.append("taskID", formData.taskID)
-        // ... append other fields
-        // const response = await fetch('/api/achievements/notable-awards', {
-        //   method: 'POST',
-        //   body: data,
-        // })
-
-        alert(
-          "Achievement record submitted successfully (API integration pending)",
-        );
+        const payload = buildFormData(formData);
+        await submitAchievement("notable-achievements-and-awards", payload);
         router.push("/achievements/notable-achievements-and-awards");
       } catch (error) {
         console.error("Error submitting form:", error);
@@ -315,21 +334,30 @@ export default function NotableAchievementsForm() {
     <div className="min-h-screen bg-slate-50 p-4 sm:p-6 lg:p-8 light-achievement-form [&_.text-slate-200]:!text-slate-700 [&_.text-slate-300]:!text-slate-700 [&_.text-slate-400]:!text-slate-500 [&_.text-slate-500]:!text-slate-400 [&_.bg-slate-800]:!bg-white [&_.bg-slate-900]:!bg-white [&_.border-slate-700]:!border-slate-300 [&_.border-slate-800]:!border-slate-200 [&_input.text-white]:!text-slate-900 [&_select.text-white]:!text-slate-900 [&_.hover\:bg-slate-800:hover]:!bg-slate-100">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
-        <div className="mb-6 flex items-center gap-4">
-          <Link
-            href="/achievements/notable-achievements-and-awards"
-            className="p-2 rounded-lg hover:bg-slate-100 transition-colors"
-          >
-            <ArrowLeft className="h-5 w-5 text-slate-600" />
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">
-              Add Notable Achievement
-            </h1>
-            <p className="text-sm text-slate-500">
-              Create record for Awards and Achievements
-            </p>
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Link
+              href="/achievements/notable-achievements-and-awards"
+              className="p-2 rounded-lg hover:bg-slate-100 transition-colors"
+            >
+              <ArrowLeft className="h-5 w-5 text-slate-600" />
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900">
+                Add Notable Achievement
+              </h1>
+              <p className="text-sm text-slate-500">
+                Create record for Awards and Achievements
+              </p>
+            </div>
           </div>
+          <button
+            type="button"
+            onClick={fillTestData}
+            className="rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-200"
+          >
+            Auto fill test data
+          </button>
         </div>
 
         {/* Form */}

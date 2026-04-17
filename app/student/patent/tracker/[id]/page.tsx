@@ -26,8 +26,6 @@ interface PatentTracker {
   patent_type?: string | null;
   has_image_layout_support?: string | null;
   experimentation_file_path?: string | null;
-  prior_art?: string | null;
-  novelty?: string | null;
   has_formatted_drawings?: string | null;
   drawings_file_path?: string | null;
   forms_1_and_2_prepared?: string | null;
@@ -159,17 +157,6 @@ export default function Page() {
               <div>
                 <div className="text-xs uppercase tracking-wide text-slate-500">Faculty</div>
                 <div className="mt-1 font-semibold text-slate-900">{tracker.faculty_id || 'N/A'}</div>
-              </div>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2 mt-6">
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <div className="text-xs uppercase tracking-wide text-slate-500">Prior Art</div>
-                <div className="mt-2 text-sm text-slate-700 whitespace-pre-wrap">{tracker.prior_art || 'N/A'}</div>
-              </div>
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <div className="text-xs uppercase tracking-wide text-slate-500">Novelty</div>
-                <div className="mt-2 text-sm text-slate-700 whitespace-pre-wrap">{tracker.novelty || 'N/A'}</div>
               </div>
             </div>
 

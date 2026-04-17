@@ -620,7 +620,7 @@ export default function Page() {
                                   <div className="flex gap-2">
                                     <button onClick={(e)=>{e.stopPropagation(); setSelectedTracker(tracker);}} className="inline-flex items-center gap-2 rounded border border-slate-200 px-3 py-1 text-sm text-slate-700 bg-white">Details</button>
                                     {tracker.offer_letter_link ? (
-                                      <a onClick={(e)=>e.stopPropagation()} href={`${BACKEND_BASE}${tracker.offer_letter_link}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded bg-slate-50 px-2 py-1 text-sm text-slate-700"><ExternalLink className="w-3 h-3"/></a>
+                                      <a onClick={(e)=>e.stopPropagation()} href={resolveFileUrl(tracker.offer_letter_link)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded bg-slate-50 px-2 py-1 text-sm text-slate-700"><ExternalLink className="w-3 h-3"/></a>
                                     ) : null}
                                   </div>
                                 </td>

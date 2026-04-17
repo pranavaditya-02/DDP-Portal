@@ -52,9 +52,6 @@ export default function CreatePatentTrackerPage() {
 	const [formsPrepared, setFormsPrepared] = useState<string>("No");
 	const [formsFile, setFormsFile] = useState<File | null>(null);
 
-	const [priorArt, setPriorArt] = useState("");
-	const [novelty, setNovelty] = useState("");
-
 	const imageInputRef = useRef<HTMLInputElement | null>(null);
 	const drawingsInputRef = useRef<HTMLInputElement | null>(null);
 	const formsInputRef = useRef<HTMLInputElement | null>(null);
@@ -169,8 +166,6 @@ export default function CreatePatentTrackerPage() {
 		setDrawingsFile(null);
 		setFormsPrepared("No");
 		setFormsFile(null);
-		setPriorArt("");
-		setNovelty("");
 		if (imageInputRef.current) imageInputRef.current.value = "";
 		if (drawingsInputRef.current) drawingsInputRef.current.value = "";
 		if (formsInputRef.current) formsInputRef.current.value = "";
@@ -212,8 +207,6 @@ export default function CreatePatentTrackerPage() {
 		if (drawingsFile) formData.append("drawingsFile", drawingsFile);
 		formData.append("forms_1_and_2_prepared", formsPrepared);
 		if (formsFile) formData.append("formsFile", formsFile);
-		formData.append("prior_art", priorArt);
-		formData.append("novelty", novelty);
 
 		try {
 			setSubmitting(true);
@@ -294,8 +287,7 @@ export default function CreatePatentTrackerPage() {
 							<label className="block text-sm font-medium text-slate-700 mb-2">Patent Type</label>
 							<select value={patentType} onChange={(e) => setPatentType(e.target.value)} className="input-base w-full">
 								<option value="">Choose an option</option>
-								<option value="Product">Product</option>
-								<option value="Process">Process</option>
+								<option value="Product/Process">Product/Process</option>
 								<option value="Design">Design</option>
 							</select>
 						</div>
@@ -399,15 +391,7 @@ export default function CreatePatentTrackerPage() {
 							</div>
 						)}
 
-						<div className="sm:col-span-2">
-							<label className="block text-sm font-medium text-slate-700">Prior art(references)</label>
-							<textarea value={priorArt} onChange={(e) => setPriorArt(e.target.value)} placeholder="Prior art(references)" className="input-base h-28 w-full" />
-						</div>
 
-						<div className="sm:col-span-2">
-							<label className="block text-sm font-medium text-slate-700">Novelty</label>
-							<textarea value={novelty} onChange={(e) => setNovelty(e.target.value)} placeholder="Novelty" className="input-base h-28 w-full" />
-						</div>
 
 						<div>
 							<label className="block text-sm font-medium text-slate-700 mb-2">Does the draft involve drawings as per the format of patent draft?</label>

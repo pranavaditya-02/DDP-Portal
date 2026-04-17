@@ -3,6 +3,7 @@
 import { useState, ChangeEvent, DragEvent } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, UploadCloud, FileText, X, Globe } from "lucide-react";
+import { buildFormData, submitAchievement } from "../../facultyActivitiesApi";
 
 const RequiredAst = () => <span className="text-red-500 ml-0.5">*</span>;
 
@@ -222,13 +223,29 @@ export default function InternationalVisitSubmitPage() {
     return Object.keys(nextErrors).length === 0;
   };
 
+  const fillTestData = () => {
+    setFormData({
+      taskID: "TASK-INTERNATIONAL-001",
+      countryVisited: "France",
+      purposeOfVisit: "Research Collaboration",
+      fromDate: "2026-04-16",
+      toDate: "2026-04-20",
+      fundType: "Self",
+      fundingAgencyName: "",
+      apexProof: null,
+      documentProof: null,
+    });
+    setErrors({});
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validate()) return;
 
     setIsSubmitting(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const payload = buildFormData(formData);
+      await submitAchievement("international-visit", payload);
       router.push("/achievements/international-visit");
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -256,6 +273,13 @@ export default function InternationalVisitSubmitPage() {
               Create record for International Visits
             </p>
           </div>
+          <button
+            type="button"
+            onClick={fillTestData}
+            className="rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-200"
+          >
+            Auto fill test data
+          </button>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">

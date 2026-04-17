@@ -17,6 +17,7 @@ import {
   Briefcase,
   Layout,
 } from "lucide-react";
+import { buildFormData, submitAchievement } from "../../facultyActivitiesApi";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -2014,16 +2015,50 @@ export default function EventsOrganizedSubmitPage() {
     window.scrollTo(0, 0);
   };
 
+  const fillTestData = () => {
+    setFormData({
+      ...INITIAL_FORM,
+      taskID: "TASK-ORG-001",
+      facultyName: "Test Faculty",
+      facultyRole: "Convener",
+      claimedDepartment: "CSE",
+      specialLabsInvolved: "No",
+      eventName: "Test Organized Event",
+      eventType: "Workshop",
+      eventCategory: "Technical Skill Development",
+      programType: "Academic",
+      eventMode: "Online",
+      startDate: "2026-04-16",
+      endDate: "2026-04-17",
+      eventDuration: "2",
+      eventLevel: "National",
+      eventOrganizer: "Test Organizer",
+      eventLocation: "Online",
+      internalStudentParticipants: "10",
+      internalFacultyParticipants: "2",
+      externalStudentParticipants: "5",
+      externalFacultyParticipants: "1",
+      typeOfSponsorship: "Self-Sponsored",
+      registrationAmount: "0",
+      sponsoredAmount: "0",
+      amountReceived: "0",
+      fundingAgencyName: "",
+      totalRevenue: "0",
+    });
+    setErrors({});
+  };
+
   const handleSubmit = async (e: React.MouseEvent) => {
     e.preventDefault();
     if (!validateStep(currentStep)) return;
     setIsSubmitting(true);
     try {
-      console.log("Submitting:", formData);
-      await new Promise((r) => setTimeout(r, 1000));
+      const payload = buildFormData(formData);
+      await submitAchievement("events-organized", payload);
       router.push("/achievements/events-organized");
     } catch (err) {
       console.error("Submission error:", err);
+      alert("Failed to submit form. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -2081,14 +2116,15 @@ export default function EventsOrganizedSubmitPage() {
     <div className="min-h-screen bg-slate-50 p-4 md:p-8">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
-        <div className="mb-8 flex items-center gap-4">
-          <button
-            onClick={() => router.back()}
-            className="p-2 rounded-full hover:bg-slate-200 text-slate-600 transition-colors"
-          >
-            <ArrowLeft size={20} />
-          </button>
-          <div>
+        <div className="mb-8 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => router.back()}
+              className="p-2 rounded-full hover:bg-slate-200 text-slate-600 transition-colors"
+            >
+              <ArrowLeft size={20} />
+            </button>
+            <div>
             <h1 className="text-2xl font-bold text-slate-900">
               Events Organized
             </h1>
@@ -2096,7 +2132,15 @@ export default function EventsOrganizedSubmitPage() {
               Submit details for events organized by you.
             </p>
           </div>
+          <button
+            type="button"
+            onClick={fillTestData}
+            className="rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-slate-900 hover:bg-slate-200"
+          >
+            Auto fill test data
+          </button>
         </div>
+      </div>
 
         {/* Step Progress (desktop) */}
         <div className="mb-8 hidden md:block">

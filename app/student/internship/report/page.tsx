@@ -433,7 +433,11 @@ export default function Page() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <div className="text-xs uppercase tracking-wide text-slate-500">Report ID</div>
-                  <div className="mt-1 font-medium text-slate-900">{selectedReport.id}</div>
+                  <div className="mt-1 font-medium text-slate-900">{selectedReport.report_number ?? selectedReport.id}</div>
+                </div>
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-slate-500">Tracker</div>
+                  <div className="mt-1 font-medium text-slate-900">{selectedReport.tracker_number ?? selectedReport.tracker_id ?? 'N/A'}</div>
                 </div>
                 <div>
                   <div className="text-xs uppercase tracking-wide text-slate-500">Student</div>
