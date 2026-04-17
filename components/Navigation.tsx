@@ -4,10 +4,12 @@ import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
+import { apiClient } from '@/lib/api';
 import { useRoles } from '@/hooks/useRoles';
-import { RoleGuard } from './RoleGuard';
+import { AUTH_COOKIE_NAME } from '@/lib/auth-session';
+import { clearAuthCookie } from '@/app/actions';
 import { motion } from 'framer-motion';
-import { LogOut, Menu, X, ChevronDown } from 'lucide-react';
+import { LogOut, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 
 export const Navigation: React.FC = () => {
@@ -15,8 +17,12 @@ export const Navigation: React.FC = () => {
   const { user, logout } = useAuthStore();
   const { isFaculty, isHod, isDean, isStudent, isVerification, isMaintenance } = useRoles();
   const [isOpen, setIsOpen] = useState(false);
+  const canAccessLogger = isFaculty() || isHod() || isDean() || isVerification() || isMaintenance();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await apiClient.logout().catch(() => undefined);
+    await clearAuthCookie().catch(() => undefined);
+    document.cookie = `${AUTH_COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
     logout();
     router.push('/login');
   };
@@ -50,7 +56,7 @@ export const Navigation: React.FC = () => {
     {
       label: 'Activity Logger',
       href: '/student/activity/logger',
-      show: isStudent(),
+      show: canAccessLogger,
     },
     {
       label: 'My Activities',

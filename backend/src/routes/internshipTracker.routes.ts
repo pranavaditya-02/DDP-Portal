@@ -172,9 +172,10 @@ router.patch(
 
       if (tracker.student_email && parsed.iqac_verification !== 'initiated') {
         const statusText = parsed.iqac_verification === 'approved' ? 'approved' : 'declined';
+        const displayId = tracker.tracker_number ?? tracker.id;
         const subject = `Internship Tracker ${statusText.toUpperCase()} | BannariAmman College IQAC`;
-        const bodyText = `Hello ${tracker.student_name ?? 'Student'},\n\nYour internship tracker submission (ID: ${tracker.id}) has been ${statusText} by the IQAC team at BannariAmman College.\n\n${parsed.reject_reason ? `Reason: ${parsed.reject_reason}\n\n` : ''}If you have any questions, please reply to this email.\n\nIQAC Team\nSanthosh\n BannariAmman College`;
-        const bodyHtml = `<p>Hello ${tracker.student_name ?? 'Student'},</p><p>Your internship tracker submission <strong>(ID: ${tracker.id})</strong> has been <strong>${statusText}</strong> by the IQAC team at <strong>BannariAmman College</strong>.</p>${parsed.reject_reason ? `<p><strong>Reason:</strong> ${parsed.reject_reason}</p>` : ''}<p>If you have any questions, please reply to this email.</p><p>IQAC Team<br/>BannariAmman College</p>`;
+        const bodyText = `Hello ${tracker.student_name ?? 'Student'},\n\nYour internship tracker submission (ID: ${displayId}) has been ${statusText} by the IQAC team at BannariAmman College.\n\n${parsed.reject_reason ? `Reason: ${parsed.reject_reason}\n\n` : ''}If you have any questions, please reply to this email.\n\nIQAC Team\nSanthosh\n BannariAmman College`;
+        const bodyHtml = `<p>Hello ${tracker.student_name ?? 'Student'},</p><p>Your internship tracker submission <strong>(ID: ${displayId})</strong> has been <strong>${statusText}</strong> by the IQAC team at <strong>BannariAmman College</strong>.</p>${parsed.reject_reason ? `<p><strong>Reason:</strong> ${parsed.reject_reason}</p>` : ''}<p>If you have any questions, please reply to this email.</p><p>IQAC Team<br/>BannariAmman College</p>`;
 
         try {
           await sendEmail({
@@ -212,18 +213,18 @@ router.get('/', async (_req, res) => {
   }
 });
 
-router.get('/student/:studentId/approved', async (req, res) => {
+router.get('/student/:studentId/available', async (req, res) => {
   try {
     const studentId = Number(req.params.studentId);
     if (!Number.isInteger(studentId) || studentId <= 0) {
       return res.status(400).json({ error: 'Invalid student ID' });
     }
 
-    const trackers = await internshipTrackerService.listApprovedTrackersByStudent(studentId);
+    const trackers = await internshipTrackerService.listAvailableTrackersByStudent(studentId);
       return res.json({ trackers: trackers.map((t) => transformTrackerForResponse(req, t)) });
   } catch (error) {
-    logger.error('Error listing approved student trackers:', error);
-    return res.status(500).json({ error: 'Failed to list approved trackers' });
+    logger.error('Error listing available student trackers:', error);
+    return res.status(500).json({ error: 'Failed to list available trackers' });
   }
 });
 

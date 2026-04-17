@@ -35,7 +35,7 @@ const CREATE_SDG_GOALS_SQL = `CREATE TABLE IF NOT EXISTS sdg_goals (
 const CREATE_REPORT_SQL = `CREATE TABLE IF NOT EXISTS internship_reports (
   id INT AUTO_INCREMENT PRIMARY KEY,
   report_number BIGINT UNSIGNED NOT NULL,
-  tracker_id INT NOT NULL UNIQUE,
+  tracker_id INT NOT NULL,
   student_id INT NOT NULL,
   special_lab_id INT NOT NULL,
   year_of_study INT NOT NULL,
@@ -84,9 +84,32 @@ async function ensureTablesExist(): Promise<void> {
   await pool.query(CREATE_REPORT_SQL);
 
   try {
-    await pool.query(`ALTER TABLE internship_reports ADD COLUMN tracker_id INT NOT NULL UNIQUE AFTER id`);
+    await pool.query(`ALTER TABLE internship_reports ADD COLUMN tracker_id INT NOT NULL AFTER id`);
   } catch (error) {
     logger.warn('Could not add internship_reports.tracker_id column, it may already exist or require manual migration.', error);
+  }
+
+  try {
+    await pool.query(`ALTER TABLE internship_reports DROP INDEX tracker_id`);
+  } catch (error) {
+    logger.warn('Could not drop internship_reports.tracker_id unique index, it may not exist yet.', error);
+  }
+  try {
+    await pool.query(`ALTER TABLE internship_reports DROP INDEX uk_tracker_id`);
+  } catch (error) {
+    logger.warn('Could not drop internship_reports.uk_tracker_id unique index, it may not exist yet.', error);
+  }
+  try {
+    const [rows] = await pool.query<RowDataPacket[]>(
+      `SELECT COUNT(1) AS cnt FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'internship_reports' AND INDEX_NAME = 'uk_tracker_id'`,
+    );
+    const cnt = Number((rows as any)?.[0]?.cnt ?? 0);
+    if (cnt > 0) {
+      await pool.query(`ALTER TABLE internship_reports DROP INDEX uk_tracker_id`);
+      logger.info('Dropped existing uk_tracker_id index from internship_reports');
+    }
+  } catch (error) {
+    logger.warn('Failed to detect/drop uk_tracker_id via INFORMATION_SCHEMA.', error);
   }
 
   try {
@@ -157,6 +180,7 @@ export interface InternshipReportRecord {
   id: number;
   report_number?: number;
   tracker_id: number;
+  tracker_number?: number | null;
   student_id: number;
   student_name?: string | null;
   student_email?: string | null;
@@ -204,7 +228,7 @@ export class InternshipReportService {
     const pool = getMysqlPool();
 
     const [existingReport] = await pool.query<RowDataPacket[]>(
-      'SELECT id FROM internship_reports WHERE tracker_id = ?',
+      'SELECT id FROM internship_reports WHERE tracker_id = ? AND iqac_verification IN (\'initiated\', \'approved\') LIMIT 1',
       [data.tracker_id],
     );
 
@@ -303,6 +327,7 @@ export class InternshipReportService {
         ir.id,
         ir.report_number,
         ir.tracker_id,
+          it.tracker_number AS tracker_number,
         ir.student_id,
         s.student_name,
         s.college_email AS student_email,
@@ -335,6 +360,7 @@ export class InternshipReportService {
         ir.created_at,
         ir.updated_at
       FROM internship_reports ir
+      LEFT JOIN internship_tracker it ON ir.tracker_id = it.id
       LEFT JOIN students s ON ir.student_id = s.id
       LEFT JOIN special_labs sl ON ir.special_lab_id = sl.id
       LEFT JOIN sdg_goals sg ON ir.sdg_goal_id = sg.id
@@ -354,6 +380,7 @@ export class InternshipReportService {
         ir.id,
         ir.report_number,
         ir.tracker_id,
+        it.tracker_number AS tracker_number,
         ir.student_id,
         s.student_name,
         s.college_email AS student_email,
@@ -386,6 +413,7 @@ export class InternshipReportService {
         ir.created_at,
         ir.updated_at
       FROM internship_reports ir
+      LEFT JOIN internship_tracker it ON ir.tracker_id = it.id
       LEFT JOIN students s ON ir.student_id = s.id
       LEFT JOIN special_labs sl ON ir.special_lab_id = sl.id
       LEFT JOIN sdg_goals sg ON ir.sdg_goal_id = sg.id
@@ -412,6 +440,7 @@ export class InternshipReportService {
         ir.id,
         ir.report_number,
         ir.tracker_id,
+        it.tracker_number AS tracker_number,
         ir.student_id,
         s.student_name,
         s.college_email AS student_email,
@@ -444,6 +473,7 @@ export class InternshipReportService {
         ir.created_at,
         ir.updated_at
       FROM internship_reports ir
+      LEFT JOIN internship_tracker it ON ir.tracker_id = it.id
       LEFT JOIN students s ON ir.student_id = s.id
       LEFT JOIN special_labs sl ON ir.special_lab_id = sl.id
       LEFT JOIN sdg_goals sg ON ir.sdg_goal_id = sg.id

@@ -111,7 +111,7 @@ const quoteIdentifier = (identifier: string): string => {
 };
 
 const eventMasterTableRef = `${quoteIdentifier(process.env.MYSQL_DATABASE || 'ddp')}.${quoteIdentifier(
-  process.env.MYSQL_EVENT_MASTER_TABLE || 'event_master',
+  process.env.MYSQL_Activity_Master_TABLE || 'Activity_Master',
 )}`;
 
 const mapRow = (row: EventMasterRow): EventMasterRecord => ({
@@ -222,15 +222,6 @@ class EventMasterService {
       'img_link',
     ];
 
-    const eventLocationValue = ((): string | null => {
-      const val = input.eventLocation ?? null;
-      if (val === null) return null;
-      const s = String(val).trim().toLowerCase();
-      if (!s) return null;
-      if (s.includes('online') || s.startsWith('http') || s.includes('zoom') || s.includes('meet') || s.includes('virtual')) return 'ONLINE';
-      return 'OFFLINE';
-    })();
-
     const values = [
       input.maximumCount,
       input.appliedCount,
@@ -244,7 +235,7 @@ class EventMasterService {
       input.startDate ?? null,
       input.endDate ?? null,
       input.durationDays ?? null,
-      eventLocationValue,
+      input.eventLocation ?? null,
       input.eventLevel ?? null,
       input.state ?? null,
       input.country ?? null,

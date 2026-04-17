@@ -20,11 +20,11 @@ process.on('SIGINT', async () => {
   process.exit(0);
 });
 
-prisma.$on('error', (e) => {
+prisma.$on('error', (e: unknown) => {
   logger.error('Prisma error:', e);
 });
 
-prisma.$on('warn', (e) => {
+prisma.$on('warn', (e: unknown) => {
   logger.warn('Prisma warning:', e);
 });
 

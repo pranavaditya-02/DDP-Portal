@@ -33,6 +33,15 @@ const CREATE_TRACKER_SQL = `CREATE TABLE IF NOT EXISTS internship_tracker (
 
 let tableReady = false;
 
+async function hasColumn(pool: ReturnType<typeof getMysqlPool>, tableName: string, columnName: string): Promise<boolean> {
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ? LIMIT 1`,
+    [tableName, columnName],
+  );
+
+  return rows.length > 0;
+}
+
 async function ensureTableExists(): Promise<void> {
   if (tableReady) {
     return;
@@ -51,13 +60,17 @@ async function ensureTableExists(): Promise<void> {
   }
 
   try {
-    await pool.query(`ALTER TABLE internship_tracker ADD COLUMN reject_reason VARCHAR(255) DEFAULT NULL AFTER iqac_verification;`);
+    if (!(await hasColumn(pool, 'internship_tracker', 'reject_reason'))) {
+      await pool.query(`ALTER TABLE internship_tracker ADD COLUMN reject_reason VARCHAR(255) DEFAULT NULL AFTER iqac_verification;`);
+    }
   } catch (error) {
     logger.warn('Could not add internship_tracker.reject_reason column, it may already exist or require manual migration.', error);
   }
 
   try {
-    await pool.query(`ALTER TABLE internship_tracker ADD COLUMN tracker_number BIGINT UNSIGNED NULL AFTER id;`);
+    if (!(await hasColumn(pool, 'internship_tracker', 'tracker_number'))) {
+      await pool.query(`ALTER TABLE internship_tracker ADD COLUMN tracker_number BIGINT UNSIGNED NULL AFTER id;`);
+    }
   } catch (error) {
     logger.warn('Could not add internship_tracker.tracker_number column, it may already exist or require manual migration.', error);
   }
@@ -263,7 +276,7 @@ export class InternshipTrackerService {
     return rows as InternshipTrackerRecord[];
   }
 
-  async listApprovedTrackersByStudent(studentId: number): Promise<InternshipTrackerRecord[]> {
+  async listAvailableTrackersByStudent(studentId: number): Promise<InternshipTrackerRecord[]> {
     await ensureTableExists();
 
     const pool = getMysqlPool();
@@ -284,12 +297,19 @@ export class InternshipTrackerService {
         it.iqac_verification,
         it.reject_reason
       FROM internship_tracker it
-      LEFT JOIN internship_reports ir ON ir.tracker_id = it.id
       LEFT JOIN students s ON it.student_id = s.id
       LEFT JOIN internship_industries i ON it.industry_id = i.id
       WHERE it.student_id = ?
         AND it.iqac_verification = 'approved'
-        AND ir.id IS NULL
+        AND (NOT EXISTS (
+          SELECT 1 FROM internship_reports ir2
+          WHERE ir2.tracker_id = it.id
+            AND ir2.iqac_verification IN ('initiated', 'approved')
+        ) OR EXISTS (
+          SELECT 1 FROM internship_reports ir2
+          WHERE ir2.tracker_id = it.id
+            AND ir2.iqac_verification = 'declined'
+        ))
       ORDER BY it.start_date DESC;`,
       [studentId],
     );

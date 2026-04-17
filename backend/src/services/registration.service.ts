@@ -136,7 +136,110 @@ const mapRow = (row: RegistrationRow): RegistrationRecord => ({
 });
 
 class RegistrationService {
+  private async ensureRegistrationLoggerTable(): Promise<void> {
+    const pool = getMysqlPool();
+
+    await pool.query(
+      `CREATE TABLE IF NOT EXISTS Activity_logger (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        registration_id INT NULL,
+        event_id INT NOT NULL,
+        student_id INT NULL,
+        student_name VARCHAR(255) NOT NULL,
+        student_email VARCHAR(255) NULL,
+        student_department VARCHAR(255) NULL,
+        event_category VARCHAR(255) NULL,
+        activity_event VARCHAR(255) NULL,
+        from_date DATE NULL,
+        to_date DATE NULL,
+        mode_of_participation VARCHAR(255) NULL,
+        iqac_verification VARCHAR(255) NOT NULL DEFAULT 'Initiated',
+        status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending',
+        rejection_reason VARCHAR(255) NULL,
+        verified_by INT NULL,
+        verified_at DATETIME NULL,
+        approved_by INT NULL,
+        approved_at DATETIME NULL,
+        created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY uq_activity_logger_registration_id (registration_id)
+      )`,
+    );
+
+    const [columnRows] = await pool.query<Array<RowDataPacket & { COLUMN_NAME: string; IS_NULLABLE: string }>>(
+      `SELECT COLUMN_NAME, IS_NULLABLE
+      FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE()
+        AND TABLE_NAME = 'Activity_logger'`,
+    );
+
+    const columns = new Map(columnRows.map((row) => [row.COLUMN_NAME, row.IS_NULLABLE]));
+    const alterStatements: string[] = [];
+
+    if (!columns.has('event_category')) {
+      alterStatements.push(`ADD COLUMN event_category VARCHAR(255) NULL`);
+    }
+
+    if (!columns.has('activity_event')) {
+      alterStatements.push(`ADD COLUMN activity_event VARCHAR(255) NULL`);
+    }
+
+    if (!columns.has('from_date')) {
+      alterStatements.push(`ADD COLUMN from_date DATE NULL`);
+    }
+
+    if (!columns.has('to_date')) {
+      alterStatements.push(`ADD COLUMN to_date DATE NULL`);
+    }
+
+    if (!columns.has('mode_of_participation')) {
+      alterStatements.push(`ADD COLUMN mode_of_participation VARCHAR(255) NULL`);
+    }
+
+    if (!columns.has('iqac_verification')) {
+      alterStatements.push(`ADD COLUMN iqac_verification VARCHAR(255) NOT NULL DEFAULT 'Initiated'`);
+    }
+
+    if (!columns.has('status')) {
+      alterStatements.push(`ADD COLUMN status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending'`);
+    }
+
+    if (!columns.has('verified_by')) {
+      alterStatements.push(`ADD COLUMN verified_by INT NULL`);
+    }
+
+    if (!columns.has('verified_at')) {
+      alterStatements.push(`ADD COLUMN verified_at DATETIME NULL`);
+    }
+
+    if (!columns.has('approved_by')) {
+      alterStatements.push(`ADD COLUMN approved_by INT NULL`);
+    }
+
+    if (!columns.has('approved_at')) {
+      alterStatements.push(`ADD COLUMN approved_at DATETIME NULL`);
+    }
+
+    if (!columns.has('created_date')) {
+      alterStatements.push(`ADD COLUMN created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
+    }
+
+    if (!columns.has('updated_date')) {
+      alterStatements.push(`ADD COLUMN updated_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`);
+    }
+
+    if (columns.get('registration_id') === 'NO') {
+      alterStatements.push(`MODIFY COLUMN registration_id INT NULL`);
+    }
+
+    if (alterStatements.length > 0) {
+      await pool.query(`ALTER TABLE Activity_logger ${alterStatements.join(', ')}`);
+    }
+  }
+
   async registerForEvent(input: CreateRegistrationInput): Promise<RegistrationRecord> {
+    await this.ensureRegistrationLoggerTable();
+
     const connection = await getMysqlPool().getConnection();
 
     try {
@@ -151,7 +254,7 @@ class RegistrationService {
           applied_count,
           (maximum_count - applied_count) AS balance_count,
           active_status
-        FROM event_master
+        FROM Activity_Master
         WHERE id = ?
         LIMIT 1
         FOR UPDATE`,
@@ -174,7 +277,7 @@ class RegistrationService {
       if (input.studentId) {
         const [duplicateRows] = await connection.query<Array<RowDataPacket & { id: number }>>(
           `SELECT id
-          FROM event_registrations
+          FROM Activity_logger
           WHERE event_id = ?
             AND student_id = ?
             AND status IN ('pending', 'approved')
@@ -188,7 +291,7 @@ class RegistrationService {
       }
 
       const [insertResult] = await connection.execute<ResultSetHeader>(
-        `INSERT INTO event_registrations (
+        `INSERT INTO Activity_logger (
           event_id,
           student_id,
           student_name,
@@ -218,7 +321,7 @@ class RegistrationService {
       );
 
       await connection.execute<ResultSetHeader>(
-        `UPDATE event_master
+        `UPDATE Activity_Master
         SET
           applied_count = applied_count + 1
         WHERE id = ?`,
@@ -242,6 +345,8 @@ class RegistrationService {
   }
 
   async getRegistrationById(id: number): Promise<RegistrationRecord | null> {
+    await this.ensureRegistrationLoggerTable();
+
     const [rows] = await getMysqlPool().query<RegistrationRow[]>(
       `SELECT
         er.id,
@@ -266,8 +371,8 @@ class RegistrationService {
         em.event_code,
         em.event_organizer,
         em.event_level
-      FROM event_registrations er
-      INNER JOIN event_master em ON em.id = er.event_id
+      FROM Activity_logger er
+      INNER JOIN Activity_Master em ON em.id = er.event_id
       WHERE er.id = ?
       LIMIT 1`,
       [id],
@@ -281,6 +386,8 @@ class RegistrationService {
   }
 
   async listRegistrations(status?: 'pending' | 'approved' | 'rejected'): Promise<RegistrationRecord[]> {
+    await this.ensureRegistrationLoggerTable();
+
     const where = status ? 'WHERE er.status = ?' : '';
     const params = status ? [status] : [];
 
@@ -308,8 +415,8 @@ class RegistrationService {
         em.event_code,
         em.event_organizer,
         em.event_level
-      FROM event_registrations er
-      INNER JOIN event_master em ON em.id = er.event_id
+      FROM Activity_logger er
+      INNER JOIN Activity_Master em ON em.id = er.event_id
       ${where}
       ORDER BY
         CASE er.status
@@ -325,25 +432,41 @@ class RegistrationService {
   }
 
   async approveRegistration(registrationId: number, verifiedBy: number): Promise<RegistrationRecord> {
-    const [updateResult] = await getMysqlPool().execute<ResultSetHeader>(
-      `UPDATE event_registrations
-      SET
-        status = 'approved',
-        iqac_verification = 'Approved',
-        rejection_reason = NULL,
-        verified_by = ?,
-        verified_at = NOW()
-      WHERE id = ?
-        AND status = 'pending'`,
-      [verifiedBy, registrationId],
-    );
+    await this.ensureRegistrationLoggerTable();
 
-    if (updateResult.affectedRows === 0) {
-      const existing = await this.getRegistrationById(registrationId);
-      if (!existing) {
-        throw new RegistrationNotFoundError(registrationId);
+    const connection = await getMysqlPool().getConnection();
+
+    try {
+      await connection.beginTransaction();
+
+      const [updateResult] = await connection.execute<ResultSetHeader>(
+        `UPDATE Activity_logger
+        SET
+          status = 'approved',
+          iqac_verification = 'Approved',
+          rejection_reason = NULL,
+          verified_by = ?,
+          verified_at = NOW()
+        WHERE id = ?
+          AND status = 'pending'`,
+        [verifiedBy, registrationId],
+      );
+
+      if (updateResult.affectedRows === 0) {
+        await connection.rollback();
+        const existing = await this.getRegistrationById(registrationId);
+        if (!existing) {
+          throw new RegistrationNotFoundError(registrationId);
+        }
+        return existing;
       }
-      return existing;
+
+      await connection.commit();
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
     }
 
     const updated = await this.getRegistrationById(registrationId);
@@ -354,13 +477,15 @@ class RegistrationService {
   }
 
   async rejectRegistration(registrationId: number, verifiedBy: number, reason: string): Promise<RegistrationRecord> {
+    await this.ensureRegistrationLoggerTable();
+
     const connection = await getMysqlPool().getConnection();
 
     try {
       await connection.beginTransaction();
 
       const [rows] = await connection.query<Array<RowDataPacket & { event_id: number; status: string }>>(
-        `SELECT event_id, status FROM event_registrations WHERE id = ? LIMIT 1 FOR UPDATE`,
+        `SELECT event_id, status FROM Activity_logger WHERE id = ? LIMIT 1 FOR UPDATE`,
         [registrationId],
       );
 
@@ -372,7 +497,7 @@ class RegistrationService {
       const wasPending = existing.status === 'pending';
 
       await connection.execute<ResultSetHeader>(
-        `UPDATE event_registrations
+        `UPDATE Activity_logger
         SET
           status = 'rejected',
           iqac_verification = 'Rejected',
@@ -385,7 +510,7 @@ class RegistrationService {
 
       if (wasPending) {
         await connection.execute<ResultSetHeader>(
-          `UPDATE event_master
+          `UPDATE Activity_Master
           SET
             applied_count = CASE WHEN applied_count > 0 THEN applied_count - 1 ELSE 0 END
           WHERE id = ?`,
@@ -409,6 +534,8 @@ class RegistrationService {
   }
 
   async getRegistrationsByEventId(eventId: number, status?: 'pending' | 'approved' | 'rejected'): Promise<RegistrationRecord[]> {
+    await this.ensureRegistrationLoggerTable();
+
     const where = status ? 'WHERE er.event_id = ? AND er.status = ?' : 'WHERE er.event_id = ?';
     const params = status ? [eventId, status] : [eventId];
 
@@ -436,8 +563,8 @@ class RegistrationService {
         em.event_code,
         em.event_organizer,
         em.event_level
-      FROM event_registrations er
-      INNER JOIN event_master em ON em.id = er.event_id
+      FROM Activity_logger er
+      INNER JOIN Activity_Master em ON em.id = er.event_id
       ${where}
       ORDER BY
         CASE er.status
@@ -453,6 +580,8 @@ class RegistrationService {
   }
 
   async getRegistrationsByStudentId(studentId: number, status?: 'pending' | 'approved' | 'rejected'): Promise<RegistrationRecord[]> {
+    await this.ensureRegistrationLoggerTable();
+
     const where = status ? 'WHERE er.student_id = ? AND er.status = ?' : 'WHERE er.student_id = ?';
     const params = status ? [studentId, status] : [studentId];
 
@@ -480,8 +609,8 @@ class RegistrationService {
         em.event_code,
         em.event_organizer,
         em.event_level
-      FROM event_registrations er
-      INNER JOIN event_master em ON em.id = er.event_id
+      FROM Activity_logger er
+      INNER JOIN Activity_Master em ON em.id = er.event_id
       ${where}
       ORDER BY er.created_date DESC`,
       params,

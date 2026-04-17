@@ -1,7 +1,7 @@
--- Migration: Create event_master table for event intake and management
+-- Migration: Create Activity_Master table for event intake and management
 -- This table stores all event master records used for activity tracking
 
-CREATE TABLE IF NOT EXISTS `event_master` (
+CREATE TABLE IF NOT EXISTS `Activity_Master` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `maximum_count` INT NOT NULL DEFAULT 0 COMMENT 'Maximum seats available for the event',
   `applied_count` INT NOT NULL DEFAULT 0 COMMENT 'Number of applications received',

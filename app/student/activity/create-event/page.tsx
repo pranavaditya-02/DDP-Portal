@@ -14,6 +14,7 @@ type FormState = {
   aboutThisEvent: string
   eventOrganizer: string
   webLink: string
+  imgLink: string
   eventCategory: string
   status: string
   startDate: string
@@ -39,6 +40,7 @@ const initialForm: FormState = {
   aboutThisEvent: "",
   eventOrganizer: "",
   webLink: "",
+  imgLink: "",
   eventCategory: "",
   status: "Active",
   startDate: "",
@@ -68,7 +70,7 @@ const eventCategories = [
 ]
 
 const eventLevels = ["Department", "Institution", "State", "National", "International"]
-const statuses = ["Active", "Inactive", "Closed", "Completed"]
+const statuses = ["Active","Not-Active"]
 const STEPS = [
   { title: "Identity", icon: User },
   { title: "Schedule", icon: Calendar },
@@ -85,6 +87,7 @@ const testFormData: FormState = {
   aboutThisEvent: "A multi-day practical summit with expert-led sessions, hands-on workshops, and project showcase opportunities for students.",
   eventOrganizer: "Technology Department",
   webLink: "https://techsummit.example.com",
+  imgLink: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=80",
   eventCategory: "Workshop",
   status: "Active",
   startDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
@@ -152,6 +155,7 @@ export default function CreateEventPage() {
                 aboutThisEvent: "",
                 eventOrganizer: event.eventOrganizer || "",
                 webLink: event.webLink || "",
+                imgLink: event.imgLink || "",
                 eventCategory: event.eventCategory || "",
                 status: event.status,
                 startDate: event.startDate ? event.startDate.split('T')[0] : "",
@@ -249,12 +253,12 @@ export default function CreateEventPage() {
     const payload: CreateEventPayload = {
       maximumCount: form.maximumCount,
       appliedCount: 0,
-      balanceCount: form.maximumCount,
       applyByStudent: form.applyByStudent,
       eventCode: form.eventCode.trim(),
       eventName: form.eventName.trim(),
       eventOrganizer: normalizeEmpty(form.eventOrganizer),
       webLink: normalizeEmpty(form.webLink),
+      imgLink: normalizeEmpty(form.imgLink),
       eventCategory: normalizeEmpty(form.eventCategory),
       status: form.status,
       startDate: normalizeEmpty(form.startDate),
@@ -550,6 +554,16 @@ export default function CreateEventPage() {
                       className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm transition-colors focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                   </label>
+
+                  <label>
+                    <span className="mb-1 block text-sm font-medium text-slate-700">Image Link (img_link)</span>
+                    <input
+                      type="url"
+                      value={form.imgLink}
+                      onChange={(e) => onChange("imgLink", e.target.value)}
+                      className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm transition-colors focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </label>
                 </div>
               </section>
             )}
@@ -770,6 +784,7 @@ export default function CreateEventPage() {
                     <div><p className="text-xs uppercase tracking-wide text-slate-500">End Date</p><p className="text-sm text-slate-900">{form.endDate || "Not provided"}</p></div>
                     <div><p className="text-xs uppercase tracking-wide text-slate-500">Location</p><p className="text-sm text-slate-900">{form.eventLocation || "Not provided"}</p></div>
                     <div><p className="text-xs uppercase tracking-wide text-slate-500">Max Count</p><p className="text-sm text-slate-900">{form.maximumCount || 0}</p></div>
+                    <div className="md:col-span-2"><p className="text-xs uppercase tracking-wide text-slate-500">Image Link</p><p className="text-sm text-slate-900 break-all">{form.imgLink || "Not provided"}</p></div>
                   </div>
                 </div>
               </section>

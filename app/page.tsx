@@ -1,30 +1,15 @@
-'use client'
+import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
+import { AUTH_COOKIE_NAME, decodeAuthToken, getPostLoginRoute } from '@/lib/auth-session'
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAuthStore } from '@/lib/store'
+export default async function Page() {
+  const cookieStore = await cookies()
+  const token = cookieStore.get(AUTH_COOKIE_NAME)?.value || null
+  const user = token ? decodeAuthToken(token) : null
 
-export default function Page() {
-  const router = useRouter()
-  const { isAuthenticated, user } = useAuthStore()
+  if (!user) {
+    redirect('/login')
+  }
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      if (user?.roles?.includes('dean')) {
-        router.push('/college')
-      } else if (user?.roles?.includes('student')) {
-        router.push('/student/dashboard')
-      } else {
-        router.push('/dashboard')
-      }
-    } else {
-      router.push('/login')
-    }
-  }, [isAuthenticated, user, router])
-
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="animate-spin w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full" />
-    </div>
-  )
+  redirect(getPostLoginRoute(user.roles))
 }

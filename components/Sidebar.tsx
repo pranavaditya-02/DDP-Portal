@@ -1,11 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/store";
+import { apiClient } from "@/lib/api";
 import { useRoles } from "@/hooks/useRoles";
 import { studentNavItems } from "@/lib/student-navigation";
+import { AUTH_COOKIE_NAME } from "@/lib/auth-session";
+import { clearAuthCookie } from "@/app/actions";
 import {
   LayoutDashboard,
   FileText,
@@ -82,8 +85,79 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [owiExpanded, setOwiExpanded] = useState(false);
   const [rndExpanded, setRndExpanded] = useState(false);
   const [studentExpanded, setStudentExpanded] = useState(false);
+  const [verificationQueuePendingCount, setVerificationQueuePendingCount] = useState(0);
+  const [verificationPanelPendingCount, setVerificationPanelPendingCount] = useState(0);
+  const isVerificationUser = isVerification();
+  const canAccessLogger = isFaculty() || isHod() || isDean() || isVerification() || isAdmin();
 
-  const handleLogout = () => {
+  useEffect(() => {
+    if (!isVerificationUser) {
+      setVerificationQueuePendingCount(0);
+      setVerificationPanelPendingCount(0);
+      return;
+    }
+
+    let active = true;
+
+    const getListCount = (value: unknown) => {
+      if (Array.isArray(value)) return value.length;
+      if (!value || typeof value !== "object") return 0;
+
+      const maybeObject = value as {
+        activities?: unknown;
+        registrations?: unknown;
+        data?: unknown;
+        count?: unknown;
+      };
+
+      if (Array.isArray(maybeObject.activities)) return maybeObject.activities.length;
+      if (Array.isArray(maybeObject.registrations)) return maybeObject.registrations.length;
+      if (Array.isArray(maybeObject.data)) return maybeObject.data.length;
+      if (typeof maybeObject.count === "number") return maybeObject.count;
+
+      return 0;
+    };
+
+    const loadPendingCount = async () => {
+      try {
+        const [queueResponse, panelResponse] = await Promise.all([
+          apiClient.getPendingActivities(),
+          apiClient.getVerificationRegistrations("pending"),
+        ]);
+
+        if (!active) return;
+
+        setVerificationQueuePendingCount(getListCount(queueResponse));
+        setVerificationPanelPendingCount(getListCount(panelResponse));
+      } catch {
+        if (!active) return;
+        setVerificationQueuePendingCount(0);
+        setVerificationPanelPendingCount(0);
+      }
+    };
+
+    void loadPendingCount();
+
+    const handlePendingRefresh = () => {
+      void loadPendingCount();
+    };
+
+    window.addEventListener("verification-pending-updated", handlePendingRefresh);
+    const timer = window.setInterval(() => {
+      void loadPendingCount();
+    }, 30000);
+
+    return () => {
+      active = false;
+      window.removeEventListener("verification-pending-updated", handlePendingRefresh);
+      window.clearInterval(timer);
+    };
+  }, [isVerificationUser, pathname]);
+
+  const handleLogout = async () => {
+    await apiClient.logout().catch(() => undefined);
+    await clearAuthCookie().catch(() => undefined);
+    document.cookie = `${AUTH_COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
     logout();
     router.push("/login");
   };
@@ -100,6 +174,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           icon: LayoutDashboard,
           show: !isDean() && !isStudent(),
         },
+
       ],
     },
     {
@@ -112,12 +187,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           show: isStudent(),
         },
         {
-          label: "Overview",
-          href: "/student/overview",
-          icon: FileText,
-          show: isStudent(),
-        },
-        {
           label: "Activity Master",
           href: "/student/activity/master",
           icon: Clipboard,
@@ -127,7 +196,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           label: "Activity Logger",
           href: "/student/activity/logger",
           icon: PlusCircle,
-          show: isStudent(),
+          show: false,
         },
         {
           label: "Create Event",
@@ -135,13 +204,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
           icon: Calendar,
           show: isAdmin(),
         },
-        
+
         ...studentNavItems.map((item) => ({
           label: item.label,
           href: `/student/${item.slug}`,
           icon: FileText,
-          show: isStudent(),
+          show: isStudent() && item.slug !== 'activity-logger',
         })),
+      ],
+    },
+    {
+      title: "Logger",
+      items: [
+        {
+          label: "Activity Logger",
+          href: "/student/activity/logger",
+          icon: PlusCircle,
+          show: canAccessLogger,
+        },
       ],
     },
     {
@@ -214,14 +294,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
           label: "Verification Queue",
           href: "/verification",
           icon: ShieldCheck,
-          show: isVerification(),
-          badge: 7,
+          show: isVerificationUser,
+          badge: verificationQueuePendingCount,
         },
         {
           label: "Verification Panel",
           href: "/verification-panel",
           icon: ShieldCheck,
-          show: isVerification(),
+          show: isVerificationUser,
+          badge: verificationPanelPendingCount,
         },
         {
           label: "User Management",
@@ -399,12 +480,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     {!collapsed && (
                       <span className="flex-1 truncate">{item.label}</span>
                     )}
-                    {!collapsed && item.badge && (
+                    {!collapsed && typeof item.badge === "number" && item.badge > 0 && (
                       <span className="px-2 py-0.5 text-[10px] font-bold bg-red-500 text-white rounded-full">
                         {item.badge}
                       </span>
                     )}
-                    {collapsed && item.badge && (
+                    {collapsed && typeof item.badge === "number" && item.badge > 0 && (
                       <span className="absolute -top-1 -right-1 w-4 h-4 text-[9px] font-bold bg-red-500 text-white rounded-full flex items-center justify-center">
                         {item.badge}
                       </span>
@@ -417,7 +498,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         ))}
 
         {/* Activity Section */}
-        {isFaculty() && !isDean() && !collapsed && (
+        {(isFaculty() || isVerificationUser) && !isDean() && !collapsed && (
           <div>
             <button
               onClick={() => setActivityExpanded(!activityExpanded)}
@@ -425,7 +506,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             >
               <div className="flex items-center gap-3">
                 <Clipboard className="w-5 h-5 flex-shrink-0" />
-                <span>Activity</span>
+                <span>Faculty Achievements</span>
               </div>
               <ChevronDown
                 className={`w-4 h-4 transition-transform ${activityExpanded ? "rotate-180" : ""}`}
@@ -441,7 +522,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   >
                     <div className="flex items-center gap-3">
                       <Trophy className="w-5 h-5 flex-shrink-0" />
-                      <span>Faculty Achievements</span>
+                      <span>Activity</span>
                     </div>
                     <ChevronDown
                       className={`w-4 h-4 transition-transform ${achievementsExpanded ? "rotate-180" : ""}`}
@@ -484,11 +565,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                               key={item.id}
                               href={href}
                               onClick={() => setMobileOpen(false)}
-                              className={`w-full flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 ${
-                                pathname === href
+                              className={`w-full flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 ${pathname === href
                                   ? "bg-blue-600/20 text-blue-400"
                                   : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                              }`}
+                                }`}
                             >
                               <Icon className="w-4 h-4 flex-shrink-0" />
                               <span className="flex-1 text-left truncate">
@@ -498,22 +578,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           );
                         }
 
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => setMobileOpen(false)}
-                      className="w-full flex items-center gap-3 py-2 px-3 rounded-lg text-xs text-slate-500 hover:bg-purple-50 hover:text-[#7D53F6] transition-colors"
-                    >
-                      <Icon className="w-4 h-4 flex-shrink-0" />
-                      <span className="flex-1 text-left truncate">
-                        {item.label}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+                        return (
+                          <button
+                            key={item.id}
+                            onClick={() => setMobileOpen(false)}
+                            className="w-full flex items-center gap-3 py-2 px-3 rounded-lg text-xs text-slate-500 hover:bg-purple-50 hover:text-[#7D53F6] transition-colors"
+                          >
+                            <Icon className="w-4 h-4 flex-shrink-0" />
+                            <span className="flex-1 text-left truncate">
+                              {item.label}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
 
                 {/* OWI (Outside World Interaction) Section */}
                 <div>
@@ -523,7 +603,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   >
                     <div className="flex items-center gap-3">
                       <Users className="w-5 h-5 flex-shrink-0" />
-                      <span>OWI (Outside World Interaction)</span>
+                      <span>OWI </span>
                     </div>
                     <ChevronDown
                       className={`w-4 h-4 transition-transform ${owiExpanded ? "rotate-180" : ""}`}
@@ -539,11 +619,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             key={item.slug}
                             href={href}
                             onClick={() => setMobileOpen(false)}
-                            className={`flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 relative ${
-                              active
+                            className={`flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 relative ${active
                                 ? "bg-blue-600/20 text-blue-400"
                                 : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                            }`}
+                              }`}
                           >
                             {active && (
                               <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-blue-500 rounded-r-full" />
@@ -580,11 +659,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             key={item.slug}
                             href={href}
                             onClick={() => setMobileOpen(false)}
-                            className={`flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 relative ${
-                              active
+                            className={`flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 relative ${active
                                 ? "bg-blue-600/20 text-blue-400"
                                 : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                            }`}
+                              }`}
                           >
                             {active && (
                               <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-blue-500 rounded-r-full" />
@@ -597,48 +675,48 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   )}
                 </div>
 
-          </div>
-        )}
-                {/* Student Achievements Section */}
-                <div>
-                  <button
-                    onClick={() => setStudentExpanded(!studentExpanded)}
-                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-150"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Clipboard className="w-5 h-5 flex-shrink-0" />
-                      <span>Student Achievements</span>
-                    </div>
-                    <ChevronDown
-                      className={`w-4 h-4 transition-transform ${studentExpanded ? "rotate-180" : ""}`}
-                    />
-                  </button>
-                  {studentExpanded && (
-                    <div className="space-y-1 mt-2 ml-2">
-                      {studentItems.map((item) => {
-                        const Icon = item.icon;
-                        if (!item.href) return null;
-                        return (
-                          <Link
-                            key={item.id}
-                            href={item.href}
-                            onClick={() => setMobileOpen(false)}
-                            className={`w-full flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 ${
-                              pathname === item.href
-                                ? "bg-blue-600/20 text-blue-400"
-                                : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                            }`}
-                          >
-                            <Icon className="w-4 h-4 flex-shrink-0" />
-                            <span className="flex-1 text-left truncate">{item.label}</span>
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
               </div>
             )}
+            {/* Student Achievements Section */}
+            <div>
+              <button
+                onClick={() => setStudentExpanded(!studentExpanded)}
+                className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all duration-150"
+              >
+                <div className="flex items-center gap-3">
+                  <Clipboard className="w-5 h-5 flex-shrink-0" />
+                  <span>Student Achievements</span>
+                </div>
+                <ChevronDown
+                  className={`w-4 h-4 transition-transform ${studentExpanded ? "rotate-180" : ""}`}
+                />
+              </button>
+              {studentExpanded && (
+                <div className="space-y-1 mt-2 ml-2">
+                  {studentItems.filter((item) => item.id !== "activityMaster" || isStudent())
+                    .map((item) => {
+                      const Icon = item.icon;
+                      if (!item.href) return null;
+                      return (
+                        <Link
+                          key={item.id}
+                          href={item.href}
+                          onClick={() => setMobileOpen(false)}
+                          className={`w-full flex items-center gap-3 py-2 px-3 rounded-lg text-xs font-medium transition-all duration-150 ${pathname === item.href
+                              ? "bg-blue-600/20 text-blue-400"
+                              : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                            }`}
+                        >
+                          <Icon className="w-4 h-4 flex-shrink-0" />
+                          <span className="flex-1 text-left truncate">{item.label}</span>
+                        </Link>
+                      );
+                    })}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </nav>
 
 

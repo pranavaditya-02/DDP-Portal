@@ -28,8 +28,6 @@ const CREATE_PATENT_REPORT_SQL = `CREATE TABLE IF NOT EXISTS patent_report (
   other_dept_student_count INT DEFAULT NULL,
   approve_filed_by_bit_id_publication INT DEFAULT NULL,
   approve_filed_by_bit_id_granted INT DEFAULT NULL,
-  prior_art TEXT,
-  novelty TEXT,
   yukti_proof_url TEXT,
   full_document_proof_url TEXT,
   cbr_receipt_url TEXT,
@@ -74,8 +72,6 @@ export interface PatentReportCreateInput {
   other_dept_student_count?: number | null;
   approve_filed_by_bit_id_publication?: number | null;
   approve_filed_by_bit_id_granted?: number | null;
-  prior_art?: string | null;
-  novelty?: string | null;
   yukti_proof_url?: string | null;
   full_document_proof_url?: string | null;
   cbr_receipt_url?: string | null;
@@ -109,8 +105,6 @@ export interface PatentReportRecord {
   other_dept_student_count?: number | null;
   approve_filed_by_bit_id_publication?: number | null;
   approve_filed_by_bit_id_granted?: number | null;
-  prior_art?: string | null;
-  novelty?: string | null;
   yukti_proof_url?: string | null;
   full_document_proof_url?: string | null;
   cbr_receipt_url?: string | null;
@@ -136,7 +130,7 @@ class PatentReportService {
         patent_license_details, funding_agency, funds_received, fund_amount,
         is_interdisciplinary, other_dept_name, other_dept_student_count,
         approve_filed_by_bit_id_publication, approve_filed_by_bit_id_granted,
-        prior_art, novelty, yukti_proof_url, full_document_proof_url, cbr_receipt_url, publication_proof_url, granted_proof_url
+        yukti_proof_url, full_document_proof_url, cbr_receipt_url, publication_proof_url, granted_proof_url
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
       [
         input.student_id,
@@ -163,8 +157,6 @@ class PatentReportService {
         input.other_dept_student_count ?? null,
         input.approve_filed_by_bit_id_publication ?? null,
         input.approve_filed_by_bit_id_granted ?? null,
-        input.prior_art ?? null,
-        input.novelty ?? null,
         input.yukti_proof_url ?? null,
         input.full_document_proof_url ?? null,
         input.cbr_receipt_url ?? null,

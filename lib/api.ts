@@ -1,5 +1,4 @@
 import axios, { AxiosInstance } from 'axios';
-import { useAuthStore } from './store';
 
 export interface EventMasterRecord {
   id: number;
@@ -27,6 +26,7 @@ export interface EventMasterRecord {
   totalLevelOfCompetition: string | null;
   eligibleForRewards: boolean;
   winnerRewards: string | null;
+  imgLink: string | null;
   createdDate: string;
   updatedDate: string;
 }
@@ -34,7 +34,6 @@ export interface EventMasterRecord {
 export interface CreateEventPayload {
   maximumCount: number;
   appliedCount: number;
-  balanceCount: number;
   applyByStudent: boolean;
   eventCode: string;
   eventName: string;
@@ -157,24 +156,15 @@ function normalizeApiUrl(rawUrl?: string) {
 
 const apiBaseURL = normalizeApiUrl(process.env.NEXT_PUBLIC_API_URL) || DEFAULT_API_URL;
 
+const API_UNREACHABLE_MESSAGE = `Cannot reach API server at ${apiBaseURL}. Start the backend and verify NEXT_PUBLIC_API_URL/ALLOWED_ORIGINS.`
+
 const client: AxiosInstance = axios.create({
   baseURL: apiBaseURL,
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 });
-
-// Request interceptor to add token
-client.interceptors.request.use(
-  (config) => {
-    const token = useAuthStore.getState().token;
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
 
 // Response interceptor to handle errors
 client.interceptors.response.use(
@@ -182,20 +172,40 @@ client.interceptors.response.use(
   (error) => {
     const status = error.response?.status;
     const message = error.response?.data?.error;
-    const token = useAuthStore.getState().token;
 
-    if ((status === 401 || status === 403) && token && !token.startsWith('demo-')) {
+    if ((status === 401 || status === 403) && typeof window !== 'undefined') {
+      void fetch(`${apiBaseURL}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      }).catch(() => undefined)
+
       if (message?.toString().toLowerCase().includes('invalid') || message?.toString().toLowerCase().includes('expired') || status === 401) {
-        useAuthStore.getState().logout();
-        if (typeof window !== 'undefined') {
-          window.location.href = '/login';
-        }
+        window.location.href = '/login';
       }
     }
 
     return Promise.reject(error);
   }
 );
+
+export const getApiErrorMessage = (error: unknown, fallback = 'Request failed') => {
+  if (axios.isAxiosError(error)) {
+    const responseMessage = error.response?.data?.error
+    if (typeof responseMessage === 'string' && responseMessage.trim().length > 0) {
+      return responseMessage
+    }
+
+    if (error.code === 'ERR_NETWORK') {
+      return API_UNREACHABLE_MESSAGE
+    }
+
+    if (typeof error.message === 'string' && error.message.trim().length > 0) {
+      return error.message
+    }
+  }
+
+  return fallback
+}
 
 export const apiClient = {
   // Auth endpoints
@@ -209,11 +219,15 @@ export const apiClient = {
     return response.data;
   },
 
-  login: async (email: string, password: string) => {
-    const response = await client.post('/auth/login', {
-      email,
-      password,
+  loginWithGoogle: async (credential: string) => {
+    const response = await client.post('/auth/google', {
+      credential,
     });
+    return response.data;
+  },
+
+  logout: async () => {
+    const response = await client.post('/auth/logout');
     return response.data;
   },
 
@@ -465,14 +479,6 @@ export const apiClient = {
 
   getEvents: async (params?: { sort?: 'asc' | 'desc' }): Promise<{ events: EventMasterRecord[] }> => {
     const searchParams = new URLSearchParams();
-    const token = useAuthStore.getState().token;
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    };
-
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
 
     if (params?.sort) {
       searchParams.set('sort', params.sort);
@@ -480,7 +486,7 @@ export const apiClient = {
 
     const response = await fetch(`/api/events${searchParams.toString() ? `?${searchParams.toString()}` : ''}`, {
       method: 'GET',
-      headers,
+      credentials: 'include',
       cache: 'no-store',
     });
 
@@ -493,18 +499,12 @@ export const apiClient = {
   },
 
   createEvent: async (data: CreateEventPayload): Promise<{ message: string; event: EventMasterRecord }> => {
-    const token = useAuthStore.getState().token;
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    };
-
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
-
     const response = await fetch('/api/events', {
       method: 'POST',
-      headers,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
       body: JSON.stringify(data),
     });
 

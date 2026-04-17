@@ -47,12 +47,10 @@ const schema = z.object({
   patent_title: z.string().min(1),
   applicants_involved: z.enum(['BIT students only','BIT student along with faculty','BIT student along with external institutions']),
   faculty_id: z.string().optional(),
-  patent_type: z.enum(['Product','Process','Design']),
+  patent_type: z.enum(['Product/Process','Design']),
   has_image_layout_support: z.enum(['Yes','No']).optional(),
   has_formatted_drawings: z.enum(['Yes','No']).optional(),
   forms_1_and_2_prepared: z.enum(['Yes','No']).optional(),
-  prior_art: z.string().optional(),
-  novelty: z.string().optional(),
   iqac_verification: z.enum(['Initiated','Approved','Declined']).optional(),
 });
 
@@ -90,8 +88,6 @@ router.post('/', upload.fields([
       patent_type: parsed.patent_type,
       has_image_layout_support: parsed.has_image_layout_support ?? 'No',
       experimentation_file_path,
-      prior_art: parsed.prior_art ?? '',
-      novelty: parsed.novelty ?? '',
       has_formatted_drawings: parsed.has_formatted_drawings ?? 'No',
       drawings_file_path,
       forms_1_and_2_prepared: parsed.forms_1_and_2_prepared ?? 'No',
@@ -123,7 +119,7 @@ router.get('/', async (req, res) => {
 router.get('/:id(\\d+)', async (req, res) => {
   try {
     const id = Number(req.params.id);
-    const t = await patentTrackerService.getTrackerById(id);
+    const t = await patentTrackerService.getTrackerByIdOrNumber(id);
     if (!t) return res.status(404).json({ error: 'Patent tracker not found' });
     return res.json({ tracker: transform(req, t) });
   } catch (err) {
@@ -146,12 +142,11 @@ router.patch('/:id(\\d+)/iqac', async (req, res) => {
       return res.status(400).json({ error: 'Reject reason is required when declining a tracker.' });
     }
 
-    const existing = await patentTrackerService.getTrackerById(id);
+    const existing = await patentTrackerService.getTrackerByIdOrNumber(id);
     if (!existing) return res.status(404).json({ error: 'Patent tracker not found' });
 
     // update verification; if declined, store reject reason
-    const pool = await patentTrackerService.updateIqacVerification(id, iqacValue as any);
-    const updated = await patentTrackerService.getTrackerById(id);
+    const updated = await patentTrackerService.updateIqacVerification(existing.id, iqacValue as any, body.reject_reason ?? null);
     if (!updated) return res.status(404).json({ error: 'Patent tracker not found' });
 
     // send email to student if email available and not initiated

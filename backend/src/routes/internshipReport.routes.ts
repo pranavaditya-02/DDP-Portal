@@ -4,7 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { z } from 'zod';
 import internshipReportService from '../services/internshipReport.service';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/logger';   
 import { sendEmail } from '../utils/mailer';
 
 const router = express.Router();
@@ -85,19 +85,22 @@ const internshipReportSchema = z.object({
   sdg_goal_id: z.preprocess((value) => Number(value), z.number().int().positive()),
 });
 
-router.post(
-  '/',
+router.post('/', async (req, res) => {
+  // Run multer upload and capture any multer/file-filter errors to return a 400 with a clear message
   upload.fields([
     { name: 'fullDocumentProof', maxCount: 1 },
     { name: 'originalCertificateProof', maxCount: 1 },
     { name: 'attestedCertificate', maxCount: 1 },
-  ]),
-  async (req, res) => {
+  ])(req, res, async (uploadErr: any) => {
+    if (uploadErr) {
+      logger.error('Multer upload error for internship report:', uploadErr);
+      return res.status(400).json({ error: uploadErr.message || 'File upload error' });
+    }
+
     try {
       const parsed = internshipReportSchema.parse(req.body);
 
       const files = req.files as Record<string, Express.Multer.File[]> | undefined;
-      // Log received files for debugging duplicate/missing uploads
       logger.info('Received report upload files:', { keys: Object.keys(files || {}), filesSummary: Object.entries(files || {}).map(([k, arr]) => ({ field: k, count: arr.length, filenames: arr.map(f => f.filename) })) });
 
       const fullDocument = files?.fullDocumentProof?.[0] ?? null;
@@ -150,8 +153,8 @@ router.post(
       }
       return res.status(500).json({ error: 'Failed to create internship report', message: error instanceof Error ? error.message : undefined });
     }
-  }
-);
+  });
+});
 
 router.get('/', async (_req, res) => {
   try {
@@ -197,9 +200,10 @@ router.patch(
 
       if (report.student_email && parsed.iqac_verification !== 'initiated') {
         const statusText = parsed.iqac_verification === 'approved' ? 'approved' : 'declined';
+        const displayId = report.report_number ?? report.id;
         const subject = `Internship Report ${statusText.toUpperCase()} | BannariAmman College IQAC`;
-        const bodyText = `Hello ${report.student_name ?? 'Student'},\n\nYour internship report submission (ID: ${report.id}) has been ${statusText} by the IQAC team at BannariAmman College.\n\n${parsed.reject_reason ? `Reason: ${parsed.reject_reason}\n\n` : ''}If you have any questions, please reply to this email.\n\nIQAC Team\nSanthosh\n BannariAmman College`;
-        const bodyHtml = `<p>Hello ${report.student_name ?? 'Student'},</p><p>Your internship report submission <strong>(ID: ${report.id})</strong> has been <strong>${statusText}</strong> by the IQAC team at <strong>BannariAmman College</strong>.</p>${parsed.reject_reason ? `<p><strong>Reason:</strong> ${parsed.reject_reason}</p>` : ''}<p>If you have any questions, please reply to this email.</p><p>IQAC Team<br/>BannariAmman College</p>`;
+        const bodyText = `Hello ${report.student_name ?? 'Student'},\n\nYour internship report submission (ID: ${displayId}) has been ${statusText} by the IQAC team at BannariAmman College.\n\n${parsed.reject_reason ? `Reason: ${parsed.reject_reason}\n\n` : ''}If you have any questions, please reply to this email.\n\nIQAC Team\nSanthosh\n BannariAmman College`;
+        const bodyHtml = `<p>Hello ${report.student_name ?? 'Student'},</p><p>Your internship report submission <strong>(ID: ${displayId})</strong> has been <strong>${statusText}</strong> by the IQAC team at <strong>BannariAmman College</strong>.</p>${parsed.reject_reason ? `<p><strong>Reason:</strong> ${parsed.reject_reason}</p>` : ''}<p>If you have any questions, please reply to this email.</p><p>IQAC Team<br/>BannariAmman College</p>`;
 
         try {
           await sendEmail({
