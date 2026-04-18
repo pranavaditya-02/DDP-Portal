@@ -18,6 +18,7 @@ export default function StudentOverviewPage() {
             <Link
               key={item.slug}
               href={`/student/${item.slug}`}
+              prefetch={false}
               className="rounded-lg border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors"
             >
               {item.label}

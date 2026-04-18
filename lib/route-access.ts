@@ -4,6 +4,30 @@ export type MinimalAccessResource = Pick<AccessResource, 'href' | 'label' | 'gro
 
 const GROUP_ORDER = ['Overview', 'Student', 'Faculty', 'Department', 'College', 'Management', 'Other']
 
+const OWI_SLUGS = new Set([
+  'coe',
+  'external-vip-visit',
+  'faculty-industry-projects',
+  'faculty-trained-by-industry',
+  'industry-advisors',
+  'irp-visit',
+  'laboratory-by-industry',
+  'mou',
+  'professional-membership',
+  'students-industrial-visit',
+  'technical-societies',
+  'training-to-industry',
+])
+
+const RND_SLUGS = new Set([
+  'journal-publications-applied',
+  'journal-publications-published',
+  'book-publications-proposal-applied-proposal-sanctionaed',
+])
+
+export const FACULTY_SUBGROUP_ORDER = ['Achievements', 'OWI', 'R&D', 'Faculty'] as const
+export type FacultySubgroupName = (typeof FACULTY_SUBGROUP_ORDER)[number]
+
 export const normalizePath = (value: string) => {
   if (!value || value === '/') return '/'
   return value.replace(/\/+$/, '')
@@ -13,7 +37,13 @@ export const isDynamicPatternRoute = (value: string) => /\[[^\]]+\]/.test(value)
 
 export const shouldHideInNavigation = (route: string) => {
   const normalizedRoute = normalizePath(route)
-  return normalizedRoute.endsWith('/submit')
+  const segments = normalizedRoute.toLowerCase().split('/').filter(Boolean)
+
+  return segments.some((segment) => {
+    if (segment === 'submit' || segment === 'create') return true
+    if (segment.startsWith('create-') || segment.endsWith('-create')) return true
+    return false
+  })
 }
 
 export const routeToGroup = (route: string) => {
@@ -23,6 +53,44 @@ export const routeToGroup = (route: string) => {
   if (route.startsWith('/college')) return 'College'
   if (route.startsWith('/verification') || route.startsWith('/roles') || route.startsWith('/users')) return 'Management'
   return 'Other'
+}
+
+export const routeToFacultySubgroup = (route: string): FacultySubgroupName => {
+  const normalizedRoute = normalizePath(route).toLowerCase()
+
+  if (normalizedRoute.startsWith('/achievements/')) {
+    return 'Achievements'
+  }
+
+  const segments = normalizedRoute.split('/').filter(Boolean)
+  if (segments.some((segment) => OWI_SLUGS.has(segment))) {
+    return 'OWI'
+  }
+
+  if (segments.some((segment) => RND_SLUGS.has(segment))) {
+    return 'R&D'
+  }
+
+  return 'Faculty'
+}
+
+export const getDisplayGroupName = (route: string, group: string) => {
+  if (group !== 'Faculty') return group
+  return `Faculty / ${routeToFacultySubgroup(route)}`
+}
+
+export const getGroupSortRank = (displayGroup: string) => {
+  const [parent, subgroup] = displayGroup.split(' / ')
+  const parentIndex = GROUP_ORDER.indexOf(parent)
+  const parentRank = parentIndex === -1 ? Number.MAX_SAFE_INTEGER : parentIndex
+
+  if (parent !== 'Faculty') {
+    return parentRank * 100
+  }
+
+  const subgroupIndex = FACULTY_SUBGROUP_ORDER.indexOf((subgroup || 'Faculty') as FacultySubgroupName)
+  const subgroupRank = subgroupIndex === -1 ? FACULTY_SUBGROUP_ORDER.length : subgroupIndex
+  return parentRank * 100 + subgroupRank
 }
 
 export const routeToLabel = (route: string) => {
@@ -112,6 +180,12 @@ export const hasRouteAccess = (pathname: string, allowedRoutes: string[]) => {
   if (allowedRoutes.length === 0) return true
 
   const normalizedPath = normalizePath(pathname)
+
+  if (normalizedPath.startsWith('/roles/')) {
+    if (allowedRoutes.some((route) => normalizePath(route) === '/roles')) {
+      return true
+    }
+  }
 
   if (normalizedPath.endsWith('/submit')) {
     const parentPath = normalizedPath.replace(/\/submit$/, '') || '/'

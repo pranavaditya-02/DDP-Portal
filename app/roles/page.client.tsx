@@ -1,7 +1,9 @@
 'use client'
 
 import React, { useEffect, useState, useMemo } from 'react'
+import Link from 'next/link'
 import { apiClient, getApiErrorMessage, type RoleRecord, type RoleResourceRecord, type UpsertRolePayload } from '@/lib/api'
+import { getDisplayGroupName, getGroupSortRank, shouldHideInNavigation } from '@/lib/route-access'
 import toast from 'react-hot-toast'
 import {
   FileText, Award, Clipboard, Building2, GraduationCap, ShieldCheck,
@@ -21,8 +23,9 @@ const iconMap: Record<string, React.ElementType> = {
 function groupResources(resources: Resource[]) {
   const groups: Record<string, Resource[]> = {}
   resources.forEach(r => {
-    if (!groups[r.group]) groups[r.group] = []
-    groups[r.group].push(r)
+    const displayGroup = getDisplayGroupName(r.href, r.group)
+    if (!groups[displayGroup]) groups[displayGroup] = []
+    groups[displayGroup].push(r)
   })
   return groups
 }
@@ -33,11 +36,19 @@ type Role = RoleRecord
 const groupIcons: Record<string, React.ElementType> = {
   Overview: LayoutDashboard, Faculty: FileText, Department: Building2,
   College: GraduationCap, Management: Shield,
+  'Faculty / Achievements': Award,
+  'Faculty / OWI': Users,
+  'Faculty / R&D': Trophy,
+  'Faculty / Faculty': FileText,
 }
 const groupColors: Record<string, string> = {
   Overview: 'text-blue-600 bg-blue-50', Faculty: 'text-emerald-600 bg-emerald-50',
   Department: 'text-purple-600 bg-purple-50', College: 'text-amber-600 bg-amber-50',
   Management: 'text-red-600 bg-red-50',
+  'Faculty / Achievements': 'text-indigo-600 bg-indigo-50',
+  'Faculty / OWI': 'text-cyan-600 bg-cyan-50',
+  'Faculty / R&D': 'text-amber-600 bg-amber-50',
+  'Faculty / Faculty': 'text-emerald-600 bg-emerald-50',
 }
 
 /* ====== Resource Tree Component ====== */
@@ -62,7 +73,12 @@ function ResourceTree({ selected, onToggle, resources }: { selected: Set<string>
         <span className="text-[11px] text-slate-400">Selected: {selected.size} of {resources.length}</span>
       </div>
       <div className="max-h-[320px] overflow-y-auto">
-        {Object.entries(grouped).map(([group, resources]) => {
+        {Object.entries(grouped).sort((a, b) => {
+          const ai = getGroupSortRank(a[0])
+          const bi = getGroupSortRank(b[0])
+          if (ai === bi) return a[0].localeCompare(b[0])
+          return ai - bi
+        }).map(([group, resources]) => {
           const selectedInGroup = resources.filter(r => selected.has(r.id)).length
           const allSelected = selectedInGroup === resources.length
           const someSelected = selectedInGroup > 0 && !allSelected
@@ -113,7 +129,10 @@ function RoleModal({ role, resources, onClose, onSave }: {
   onSave: (role: UpsertRolePayload & { id?: number }) => void
 }) {
   const [name, setName] = useState(role?.name || '')
-  const [selectedResources, setSelectedResources] = useState<Set<string>>(new Set(role?.resources || []))
+  const visibleResourceIds = useMemo(() => new Set(resources.map((item) => item.id)), [resources])
+  const [selectedResources, setSelectedResources] = useState<Set<string>>(
+    new Set((role?.resources || []).filter((id) => visibleResourceIds.has(id)))
+  )
   const [errors, setErrors] = useState<Record<string, string>>({})
   const handleToggle = (id: string) => {
     setSelectedResources(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next })
@@ -227,6 +246,16 @@ export default function RolesPage() {
     return rolesList.filter(r => r.name.toLowerCase().includes(q))
   }, [rolesList, search])
 
+  const visibleResourcesList = useMemo(
+    () => resourcesList.filter((resource) => !shouldHideInNavigation(resource.href)),
+    [resourcesList],
+  )
+
+  const resourcesById = useMemo(
+    () => new Map(resourcesList.map((resource) => [resource.id, resource])),
+    [resourcesList],
+  )
+
   const handleSave = async (data: UpsertRolePayload & { id?: number }) => {
     try {
       if (data.id) {
@@ -296,9 +325,14 @@ export default function RolesPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input type="text" placeholder="Search roles..." value={search} onChange={(e) => setSearch(e.target.value)} className="input-base pl-10" />
           </div>
-          <button onClick={() => setShowAddModal(true)} className="btn-primary w-fit">
-            <Plus className="w-4 h-4" /> Add Role
-          </button>
+          <div className="flex items-center gap-2">
+            <Link href="/roles/pages" className="btn-outline">
+              Manage Pages
+            </Link>
+            <button onClick={() => setShowAddModal(true)} className="btn-primary w-fit">
+              <Plus className="w-4 h-4" /> Add Role
+            </button>
+          </div>
         </div>
 
         {/* Roles Table */}
@@ -336,10 +370,18 @@ export default function RolesPage() {
                           </div>
                         </td>
                         <td className="px-5 py-4 text-center">
+                          {(() => {
+                            const visibleAssignedCount = role.resources.filter((id) => {
+                              const resource = resourcesById.get(id)
+                              return resource ? !shouldHideInNavigation(resource.href) : false
+                            }).length
+                            return (
                           <button onClick={() => setExpandedRow(expandedRow === role.id ? null : role.id)} className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">
-                            {role.resources.length} pages
+                            {visibleAssignedCount} pages
                             {expandedRow === role.id ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
                           </button>
+                            )
+                          })()}
                         </td>
                         <td className="px-5 py-4">
                           <div className="flex items-center justify-center gap-2">
@@ -351,11 +393,15 @@ export default function RolesPage() {
                       </tr>
                       {expandedRow === role.id && (
                         <tr><td colSpan={4} className="px-5 py-3 bg-slate-50/80">
-                          <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Assigned Resources ({role.resources.length})</p>
+                          <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Assigned Resources ({role.resources.filter((id) => {
+                            const resource = resourcesById.get(id)
+                            return resource ? !shouldHideInNavigation(resource.href) : false
+                          }).length})</p>
                           <div className="flex flex-wrap gap-2">
                             {role.resources.map(resId => {
                               const res = resourcesList.find(r => r.id === resId)
                               if (!res) return null
+                              if (shouldHideInNavigation(res.href)) return null
                               const Icon = iconMap[res.icon] || FileText
                               return (
                                 <span key={resId} className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-xs text-slate-700">
@@ -382,7 +428,7 @@ export default function RolesPage() {
 
       {/* Modals */}
       {(showAddModal || editingRole) && (
-        <RoleModal role={editingRole} resources={resourcesList} onClose={() => { setShowAddModal(false); setEditingRole(null) }} onSave={handleSave} />
+        <RoleModal role={editingRole} resources={visibleResourcesList} onClose={() => { setShowAddModal(false); setEditingRole(null) }} onSave={handleSave} />
       )}
       {deletingRole && (
         <DeleteConfirm role={deletingRole} onClose={() => setDeletingRole(null)} onConfirm={handleDelete} />

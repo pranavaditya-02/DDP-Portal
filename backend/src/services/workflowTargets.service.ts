@@ -1,4 +1,6 @@
 import type { OkPacket, RowDataPacket } from 'mysql2'
+import { readFile } from 'node:fs/promises'
+import path from 'node:path'
 import getMysqlPool from '../database/mysql'
 
 const DEFAULT_ACADEMIC_YEAR = '2026-27'
@@ -17,6 +19,8 @@ type TargetCode =
 type TargetMasterRow = RowDataPacket & {
   id: number
   target_code: TargetCode
+  target_name: string
+  unit: string
 }
 
 type DesignationRow = RowDataPacket & {
@@ -49,6 +53,16 @@ type WorkflowTaskStatusRow = RowDataPacket & {
   slot_no: number
   task_code: string
 }
+
+const FACULTY_RESOLVED_DESIGNATION_ID_SQL = `
+  COALESCE(
+    CASE
+      WHEN TRIM(f.designation_id) REGEXP '^[0-9]+$' THEN CAST(TRIM(f.designation_id) AS UNSIGNED)
+      ELSE NULL
+    END,
+    d_name.id
+  )
+`
 
 export interface WorkflowTaskPayload {
   id: string
@@ -86,6 +100,12 @@ export interface FacultyTargetSummary {
   targets: Record<string, number>
 }
 
+export interface WorkflowTargetDefinition {
+  code: string
+  name: string
+  unit: string
+}
+
 const TARGETS: Array<{ code: TargetCode; name: string; unit: string }> = [
   { code: 'wos_sci_count', name: 'WoS/SCI Journal Publications', unit: 'count' },
   { code: 'scopus_count', name: 'Scopus Journal Publications', unit: 'count' },
@@ -102,7 +122,7 @@ const normalizeDesignationName = (value: string) => value.trim().toUpperCase()
 
 const buildTaskId = (baseId: string, slotNo: number) => (slotNo <= 1 ? baseId : `${baseId}__t${slotNo}`)
 
-const DEFAULT_WORKFLOW_DEADLINE_MAP: Record<string, string> = {
+const STATIC_FALLBACK_WORKFLOW_DEADLINE_MAP: Record<string, string> = {
   'paper-title-finalization': '2026-06-01',
   'paper-abstract-preparation': '2026-06-15',
   'paper-first-draft-preparation': '2026-06-29',
@@ -137,6 +157,114 @@ const DEFAULT_WORKFLOW_DEADLINE_MAP: Record<string, string> = {
   'patent-initial-patent-draft-preparation': '2026-07-25',
   'patent-revised-patent-draft-preparation': '2026-08-20',
   'patent-final-submission-of-patent-application': '2026-08-31',
+}
+
+const toIsoFromDocDate = (value: string) => {
+  const match = value.trim().match(/^(\d{2})\.(\d{2})\.(\d{4})$/)
+  if (!match) return ''
+  return `${match[3]}-${match[2]}-${match[1]}`
+}
+
+const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+const extractSection = (text: string, startMarker: string, endMarker?: string) => {
+  const startIndex = text.indexOf(startMarker)
+  if (startIndex === -1) {
+    return ''
+  }
+
+  const fromStart = text.slice(startIndex)
+  if (!endMarker) {
+    return fromStart
+  }
+
+  const endIndex = fromStart.indexOf(endMarker)
+  if (endIndex === -1) {
+    return fromStart
+  }
+
+  return fromStart.slice(0, endIndex)
+}
+
+const matchDatesForLabel = (text: string, label: string, count: number) => {
+  const dateGroup = '(\\d{2}\\.\\d{2}\\.\\d{4})'
+  const pattern = new RegExp(`${escapeRegex(label)}\\s+${Array.from({ length: count }, () => dateGroup).join('\\s+')}`, 'i')
+  const match = text.match(pattern)
+  if (!match) {
+    return [] as string[]
+  }
+
+  return match.slice(1).map((dateValue) => toIsoFromDocDate(dateValue))
+}
+
+const buildDeadlineMapFromDocText = (text: string): Record<string, string> => {
+  const result: Record<string, string> = {}
+
+  const paperSection = extractSection(
+    text,
+    'Journal Publications - Individual Faculty Action Plan',
+    'Funding Proposal Submission - Individual Faculty Action Plan',
+  )
+  const proposalSection = extractSection(
+    text,
+    'Funding Proposal Submission - Individual Faculty Action Plan',
+    'Patent Submission - Individual Faculty Action Plan',
+  )
+  const patentSection = extractSection(text, 'Patent Submission - Individual Faculty Action Plan')
+
+  const paperMatrix: Array<{ id: string; label: string }> = [
+    { id: 'paper-title-finalization', label: 'Title Finalization' },
+    { id: 'paper-abstract-preparation', label: 'Abstract Preparation' },
+    { id: 'paper-first-draft-preparation', label: 'First Draft Preparation' },
+    { id: 'paper-revised-draft-preparation', label: 'Revised Draft Preparation' },
+    { id: 'paper-manuscript-submission', label: 'Manuscript Submission' },
+  ]
+
+  for (const item of paperMatrix) {
+    const dates = matchDatesForLabel(paperSection, item.label, 4)
+    if (dates.length !== 4) continue
+
+    result[item.id] = dates[0]
+    result[`${item.id}__t2`] = dates[1]
+    result[`${item.id}__t3`] = dates[2]
+    result[`${item.id}__t4`] = dates[3]
+  }
+
+  const proposalMatrix: Array<{ id: string; label: string }> = [
+    { id: 'proposal-title-finalization', label: 'Title Finalization' },
+    { id: 'proposal-concept-presentation-rnd-approval', label: 'Concept Presentation & R&D Cell Approval' },
+    { id: 'proposal-initial-proposal-draft-preparation', label: 'Initial Proposal Draft Preparation' },
+    { id: 'proposal-revised-proposal-draft-preparation', label: 'Revised Proposal Draft Preparation' },
+  ]
+
+  for (const item of proposalMatrix) {
+    const dates = matchDatesForLabel(proposalSection, item.label, 2)
+    if (dates.length !== 2) continue
+
+    result[item.id] = dates[0]
+    result[`${item.id}__t2`] = dates[1]
+  }
+
+  result['proposal-final-proposal-submission'] = ''
+  result['proposal-final-proposal-submission__t2'] = ''
+
+  const patentMatrix: Array<{ id: string; label: string }> = [
+    {
+      id: 'patent-title-finalization-with-bit-patent-office-approval',
+      label: 'Title Finalization with BIT Patent Office Approval',
+    },
+    { id: 'patent-initial-patent-draft-preparation', label: 'Initial Patent Draft Preparation' },
+    { id: 'patent-revised-patent-draft-preparation', label: 'Revised Patent Draft Preparation' },
+    { id: 'patent-final-submission-of-patent-application', label: 'Final Submission of Patent Application' },
+  ]
+
+  for (const item of patentMatrix) {
+    const dates = matchDatesForLabel(patentSection, item.label, 1)
+    if (dates.length !== 1) continue
+    result[item.id] = dates[0]
+  }
+
+  return result
 }
 
 const PAPER_TASKS = [
@@ -226,6 +354,62 @@ const getDefaultTargetsForDesignation = (designationName: string): Record<Target
 
 class WorkflowTargetsService {
   private bootstrapPromise: Promise<void> | null = null
+  private defaultDeadlineMapPromise: Promise<Record<string, string>> | null = null
+
+  private async getDefaultWorkflowDeadlineMap() {
+    if (this.defaultDeadlineMapPromise) {
+      return this.defaultDeadlineMapPromise
+    }
+
+    this.defaultDeadlineMapPromise = (async () => {
+      const candidates = [
+        path.resolve(process.cwd(), 'assets', '.docx_extract', 'ddp_doc_text.txt'),
+        path.resolve(process.cwd(), '..', 'assets', '.docx_extract', 'ddp_doc_text.txt'),
+      ]
+
+      for (const candidate of candidates) {
+        try {
+          const text = await readFile(candidate, 'utf8')
+          const parsed = buildDeadlineMapFromDocText(text)
+          const merged = {
+            ...STATIC_FALLBACK_WORKFLOW_DEADLINE_MAP,
+            ...parsed,
+          }
+          return merged
+        } catch {
+          // Try next path candidate.
+        }
+      }
+
+      return { ...STATIC_FALLBACK_WORKFLOW_DEADLINE_MAP }
+    })()
+
+    return this.defaultDeadlineMapPromise
+  }
+
+  private async resolveCanonicalFacultyId(facultyId: string, facultyEmail?: string) {
+    const normalizedId = String(facultyId || '').trim()
+    const normalizedEmail = String(facultyEmail || '').trim()
+
+    if (!normalizedId && !normalizedEmail) {
+      return null
+    }
+
+    const pool = getMysqlPool()
+    const [rows] = await pool.query<RowDataPacket[]>(
+      `
+        SELECT id
+        FROM faculty
+        WHERE (? <> '' AND (id = ? OR UPPER(TRIM(id)) = UPPER(TRIM(?))))
+           OR (? <> '' AND LOWER(TRIM(email)) = LOWER(TRIM(?)))
+        ORDER BY CASE WHEN id = ? THEN 0 ELSE 1 END, id
+        LIMIT 1
+      `,
+      [normalizedId, normalizedId, normalizedId, normalizedEmail, normalizedEmail, normalizedId],
+    )
+
+    return (rows[0]?.id as string | undefined) || (normalizedId || null)
+  }
 
   private async ensureSchema() {
     if (this.bootstrapPromise) {
@@ -347,6 +531,7 @@ class WorkflowTargetsService {
   private async getDeadlineSettings(academicYear: string) {
     await this.ensureSchema()
     const pool = getMysqlPool()
+    const defaultDeadlineMap = await this.getDefaultWorkflowDeadlineMap()
     const [rows] = await pool.query<RowDataPacket[]>(
       `SELECT settings_json FROM workflow_deadline_settings WHERE academic_year = ? LIMIT 1`,
       [academicYear],
@@ -354,7 +539,7 @@ class WorkflowTargetsService {
 
     const stored = rows[0]?.settings_json as Record<string, string> | undefined
     return {
-      ...DEFAULT_WORKFLOW_DEADLINE_MAP,
+      ...defaultDeadlineMap,
       ...(stored || {}),
     }
   }
@@ -366,8 +551,9 @@ class WorkflowTargetsService {
   async saveDeadlineSettings(input: { academicYear: string; settings: Record<string, string>; updatedBy?: number | null }) {
     await this.ensureSchema()
     const pool = getMysqlPool()
+    const defaultDeadlineMap = await this.getDefaultWorkflowDeadlineMap()
     const merged = {
-      ...DEFAULT_WORKFLOW_DEADLINE_MAP,
+      ...defaultDeadlineMap,
       ...(input.settings || {}),
     }
 
@@ -388,10 +574,24 @@ class WorkflowTargetsService {
   private async getTargetMasterMap() {
     const pool = getMysqlPool()
     const [rows] = await pool.query<TargetMasterRow[]>(
-      `SELECT id, target_code FROM fap_target_master WHERE is_active = 1 ORDER BY id`,
+      `SELECT id, target_code, target_name, unit FROM fap_target_master WHERE is_active = 1 ORDER BY id`,
     )
 
     return new Map(rows.map((row) => [row.target_code, row.id]))
+  }
+
+  async getTargetDefinitions(): Promise<WorkflowTargetDefinition[]> {
+    await this.ensureSchema()
+    const pool = getMysqlPool()
+    const [rows] = await pool.query<TargetMasterRow[]>(
+      `SELECT id, target_code, target_name, unit FROM fap_target_master WHERE is_active = 1 ORDER BY id`,
+    )
+
+    return rows.map((row) => ({
+      code: row.target_code,
+      name: row.target_name,
+      unit: row.unit,
+    }))
   }
 
   async seedDefaultsForAcademicYear(academicYear: string = DEFAULT_ACADEMIC_YEAR) {
@@ -467,9 +667,14 @@ class WorkflowTargetsService {
 
     const [facultyCounts] = await pool.query<FacultyCountRow[]>(
       `
-        SELECT designation_id, COUNT(*) AS faculty_count
-        FROM faculty
-        GROUP BY designation_id
+        SELECT
+          ${FACULTY_RESOLVED_DESIGNATION_ID_SQL} AS designation_id,
+          COUNT(*) AS faculty_count
+        FROM faculty f
+        LEFT JOIN designation d_name
+          ON UPPER(TRIM(d_name.designation_name)) = UPPER(TRIM(f.designation_id))
+        WHERE ${FACULTY_RESOLVED_DESIGNATION_ID_SQL} IS NOT NULL
+        GROUP BY ${FACULTY_RESOLVED_DESIGNATION_ID_SQL}
       `,
     )
 
@@ -566,11 +771,9 @@ class WorkflowTargetsService {
       if (input.designationId) {
         await connection.query<OkPacket>(
           `
-            DELETE a
-            FROM faculty_fap_target_assignment a
-            JOIN faculty f ON f.id = a.faculty_id
-            WHERE a.academic_year = ?
-              AND f.designation_id = ?
+            DELETE FROM faculty_fap_target_assignment
+            WHERE academic_year = ?
+              AND designation_id = ?
           `,
           [input.academicYear, input.designationId],
         )
@@ -581,7 +784,6 @@ class WorkflowTargetsService {
         )
       }
 
-      const whereClause = input.designationId ? 'AND f.designation_id = ?' : ''
       const params: unknown[] = [input.academicYear]
       if (input.designationId) {
         params.push(input.designationId)
@@ -600,15 +802,18 @@ class WorkflowTargetsService {
           SELECT
             r.academic_year,
             f.id,
-            f.designation_id,
+            r.designation_id,
             r.target_id,
             r.target_value,
             CURDATE()
           FROM faculty f
+          LEFT JOIN designation d_name
+            ON UPPER(TRIM(d_name.designation_name)) = UPPER(TRIM(f.designation_id))
           JOIN fap_designation_target_rule r
-            ON r.designation_id = f.designation_id
+            ON r.designation_id = ${FACULTY_RESOLVED_DESIGNATION_ID_SQL}
            AND r.academic_year = ?
-          WHERE 1 = 1 ${whereClause}
+          WHERE ${FACULTY_RESOLVED_DESIGNATION_ID_SQL} IS NOT NULL
+          ${input.designationId ? 'AND r.designation_id = ?' : ''}
           ON DUPLICATE KEY UPDATE
             designation_id = VALUES(designation_id),
             assigned_value = VALUES(assigned_value),
@@ -654,10 +859,10 @@ class WorkflowTargetsService {
         JOIN designation d ON d.id = a.designation_id
         JOIN fap_target_master tm ON tm.id = a.target_id
         WHERE a.academic_year = ?
-          AND a.faculty_id = ?
+          AND (a.faculty_id = ? OR UPPER(TRIM(a.faculty_id)) = UPPER(TRIM(?)))
         ORDER BY tm.id
       `,
-      [academicYear, facultyId],
+      [academicYear, facultyId, facultyId],
     )
 
     if (rows.length === 0) {
@@ -679,18 +884,35 @@ class WorkflowTargetsService {
     return summary
   }
 
-  async getWorkflowPlanForFaculty(input: { academicYear: string; facultyId: string }): Promise<WorkflowPlanPayload | null> {
+  async getWorkflowPlanForFaculty(input: { academicYear: string; facultyId: string; facultyEmail?: string }): Promise<WorkflowPlanPayload | null> {
     await this.ensureSchema()
     await this.seedDefaultsForAcademicYear(input.academicYear)
 
-    let targetSummary = await this.getFacultyTargets(input.academicYear, input.facultyId)
+    const canonicalFacultyId = await this.resolveCanonicalFacultyId(input.facultyId, input.facultyEmail)
+    const effectiveFacultyId = canonicalFacultyId || input.facultyId
+
+    let targetSummary = await this.getFacultyTargets(input.academicYear, effectiveFacultyId)
     if (!targetSummary) {
       await this.rebuildAssignments({ academicYear: input.academicYear })
-      targetSummary = await this.getFacultyTargets(input.academicYear, input.facultyId)
+      targetSummary = await this.getFacultyTargets(input.academicYear, effectiveFacultyId)
     }
 
     if (!targetSummary) {
-      return null
+      const rules = await this.getDesignationRules(input.academicYear)
+      const fallbackRule = rules.find((rule) => normalizeDesignationName(rule.designationName) === 'ASSISTANT PROFESSOR LEVEL I')
+        || rules[0]
+
+      if (!fallbackRule) {
+        return null
+      }
+
+      targetSummary = {
+        facultyId: effectiveFacultyId,
+        designationId: fallbackRule.designationId,
+        designationName: fallbackRule.designationName,
+        academicYear: input.academicYear,
+        targets: { ...fallbackRule.targets },
+      }
     }
 
     const deadlineMap = await this.getDeadlineSettings(input.academicYear)
@@ -751,10 +973,10 @@ class WorkflowTargetsService {
         SELECT workflow_type, slot_no, task_code
         FROM faculty_workflow_task_status
         WHERE academic_year = ?
-          AND faculty_id = ?
+          AND (faculty_id = ? OR UPPER(TRIM(faculty_id)) = UPPER(TRIM(?)))
           AND status = 'completed'
       `,
-      [input.academicYear, input.facultyId],
+      [input.academicYear, effectiveFacultyId, effectiveFacultyId],
     )
 
     const completedSet = new Set(
@@ -779,6 +1001,7 @@ class WorkflowTargetsService {
   async completeWorkflowTask(input: {
     academicYear: string
     facultyId: string
+    facultyEmail?: string
     workflowType: 'paper' | 'patent' | 'proposal'
     slotNo: number
     taskCode: string
@@ -786,6 +1009,8 @@ class WorkflowTargetsService {
   }) {
     await this.ensureSchema()
     const pool = getMysqlPool()
+    const canonicalFacultyId = await this.resolveCanonicalFacultyId(input.facultyId, input.facultyEmail)
+    const effectiveFacultyId = canonicalFacultyId || input.facultyId
 
     await pool.query<OkPacket>(
       `
@@ -807,7 +1032,7 @@ class WorkflowTargetsService {
       `,
       [
         input.academicYear,
-        input.facultyId,
+        effectiveFacultyId,
         input.workflowType,
         Math.max(1, Math.trunc(input.slotNo || 1)),
         input.taskCode,

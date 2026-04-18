@@ -2,15 +2,8 @@
 
 import React, { useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
-import client from '@/lib/api'
+import client, { apiClient, getApiErrorMessage, type WorkflowPlanTaskRecord } from '@/lib/api'
 import { useAuthStore } from '@/lib/store'
-import {
-  DEFAULT_WORKFLOW_DEADLINE_MAP,
-  DEFAULT_WORKFLOW_SETTINGS,
-  getPaperDeadlineKey,
-  WORKFLOW_DEADLINES_STORAGE_KEY,
-  WORKFLOW_SETTINGS_STORAGE_KEY,
-} from '@/lib/workflow-deadlines'
 import { useDeadlineAlerts } from '@/hooks/useDeadlineAlerts'
 import {
   AlertCircle,
@@ -49,7 +42,7 @@ type WorkflowStep = {
   fields: DynamicField[]
 }
 
-const STORAGE_KEY = 'faculty-activities-workflow-v1'
+const ACADEMIC_YEAR = '2026-27'
 
 const TAB_OPTIONS: { key: TabKey; label: string }[] = [
   { key: 'all', label: 'All' },
@@ -137,8 +130,8 @@ const PATENT_STEPS: WorkflowStep[] = [
     ],
   },
   {
-    id: 'patent-initial-draft-preparation',
-    baseId: 'patent-initial-draft-preparation',
+    id: 'patent-initial-patent-draft-preparation',
+    baseId: 'patent-initial-patent-draft-preparation',
     title: 'Initial Patent Draft Preparation',
     deadlineLabel: 'July 25',
     deadlineISO: '2026-07-25',
@@ -149,8 +142,8 @@ const PATENT_STEPS: WorkflowStep[] = [
     ],
   },
   {
-    id: 'patent-revised-draft-preparation',
-    baseId: 'patent-revised-draft-preparation',
+    id: 'patent-revised-patent-draft-preparation',
+    baseId: 'patent-revised-patent-draft-preparation',
     title: 'Revised Patent Draft Preparation',
     deadlineLabel: 'Aug 20',
     deadlineISO: '2026-08-20',
@@ -201,8 +194,8 @@ const PROPOSAL_STEPS: WorkflowStep[] = [
     ],
   },
   {
-    id: 'proposal-initial-draft-preparation',
-    baseId: 'proposal-initial-draft-preparation',
+    id: 'proposal-initial-proposal-draft-preparation',
+    baseId: 'proposal-initial-proposal-draft-preparation',
     title: 'Initial Proposal Draft Preparation',
     deadlineLabel: 'July 11',
     deadlineISO: '2026-07-11',
@@ -213,8 +206,8 @@ const PROPOSAL_STEPS: WorkflowStep[] = [
     ],
   },
   {
-    id: 'proposal-revised-draft-preparation',
-    baseId: 'proposal-revised-draft-preparation',
+    id: 'proposal-revised-proposal-draft-preparation',
+    baseId: 'proposal-revised-proposal-draft-preparation',
     title: 'Revised Proposal Draft Preparation',
     deadlineLabel: 'July 30',
     deadlineISO: '2026-07-30',
@@ -225,8 +218,8 @@ const PROPOSAL_STEPS: WorkflowStep[] = [
     ],
   },
   {
-    id: 'proposal-final-submission',
-    baseId: 'proposal-final-submission',
+    id: 'proposal-final-proposal-submission',
+    baseId: 'proposal-final-proposal-submission',
     title: 'Final Proposal Submission',
     deadlineLabel: 'Based on call received from the agencies',
     deadlineISO: '',
@@ -240,19 +233,39 @@ const PROPOSAL_STEPS: WorkflowStep[] = [
   },
 ]
 
-const PROPOSAL_SLOT_2_DEFAULTS: Record<string, string> = {
-  'proposal-title-finalization': '2026-08-01',
-  'proposal-concept-presentation-rnd-approval': '2026-08-16',
-  'proposal-initial-draft-preparation': '2026-09-11',
-  'proposal-revised-draft-preparation': '2026-09-30',
-}
+const FIELD_MAP: Record<string, DynamicField[]> = [...PAPER_STEPS, ...PATENT_STEPS, ...PROPOSAL_STEPS].reduce((acc, step) => {
+  acc[step.baseId] = step.fields
+  return acc
+}, {} as Record<string, DynamicField[]>)
+
+const PAPER_ORDER = new Map(PAPER_STEPS.map((step, index) => [step.baseId, index]))
+const PATENT_ORDER = new Map(PATENT_STEPS.map((step, index) => [step.baseId, index]))
+const PROPOSAL_ORDER = new Map(PROPOSAL_STEPS.map((step, index) => [step.baseId, index]))
 
 function classNames(...classes: (string | false | undefined)[]) {
   return classes.filter(Boolean).join(' ')
 }
 
-function buildPaperTaskId(baseId: string, targetIndex: number) {
-  return targetIndex === 1 ? baseId : `${baseId}__t${targetIndex}`
+function ActivitiesLoadingSkeleton() {
+  return (
+    <div className="w-full p-4 sm:p-6 lg:p-8 animate-pulse">
+      <div className="mb-6 rounded-2xl border border-violet-100 bg-white p-5 shadow-sm sm:p-6">
+        <div className="mb-4 h-8 w-48 rounded-lg bg-slate-200" />
+        <div className="mb-6 h-4 w-72 rounded bg-slate-100" />
+        <div className="mb-4 h-11 w-64 rounded-xl bg-violet-100/70" />
+        <div className="h-3 w-full rounded-full bg-violet-100" />
+      </div>
+
+      <div className="rounded-2xl border border-violet-100 bg-white p-4 shadow-sm sm:p-6">
+        <div className="mb-4 h-6 w-64 rounded bg-slate-200" />
+        <div className="space-y-3">
+          {[1, 2, 3, 4].map((item) => (
+            <div key={item} className="h-20 rounded-xl border border-slate-200 bg-slate-50" />
+          ))}
+        </div>
+      </div>
+    </div>
+  )
 }
 
 function formatDeadline(deadlineISO: string) {
@@ -470,20 +483,70 @@ function SubmissionViewModal({
   )
 }
 
+function CompletionConfirmModal({
+  step,
+  onCancel,
+  onConfirm,
+}: {
+  step: WorkflowStep
+  onCancel: () => void
+  onConfirm: () => void
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-slate-950/40" onClick={onCancel} />
+      <div className="relative w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl animate-[fadeIn_180ms_ease-out]">
+        <div className="mb-4 flex items-start gap-3">
+          <div className="rounded-xl bg-emerald-50 p-2 text-emerald-600">
+            <CheckCircle2 className="h-5 w-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 className="text-lg font-semibold text-slate-900">Confirm completion</h3>
+            <p className="mt-1 text-sm text-slate-500">
+              I confirm I completed this task: {step.title}
+            </p>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+          Please verify that the work is finished before you continue. This will mark the current task as completed.
+        </div>
+
+        <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+          >
+            Complete
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function WorkflowCard({
   title,
   subtitle,
   icon,
   steps,
   completed,
-  onComplete,
+  onRequestComplete,
 }: {
   title: string
   subtitle: string
   icon: React.ReactNode
   steps: WorkflowStep[]
   completed: Record<string, boolean>
-  onComplete: (step: WorkflowStep) => void
+  onRequestComplete: (step: WorkflowStep) => void
 }) {
   const currentStepIndex = steps.findIndex((step) => !completed[step.id])
 
@@ -571,7 +634,7 @@ function WorkflowCard({
                           <button
                             type="button"
                             disabled={!isUnlocked}
-                            onClick={() => onComplete(step)}
+                            onClick={() => onRequestComplete(step)}
                             className={classNames(
                               'inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
                               isUnlocked
@@ -600,28 +663,66 @@ export default function ActivitiesPage() {
   const { user } = useAuthStore()
   const [activeTab, setActiveTab] = useState<TabKey>('all')
   const [completed, setCompleted] = useState<Record<string, boolean>>({})
-  const [deadlineMap, setDeadlineMap] = useState<Record<string, string>>(DEFAULT_WORKFLOW_DEADLINE_MAP)
-  const [paperTargets, setPaperTargets] = useState<number>(DEFAULT_WORKFLOW_SETTINGS.paperTargets)
+  const [pendingCompletionStep, setPendingCompletionStep] = useState<WorkflowStep | null>(null)
+  const [workflowTasks, setWorkflowTasks] = useState<WorkflowPlanTaskRecord[]>([])
+  const [paperTargets, setPaperTargets] = useState<number>(1)
+  const [proposalSlots, setProposalSlots] = useState<number>(1)
+  const [patentEnabled, setPatentEnabled] = useState<boolean>(true)
+  const [isLoadingPlan, setIsLoadingPlan] = useState<boolean>(true)
   const { checkAndSendAlerts } = useDeadlineAlerts()
 
-  const paperWorkflowGroups = useMemo(() => {
-    return Array.from({ length: paperTargets }, (_, index) => {
-      const targetIndex = index + 1
-      return {
-        targetIndex,
-        steps: PAPER_STEPS.map((step) => ({
-          ...step,
-          id: buildPaperTaskId(step.baseId, targetIndex),
-          baseId: step.baseId,
-          targetIndex,
-          deadlineISO:
-            deadlineMap[getPaperDeadlineKey(step.baseId, targetIndex)] ||
-            deadlineMap[step.baseId] ||
-            step.deadlineISO,
-        })),
+  useEffect(() => {
+    const loadPlan = async () => {
+      setIsLoadingPlan(true)
+      try {
+        const plan = await apiClient.getMyWorkflowPlan(ACADEMIC_YEAR)
+        setWorkflowTasks(plan.tasks || [])
+        setPaperTargets(Math.max(1, Math.min(4, Number(plan.paperTargets || 1))))
+        setProposalSlots(Math.max(1, Math.min(2, Number(plan.proposalSlots || 1))))
+        setPatentEnabled(Boolean(plan.patentEnabled))
+
+        const completedMap: Record<string, boolean> = {}
+        for (const taskId of plan.completedTaskIds || []) {
+          completedMap[taskId] = true
+        }
+        setCompleted(completedMap)
+      } catch (error) {
+        toast.error(getApiErrorMessage(error, 'Failed to load workflow plan'))
+      } finally {
+        setIsLoadingPlan(false)
       }
-    })
-  }, [deadlineMap, paperTargets])
+    }
+
+    void loadPlan()
+  }, [])
+
+  const paperWorkflowGroups = useMemo(() => {
+    const grouped = new Map<number, WorkflowStep[]>()
+
+    for (const task of workflowTasks) {
+      if (task.type !== 'paper') continue
+      const slot = Math.max(1, Number(task.slotNo || 1))
+      const list = grouped.get(slot) || []
+      list.push({
+        id: task.id,
+        baseId: task.baseId,
+        title: task.title,
+        deadlineLabel: '',
+        deadlineISO: task.deadlineISO,
+        type: 'paper',
+        targetIndex: slot,
+        fields: FIELD_MAP[task.baseId] || [],
+      })
+      grouped.set(slot, list)
+    }
+
+    return Array.from(grouped.entries())
+      .sort((a, b) => a[0] - b[0])
+      .map(([targetIndex, steps]) => ({
+        targetIndex,
+        steps: steps.sort((a, b) => (PAPER_ORDER.get(a.baseId) ?? 999) - (PAPER_ORDER.get(b.baseId) ?? 999)),
+      }))
+  }, [workflowTasks])
 
   const paperSteps = useMemo(
     () => paperWorkflowGroups.flatMap((group) => group.steps),
@@ -629,34 +730,48 @@ export default function ActivitiesPage() {
   )
 
   const patentSteps = useMemo(
-    () => PATENT_STEPS.map((step) => ({ ...step, deadlineISO: deadlineMap[step.baseId] || step.deadlineISO })),
-    [deadlineMap],
+    () => workflowTasks
+      .filter((task) => task.type === 'patent')
+      .map((task) => ({
+        id: task.id,
+        baseId: task.baseId,
+        title: task.title,
+        deadlineLabel: '',
+        deadlineISO: task.deadlineISO,
+        type: 'patent' as const,
+        fields: FIELD_MAP[task.baseId] || [],
+      }))
+      .sort((a, b) => (PATENT_ORDER.get(a.baseId) ?? 999) - (PATENT_ORDER.get(b.baseId) ?? 999)),
+    [workflowTasks],
   )
 
   const proposalWorkflowGroups = useMemo(() => {
-    return Array.from({ length: 2 }, (_, index) => {
-      const slotIndex = index + 1
-      return {
-        slotIndex,
-        steps: PROPOSAL_STEPS.map((step) => {
-          const slotDeadline = slotIndex === 1
-            ? step.deadlineISO
-            : PROPOSAL_SLOT_2_DEFAULTS[step.baseId] || step.deadlineISO
+    const grouped = new Map<number, WorkflowStep[]>()
 
-          return {
-            ...step,
-            id: buildPaperTaskId(step.baseId, slotIndex),
-            baseId: step.baseId,
-            targetIndex: slotIndex,
-            deadlineISO:
-              deadlineMap[getPaperDeadlineKey(step.baseId, slotIndex)] ||
-              (slotIndex === 1 ? deadlineMap[step.baseId] : undefined) ||
-              slotDeadline,
-          }
-        }),
-      }
-    })
-  }, [deadlineMap])
+    for (const task of workflowTasks) {
+      if (task.type !== 'proposal') continue
+      const slot = Math.max(1, Number(task.slotNo || 1))
+      const list = grouped.get(slot) || []
+      list.push({
+        id: task.id,
+        baseId: task.baseId,
+        title: task.title,
+        deadlineLabel: '',
+        deadlineISO: task.deadlineISO,
+        type: 'proposal',
+        targetIndex: slot,
+        fields: FIELD_MAP[task.baseId] || [],
+      })
+      grouped.set(slot, list)
+    }
+
+    return Array.from(grouped.entries())
+      .sort((a, b) => a[0] - b[0])
+      .map(([slotIndex, steps]) => ({
+        slotIndex,
+        steps: steps.sort((a, b) => (PROPOSAL_ORDER.get(a.baseId) ?? 999) - (PROPOSAL_ORDER.get(b.baseId) ?? 999)),
+      }))
+  }, [workflowTasks])
 
   const proposalSteps = useMemo(
     () => proposalWorkflowGroups.flatMap((group) => group.steps),
@@ -664,45 +779,6 @@ export default function ActivitiesPage() {
   )
 
   const allSteps = useMemo(() => [...paperSteps, ...patentSteps, ...proposalSteps], [paperSteps, patentSteps, proposalSteps])
-
-  useEffect(() => {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return
-
-    try {
-      const parsed = JSON.parse(raw) as {
-        completed?: Record<string, boolean>
-      }
-      setCompleted(parsed.completed || {})
-    } catch {
-      localStorage.removeItem(STORAGE_KEY)
-    }
-  }, [])
-
-  useEffect(() => {
-    const raw = localStorage.getItem(WORKFLOW_DEADLINES_STORAGE_KEY)
-    if (!raw) return
-
-    try {
-      const parsed = JSON.parse(raw) as Record<string, string>
-      setDeadlineMap({ ...DEFAULT_WORKFLOW_DEADLINE_MAP, ...parsed })
-    } catch {
-      localStorage.removeItem(WORKFLOW_DEADLINES_STORAGE_KEY)
-    }
-  }, [])
-
-  useEffect(() => {
-    const raw = localStorage.getItem(WORKFLOW_SETTINGS_STORAGE_KEY)
-    if (!raw) return
-
-    try {
-      const parsed = JSON.parse(raw) as { paperTargets?: number }
-      const count = parsed.paperTargets || DEFAULT_WORKFLOW_SETTINGS.paperTargets
-      setPaperTargets(Math.max(1, Math.min(4, count)))
-    } catch {
-      localStorage.removeItem(WORKFLOW_SETTINGS_STORAGE_KEY)
-    }
-  }, [])
 
   // Check and send deadline alerts when page loads (once per day)
   useEffect(() => {
@@ -737,10 +813,6 @@ export default function ActivitiesPage() {
 
     return () => clearTimeout(timer)
   }, [allSteps, completed, checkAndSendAlerts])
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ completed }))
-  }, [completed])
 
   const completedCount = useMemo(
     () => allSteps.filter((step) => completed[step.id]).length,
@@ -818,13 +890,18 @@ export default function ActivitiesPage() {
   )
 
   const completeStep = async (step: WorkflowStep) => {
-    setCompleted((prev) => ({
-      ...prev,
-      [step.id]: true,
-    }))
-    toast.success('Task completed successfully')
+    setCompleted((prev) => ({ ...prev, [step.id]: true }))
 
     try {
+      await apiClient.completeMyWorkflowTask({
+        academicYear: ACADEMIC_YEAR,
+        workflowType: step.type,
+        slotNo: step.targetIndex || 1,
+        taskCode: step.baseId,
+      })
+
+      toast.success('Task completed successfully')
+
       await client.post('/alerts/task-completed', {
         taskTitle: step.title,
         completedAt: new Date().toISOString(),
@@ -832,8 +909,43 @@ export default function ActivitiesPage() {
         facultyEmail: user?.email,
       })
     } catch (error) {
+      setCompleted((prev) => {
+        const next = { ...prev }
+        delete next[step.id]
+        return next
+      })
+      toast.error(getApiErrorMessage(error, 'Failed to mark task as completed'))
       console.debug('Task completion email notification failed (non-critical):', error)
     }
+  }
+
+  const requestCompletion = (step: WorkflowStep) => {
+    setPendingCompletionStep(step)
+  }
+
+  const confirmCompletion = async () => {
+    if (!pendingCompletionStep) return
+
+    const step = pendingCompletionStep
+    setPendingCompletionStep(null)
+    await completeStep(step)
+  }
+
+  const enabledTabs = TAB_OPTIONS.filter((tab) => {
+    if (tab.key === 'patent') return patentEnabled && patentSteps.length > 0
+    if (tab.key === 'paper') return paperSteps.length > 0
+    if (tab.key === 'proposal') return proposalSteps.length > 0
+    return true
+  })
+
+  useEffect(() => {
+    if (activeTab === 'patent' && (!patentEnabled || patentSteps.length === 0)) {
+      setActiveTab('all')
+    }
+  }, [activeTab, patentEnabled, patentSteps.length])
+
+  if (isLoadingPlan) {
+    return <ActivitiesLoadingSkeleton />
   }
 
   return (
@@ -845,7 +957,7 @@ export default function ActivitiesPage() {
         </div>
 
         <div className="mb-5 inline-flex rounded-xl border border-violet-200 bg-violet-50 p-1">
-          {TAB_OPTIONS.map((tab) => (
+          {enabledTabs.map((tab) => (
             <button
               key={tab.key}
               type="button"
@@ -881,7 +993,7 @@ export default function ActivitiesPage() {
         <section className="rounded-2xl border border-violet-100 bg-white p-4 shadow-sm sm:p-6">
           <div className="mb-5">
             <h2 className="text-lg font-semibold text-slate-900">Combined Planning Timeline</h2>
-            <p className="text-sm text-slate-500">Paper and patent milestones sorted by nearest deadline.</p>
+            <p className="text-sm text-slate-500">Journal, proposal, and patent milestones sorted by nearest deadline.</p>
           </div>
 
           <div className="space-y-4">
@@ -904,7 +1016,14 @@ export default function ActivitiesPage() {
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div>
                         <h3 className="text-sm font-semibold text-slate-900">
-                          {item.title} <span className="text-slate-400">- {item.type === 'paper' ? `Paper${item.targetIndex ? ` T${item.targetIndex}` : ''}` : 'Patent'}</span>
+                          {item.title}{' '}
+                          <span className="text-slate-400">
+                            - {item.type === 'paper'
+                              ? `Paper${item.targetIndex ? ` T${item.targetIndex}` : ''}`
+                              : item.type === 'proposal'
+                                ? `Proposal${item.targetIndex ? ` Slot ${item.targetIndex}` : ''}`
+                                : 'Patent'}
+                          </span>
                         </h3>
                         <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
                           <span className="inline-flex items-center gap-1">
@@ -960,20 +1079,20 @@ export default function ActivitiesPage() {
               icon={<FileText className="h-5 w-5" />}
               steps={group.steps}
               completed={completed}
-              onComplete={completeStep}
+              onRequestComplete={requestCompletion}
             />
           ))}
         </div>
       ) : null}
 
-      {activeTab === 'patent' ? (
+      {activeTab === 'patent' && patentEnabled && patentSteps.length > 0 ? (
         <WorkflowCard
           title="Patent Filing Workflow"
           subtitle="Track invention progress from ideation through filing."
           icon={<FlaskConical className="h-5 w-5" />}
           steps={patentSteps}
           completed={completed}
-          onComplete={completeStep}
+          onRequestComplete={requestCompletion}
         />
       ) : null}
 
@@ -982,15 +1101,25 @@ export default function ActivitiesPage() {
           {proposalWorkflowGroups.map((group) => (
             <WorkflowCard
               key={`proposal-slot-${group.slotIndex}`}
-              title={`Funding Proposal Submission Workflow - Slot ${group.slotIndex}`}
+              title={proposalSlots > 1 ? `Funding Proposal Submission Workflow - Slot ${group.slotIndex}` : 'Funding Proposal Submission Workflow'}
               subtitle="Plan and submit proposal milestones aligned to agency call cycles."
               icon={<Bell className="h-5 w-5" />}
               steps={group.steps}
               completed={completed}
-              onComplete={completeStep}
+              onRequestComplete={requestCompletion}
             />
           ))}
         </div>
+      ) : null}
+
+      {pendingCompletionStep ? (
+        <CompletionConfirmModal
+          step={pendingCompletionStep}
+          onCancel={() => setPendingCompletionStep(null)}
+          onConfirm={() => {
+            void confirmCompletion()
+          }}
+        />
       ) : null}
     </div>
   )

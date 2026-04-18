@@ -5,113 +5,15 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store';
 import { apiClient } from '@/lib/api';
-<<<<<<< HEAD
-import { useRoles } from '@/hooks/useRoles';
 import { AUTH_COOKIE_NAME } from '@/lib/auth-session';
 import { clearAuthCookie } from '@/app/actions';
-import { motion } from 'framer-motion';
-import { LogOut, Menu, X } from 'lucide-react';
-import { useState } from 'react';
-=======
-import { AUTH_COOKIE_NAME } from '@/lib/auth-session';
-import { clearAuthCookie } from '@/app/actions';
-import { LogOut, Menu, X } from 'lucide-react';
 import { hasRouteAccess, pickFirstAccessibleRoute, routeToLabel, shouldHideInNavigation } from '@/lib/route-access';
->>>>>>> main
 
 export const Navigation: React.FC = () => {
   const router = useRouter();
   const { user, logout, allowedRoutes, allowedResources } = useAuthStore();
   const [isOpen, setIsOpen] = useState(false);
-  const canAccessLogger = isFaculty() || isHod() || isDean() || isVerification() || isMaintenance();
 
-  const handleLogout = async () => {
-    await apiClient.logout().catch(() => undefined);
-    await clearAuthCookie().catch(() => undefined);
-    document.cookie = `${AUTH_COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-    logout();
-    router.push('/login');
-  };
-
-  if (!user) {
-    return null;
-  }
-
-<<<<<<< HEAD
-  const navItems = [
-    // Faculty items
-    {
-      label: 'Dashboard',
-      href: isStudent() ? '/student/dashboard' : '/dashboard',
-      show: !isDean(),
-    },
-    {
-      label: 'Overview',
-      href: '/student/overview',
-      show: isStudent(),
-    },
-    {
-      label: 'Student Workflow',
-      href: '/students',
-      show: isStudent(),
-    },
-    {
-      label: 'Activity Master',
-      href: '/student/activity/master',
-      show: isStudent(),
-    },
-    {
-      label: 'Activity Logger',
-      href: '/student/activity/logger',
-      show: canAccessLogger,
-    },
-    {
-      label: 'My Activities',
-      href: '/activities',
-      show: isFaculty() && !isDean(),
-    },
-    {
-      label: 'Submit Activity',
-      href: '/activities/submit',
-      show: isFaculty() && !isDean(),
-    },
-    {
-      label: 'Submit Achievements',
-      href: '/achievements/submit',
-      show: isFaculty() && !isDean(),
-    },
-    {
-      label: 'Submit Action Plan',
-      href: '/action-plan/submit',
-      show: isFaculty() && !isDean(),
-    },
-    {
-      label: 'Department',
-      href: '/department',
-      show: isHod(),
-    },
-    {
-      label: 'Faculty Leaderboard',
-      href: '/leaderboard',
-      show: isHod(),
-    },
-    {
-      label: 'College Dashboard',
-      href: '/college',
-      show: isDean(),
-    },
-    {
-      label: 'Verification Queue',
-      href: '/verification',
-      show: isVerification(),
-    },
-    {
-      label: 'User Management',
-      href: '/users',
-      show: isMaintenance(),
-    },
-  ];
-=======
   const visibleNavItems = useMemo(() => {
     if (allowedResources.length > 0) {
       return allowedResources
@@ -119,7 +21,6 @@ export const Navigation: React.FC = () => {
         .map((item) => ({ href: item.href, label: item.label || routeToLabel(item.href) }))
         .filter((item) => !shouldHideInNavigation(item.href));
     }
->>>>>>> main
 
     return allowedRoutes
       .filter((href) => !href.includes('['))
@@ -132,6 +33,18 @@ export const Navigation: React.FC = () => {
     resources: allowedResources,
     routePaths: allowedRoutes,
   }) || '/dashboard';
+
+  const handleLogout = async () => {
+    await apiClient.logout().catch(() => undefined);
+    await clearAuthCookie().catch(() => undefined);
+    document.cookie = `${AUTH_COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+    logout();
+    router.push('/login');
+  };
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <nav className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
@@ -153,7 +66,7 @@ export const Navigation: React.FC = () => {
               <div key={idx} className="transition-transform duration-150 hover:-translate-y-0.5">
                 <Link
                   href={item.href}
-                  prefetch
+                  prefetch={false}
                   className="px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors"
                 >
                   {item.label}
@@ -211,7 +124,7 @@ export const Navigation: React.FC = () => {
               <Link
                 key={idx}
                 href={item.href}
-                prefetch
+                prefetch={false}
                 onClick={() => setIsOpen(false)}
                 className="block px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-slate-100"
               >

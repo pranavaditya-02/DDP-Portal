@@ -41,10 +41,37 @@ export interface RoleAccessSummary {
   routePaths: string[]
 }
 
+export interface AppPageRecord {
+  id: number
+  pageKey: string
+  pageName: string
+  routePath: string
+  createdAt: string
+}
+
+export interface AppPageCreateInput {
+  pageKey?: string
+  pageName: string
+  routePath: string
+}
+
+export interface AppPageUpdateInput {
+  pageKey?: string
+  pageName: string
+  routePath: string
+}
+
 class RoleInUseError extends Error {
   constructor(public readonly usersCount: number) {
     super(`Role is assigned to ${usersCount} users and cannot be deleted`)
     this.name = 'RoleInUseError'
+  }
+}
+
+class AppPageConflictError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'AppPageConflictError'
   }
 }
 
@@ -53,6 +80,7 @@ type AppPageRow = RowDataPacket & {
   page_key: string
   page_name: string
   route_path: string
+  created_at?: string | Date | null
 }
 
 const CORE_RESOURCE_CATALOG: RoleResource[] = [
@@ -71,6 +99,7 @@ const CORE_RESOURCE_CATALOG: RoleResource[] = [
   { id: 'verification-panel', label: 'Verification Panel', icon: 'ShieldCheck', href: '/verification-panel', group: 'Management' },
   { id: 'user-management', label: 'User Management', icon: 'Users', href: '/users', group: 'Management' },
   { id: 'role-management', label: 'Role Management', icon: 'Shield', href: '/roles', group: 'Management' },
+  { id: 'page-management', label: 'Page Management', icon: 'Settings', href: '/roles/pages', group: 'Management' },
   { id: 'workflow-deadlines', label: 'Workflow Deadlines', icon: 'Calendar', href: '/activities/admin', group: 'Management' },
   { id: 'college-task-compliance', label: 'Task Compliance Analytics', icon: 'Users', href: '/college/task-compliance', group: 'College' },
   { id: 'student-activity-create-event', label: 'Create Event', icon: 'Clipboard', href: '/student/activity/create-event', group: 'Student' },
@@ -160,6 +189,14 @@ const buildPageKeyFromRoute = (route: string) => {
     .replace(/^-+|-+$/g, '')
     .toLowerCase()
 }
+
+const normalizePageKey = (value: string) =>
+  value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, '-')
+    .replace(/-{2,}/g, '-')
+    .replace(/^-+|-+$/g, '')
 
 const getGroupForRoute = (route: string) => {
   if (route.startsWith('/student')) return 'Student'
@@ -355,35 +392,10 @@ class RolesService {
       return
     }
 
-    const normalizedRoutes = resources.map((resource) => normalizeRoute(resource.href))
-    const routePlaceholders = normalizedRoutes.map(() => '?').join(', ')
     const connection = await pool.getConnection()
 
     try {
       await connection.beginTransaction()
-
-      const [stalePages] = await connection.query<Array<RowDataPacket & { id: number }>>(
-        `SELECT id
-         FROM app_pages
-         WHERE route_path NOT IN (${routePlaceholders})`,
-        normalizedRoutes,
-      )
-
-      const stalePageIds = stalePages.map((row) => row.id)
-      if (stalePageIds.length > 0) {
-        const staleIdPlaceholders = stalePageIds.map(() => '?').join(', ')
-        await connection.query(
-          `DELETE FROM role_page_access
-           WHERE page_id IN (${staleIdPlaceholders})`,
-          stalePageIds,
-        )
-      }
-
-      await connection.query(
-        `DELETE FROM app_pages
-         WHERE route_path NOT IN (${routePlaceholders})`,
-        normalizedRoutes,
-      )
 
       for (const resource of resources) {
         await connection.query(
@@ -402,6 +414,115 @@ class RolesService {
         await connection.rollback()
       } catch {
         // Ignore rollback failures so the original sync error can surface.
+      }
+      throw error
+    } finally {
+      connection.release()
+    }
+  }
+
+  async listAppPages(): Promise<AppPageRecord[]> {
+    await this.ensureTables()
+    const pool = getMysqlPool()
+
+    const [rows] = await pool.query<AppPageRow[]>(
+      `SELECT id, page_key, page_name, route_path, created_at
+       FROM app_pages
+       ORDER BY route_path ASC`,
+    )
+
+    return rows.map((row) => ({
+      id: Number(row.id),
+      pageKey: row.page_key,
+      pageName: row.page_name,
+      routePath: normalizeRoute(row.route_path),
+      createdAt: normalizeDate(row.created_at),
+    }))
+  }
+
+  async createAppPage(input: AppPageCreateInput): Promise<AppPageRecord> {
+    await this.ensureTables()
+    const pool = getMysqlPool()
+
+    const routePath = normalizeRoute(input.routePath)
+    const pageName = input.pageName.trim()
+    const pageKey = normalizePageKey(input.pageKey?.trim() || buildPageKeyFromRoute(routePath))
+
+    if (!pageName) {
+      throw new Error('Page name is required')
+    }
+
+    if (!routePath.startsWith('/')) {
+      throw new Error('Route path must start with "/"')
+    }
+
+    if (!pageKey) {
+      throw new Error('Page key is invalid')
+    }
+
+    try {
+      const [result] = await pool.query<OkPacket>(
+        `INSERT INTO app_pages (page_key, page_name, route_path)
+         VALUES (?, ?, ?)`,
+        [pageKey, pageName, routePath],
+      )
+
+      const pageId = Number(result.insertId)
+      const pages = await this.listAppPages()
+      const page = pages.find((item) => item.id === pageId)
+      if (!page) {
+        throw new Error('Failed to load created page')
+      }
+
+      this.invalidateRoleAccessCache()
+      return page
+    } catch (error) {
+      const sqlCode = (error as { code?: string })?.code
+      if (sqlCode === 'ER_DUP_ENTRY') {
+        throw new AppPageConflictError('Page key or route path already exists')
+      }
+      throw error
+    }
+  }
+
+  async deleteAppPage(pageId: number) {
+    await this.ensureTables()
+    const pool = getMysqlPool()
+    const connection = await pool.getConnection()
+
+    try {
+      await connection.beginTransaction()
+
+      const [rows] = await connection.query<AppPageRow[]>(
+        `SELECT id, page_key, route_path
+         FROM app_pages
+         WHERE id = ?
+         LIMIT 1`,
+        [pageId],
+      )
+
+      if (rows.length === 0) {
+        await connection.rollback()
+        return false
+      }
+
+      const row = rows[0]
+      const isProtected = CORE_BY_KEY.has(row.page_key) || CORE_BY_ROUTE.has(normalizeRoute(row.route_path))
+      if (isProtected) {
+        throw new AppPageConflictError('Core pages cannot be deleted')
+      }
+
+      await connection.query(`DELETE FROM role_page_access WHERE page_id = ?`, [pageId])
+      await connection.query(`DELETE FROM app_pages WHERE id = ?`, [pageId])
+
+      await connection.commit()
+      this.invalidateRoleAccessCache()
+      return true
+    } catch (error) {
+      try {
+        await connection.rollback()
+      } catch {
+        // Ignore rollback failures and rethrow original error.
       }
       throw error
     } finally {
@@ -689,7 +810,86 @@ class RolesService {
       connection.release()
     }
   }
+
+  async updateAppPage(pageId: number, input: AppPageUpdateInput): Promise<AppPageRecord> {
+    await this.ensureTables()
+    const pool = getMysqlPool()
+    const connection = await pool.getConnection()
+
+    const routePath = normalizeRoute(input.routePath)
+    const pageName = input.pageName.trim()
+    const pageKey = normalizePageKey(input.pageKey?.trim() || buildPageKeyFromRoute(routePath))
+
+    if (!pageName) {
+      throw new Error('Page name is required')
+    }
+
+    if (!routePath.startsWith('/')) {
+      throw new Error('Route path must start with "/"')
+    }
+
+    if (!pageKey) {
+      throw new Error('Page key is invalid')
+    }
+
+    try {
+      await connection.beginTransaction()
+
+      const [rows] = await connection.query<AppPageRow[]>(
+        `SELECT id, page_key, route_path
+         FROM app_pages
+         WHERE id = ?
+         LIMIT 1`,
+        [pageId],
+      )
+
+      if (rows.length === 0) {
+        await connection.rollback()
+        throw new Error('Page not found')
+      }
+
+      const row = rows[0]
+      const isProtected = CORE_BY_KEY.has(row.page_key) || CORE_BY_ROUTE.has(normalizeRoute(row.route_path))
+      if (isProtected) {
+        throw new AppPageConflictError('Core pages cannot be edited')
+      }
+
+      await connection.query(
+        `UPDATE app_pages
+         SET page_key = ?, page_name = ?, route_path = ?
+         WHERE id = ?`,
+        [pageKey, pageName, routePath, pageId],
+      )
+
+      await connection.commit()
+      this.invalidateRoleAccessCache()
+
+      const pages = await this.listAppPages()
+      const page = pages.find((item) => item.id === pageId)
+      if (!page) {
+        throw new Error('Failed to load updated page')
+      }
+
+      return page
+    } catch (error) {
+      try {
+        await connection.rollback()
+      } catch {
+        // Ignore rollback failures and rethrow original error.
+      }
+
+      const sqlCode = (error as { code?: string })?.code
+      if (sqlCode === 'ER_DUP_ENTRY') {
+        throw new AppPageConflictError('Page key or route path already exists')
+      }
+
+      throw error
+    } finally {
+      connection.release()
+    }
+  }
 }
 
 export { RoleInUseError }
+export { AppPageConflictError }
 export default new RolesService()

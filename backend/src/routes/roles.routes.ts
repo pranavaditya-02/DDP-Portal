@@ -1,7 +1,7 @@
 import express from 'express'
 import { z } from 'zod'
 import { authenticateToken, requireRole } from '../middleware/auth'
-import rolesService, { RoleInUseError } from '../services/roles.service'
+import rolesService, { AppPageConflictError, RoleInUseError } from '../services/roles.service'
 import { logger } from '../utils/logger'
 
 const router = express.Router()
@@ -17,6 +17,14 @@ const roleSchema = z.object({
   isSystem: z.boolean().default(false),
 })
 
+const appPageSchema = z.object({
+  pageKey: z.string().trim().optional(),
+  pageName: z.string().trim().min(1, 'Page name is required'),
+  routePath: z.string().trim().min(1, 'Route path is required').refine((value) => value.startsWith('/'), {
+    message: 'Route path must start with "/"',
+  }),
+})
+
 router.get('/resources', authenticateToken, async (_req, res) => {
   try {
     const resources = await rolesService.getResources()
@@ -24,6 +32,87 @@ router.get('/resources', authenticateToken, async (_req, res) => {
   } catch (error) {
     logger.error('Error fetching role resources:', error)
     res.status(500).json({ error: 'Failed to fetch role resources' })
+  }
+})
+
+router.get('/pages', authenticateToken, requireRole('maintenance', 'admin'), async (_req, res) => {
+  try {
+    const pages = await rolesService.listAppPages()
+    res.json({ pages })
+  } catch (error) {
+    logger.error('Error fetching app pages:', error)
+    res.status(500).json({ error: 'Failed to fetch app pages' })
+  }
+})
+
+router.post('/pages', authenticateToken, requireRole('maintenance', 'admin'), async (req, res) => {
+  try {
+    const payload = appPageSchema.parse(req.body)
+    const page = await rolesService.createAppPage(payload)
+    res.status(201).json({ message: 'Page created successfully', page })
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: error.errors })
+    }
+
+    if (error instanceof AppPageConflictError) {
+      return res.status(409).json({ error: error.message })
+    }
+
+    logger.error('Error creating app page:', error)
+    res.status(500).json({ error: 'Failed to create app page' })
+  }
+})
+
+router.put('/pages/:id', authenticateToken, requireRole('maintenance', 'admin'), async (req, res) => {
+  try {
+    const pageId = Number(req.params.id)
+    if (!Number.isFinite(pageId) || pageId <= 0) {
+      return res.status(400).json({ error: 'Invalid page id' })
+    }
+
+    const payload = appPageSchema.parse(req.body)
+    const page = await rolesService.updateAppPage(pageId, payload)
+    res.json({ message: 'Page updated successfully', page })
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: error.errors })
+    }
+
+    if (error instanceof AppPageConflictError) {
+      return res.status(409).json({ error: error.message })
+    }
+
+    const message = error instanceof Error ? error.message : ''
+    if (message === 'Page not found') {
+      return res.status(404).json({ error: 'Page not found' })
+    }
+
+    logger.error('Error updating app page:', error)
+    res.status(500).json({ error: 'Failed to update app page' })
+  }
+})
+
+router.delete('/pages/:id', authenticateToken, requireRole('maintenance', 'admin'), async (req, res) => {
+  try {
+    const pageId = Number(req.params.id)
+    if (!Number.isFinite(pageId) || pageId <= 0) {
+      return res.status(400).json({ error: 'Invalid page id' })
+    }
+
+    const deleted = await rolesService.deleteAppPage(pageId)
+    if (!deleted) {
+      return res.status(404).json({ error: 'Page not found' })
+    }
+
+    res.json({ message: 'Page deleted successfully' })
+  } catch (error) {
+    if (error instanceof AppPageConflictError) {
+      return res.status(409).json({ error: error.message })
+    }
+
+    logger.error('Error deleting app page:', error)
+    res.status(500).json({ error: 'Failed to delete app page' })
   }
 })
 

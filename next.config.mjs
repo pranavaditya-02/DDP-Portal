@@ -5,11 +5,20 @@ dotenv.config({ path: path.resolve(process.cwd(), 'backend/.env'), quiet: true }
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: false,
   typescript: {
     ignoreBuildErrors: true,
   },
   images: {
     unoptimized: true,
+  },
+  onDemandEntries: {
+    // Keep page bundles hot in dev to reduce repeated recompilation on route revisits.
+    maxInactiveAge: 1000 * 60 * 60,
+    pagesBufferLength: 100,
+  },
+  experimental: {
+    optimizePackageImports: ['lucide-react', 'date-fns', 'recharts'],
   },
   env: {
     NEXT_PUBLIC_API_URL:

@@ -59,6 +59,12 @@ export interface DesignationTargetRuleRecord {
   targets: Record<string, number>;
 }
 
+export interface WorkflowTargetDefinitionRecord {
+  code: string;
+  name: string;
+  unit: string;
+}
+
 export interface WorkflowPlanTaskRecord {
   id: string;
   baseId: string;
@@ -88,6 +94,20 @@ export interface UpsertRolePayload {
   status: boolean;
   resources: string[];
   isSystem?: boolean;
+}
+
+export interface AppPageRecord {
+  id: number;
+  pageKey: string;
+  pageName: string;
+  routePath: string;
+  createdAt: string;
+}
+
+export interface CreateAppPagePayload {
+  pageKey?: string;
+  pageName: string;
+  routePath: string;
 }
 
 export interface EventMasterRecord {
@@ -278,6 +298,42 @@ const apiBaseURL = (() => {
 })();
 
 const API_UNREACHABLE_MESSAGE = `Cannot reach API server at ${apiBaseURL}. Start the backend and verify NEXT_PUBLIC_API_URL/ALLOWED_ORIGINS.`
+
+const WORKFLOW_CACHE_TTL_MS = 60 * 1000;
+type WorkflowCacheEntry = {
+  expiresAt: number;
+  value: unknown;
+};
+
+const workflowCache = new Map<string, WorkflowCacheEntry>();
+
+function getCachedWorkflowValue<T>(key: string): T | null {
+  const entry = workflowCache.get(key);
+  if (!entry) return null;
+
+  if (entry.expiresAt <= Date.now()) {
+    workflowCache.delete(key);
+    return null;
+  }
+
+  return entry.value as T;
+}
+
+function setCachedWorkflowValue<T>(key: string, value: T, ttlMs = WORKFLOW_CACHE_TTL_MS) {
+  workflowCache.set(key, {
+    value,
+    expiresAt: Date.now() + ttlMs,
+  });
+}
+
+function invalidateWorkflowCache() {
+  const keys = Array.from(workflowCache.keys());
+  for (const key of keys) {
+    if (key.startsWith('workflow:')) {
+      workflowCache.delete(key);
+    }
+  }
+}
 
 const client: AxiosInstance = axios.create({
   baseURL: apiBaseURL,
@@ -788,10 +844,49 @@ export const apiClient = {
     return response.data;
   },
 
+  getManagedPages: async (): Promise<{ pages: AppPageRecord[] }> => {
+    const response = await client.get('/roles/pages');
+    return response.data;
+  },
+
+  createManagedPage: async (data: CreateAppPagePayload): Promise<{ message: string; page: AppPageRecord }> => {
+    const response = await client.post('/roles/pages', data);
+    return response.data;
+  },
+
+  updateManagedPage: async (id: number, data: CreateAppPagePayload): Promise<{ message: string; page: AppPageRecord }> => {
+    const response = await client.put(`/roles/pages/${id}`, data);
+    return response.data;
+  },
+
+  deleteManagedPage: async (id: number): Promise<{ message: string }> => {
+    const response = await client.delete(`/roles/pages/${id}`);
+    return response.data;
+  },
+
   getWorkflowDesignationRules: async (academicYear = '2026-27'): Promise<{ academicYear: string; rules: DesignationTargetRuleRecord[] }> => {
+    const cacheKey = `workflow:designation-rules:${academicYear}`;
+    const cached = getCachedWorkflowValue<{ academicYear: string; rules: DesignationTargetRuleRecord[] }>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
     const response = await client.get('/workflow-targets/designation-rules', {
       params: { academicYear },
     });
+    setCachedWorkflowValue(cacheKey, response.data);
+    return response.data;
+  },
+
+  getWorkflowTargetDefinitions: async (): Promise<{ targets: WorkflowTargetDefinitionRecord[] }> => {
+    const cacheKey = 'workflow:target-master';
+    const cached = getCachedWorkflowValue<{ targets: WorkflowTargetDefinitionRecord[] }>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    const response = await client.get('/workflow-targets/target-master');
+    setCachedWorkflowValue(cacheKey, response.data);
     return response.data;
   },
 
@@ -800,30 +895,47 @@ export const apiClient = {
     data: { academicYear: string; targets: Record<string, number> },
   ) => {
     const response = await client.put(`/workflow-targets/designation-rules/${designationId}`, data);
+    invalidateWorkflowCache();
     return response.data;
   },
 
   rebuildWorkflowAssignments: async (data: { academicYear: string; designationId?: number }) => {
     const response = await client.post('/workflow-targets/assignments/rebuild', data);
+    invalidateWorkflowCache();
     return response.data;
   },
 
   getWorkflowDeadlines: async (academicYear = '2026-27'): Promise<{ academicYear: string; settings: Record<string, string> }> => {
+    const cacheKey = `workflow:deadlines:${academicYear}`;
+    const cached = getCachedWorkflowValue<{ academicYear: string; settings: Record<string, string> }>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
     const response = await client.get('/workflow-targets/admin/deadlines', {
       params: { academicYear },
     });
+    setCachedWorkflowValue(cacheKey, response.data);
     return response.data;
   },
 
   updateWorkflowDeadlines: async (data: { academicYear: string; settings: Record<string, string> }) => {
     const response = await client.put('/workflow-targets/admin/deadlines', data);
+    invalidateWorkflowCache();
     return response.data;
   },
 
   getMyWorkflowPlan: async (academicYear = '2026-27'): Promise<WorkflowPlanRecord> => {
+    const cacheKey = `workflow:my-plan:${academicYear}`;
+    const cached = getCachedWorkflowValue<WorkflowPlanRecord>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
     const response = await client.get('/workflow-targets/me/workflow', {
       params: { academicYear },
     });
+    setCachedWorkflowValue(cacheKey, response.data, 30 * 1000);
     return response.data;
   },
 
@@ -841,6 +953,7 @@ export const apiClient = {
       taskCode: data.taskCode,
       payload: data.payload,
     });
+    invalidateWorkflowCache();
     return response.data;
   },
 };

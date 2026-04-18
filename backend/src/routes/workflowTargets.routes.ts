@@ -51,6 +51,16 @@ router.get('/designation-rules', authenticateToken, requireRole('maintenance', '
   }
 })
 
+router.get('/target-master', authenticateToken, requireRole('maintenance', 'admin'), async (_req, res) => {
+  try {
+    const targets = await workflowTargetsService.getTargetDefinitions()
+    res.json({ targets })
+  } catch (error) {
+    logger.error('Error fetching target master:', error)
+    res.status(500).json({ error: 'Failed to fetch target master' })
+  }
+})
+
 router.put('/designation-rules/:designationId', authenticateToken, requireRole('maintenance', 'admin'), async (req, res) => {
   try {
     const designationId = Number(req.params.designationId)
@@ -197,6 +207,7 @@ router.get('/me/workflow', authenticateToken, async (req: AuthRequest, res) => {
     const plan = await workflowTargetsService.getWorkflowPlanForFaculty({
       academicYear: parsed.data,
       facultyId: req.user.facultyId,
+      facultyEmail: req.user.email,
     })
 
     if (!plan) {
@@ -221,6 +232,7 @@ router.post('/me/workflow/complete', authenticateToken, async (req: AuthRequest,
     await workflowTargetsService.completeWorkflowTask({
       academicYear: payload.academicYear,
       facultyId: req.user.facultyId,
+      facultyEmail: req.user.email,
       workflowType: payload.workflowType,
       slotNo: payload.slotNo,
       taskCode: payload.taskCode,
