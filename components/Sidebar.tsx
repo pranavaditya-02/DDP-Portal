@@ -380,13 +380,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     href={item.href}
                     prefetch
                     onClick={() => setMobileOpen(false)}
-                    className={`group flex items-center gap-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 relative ${
-                      collapsed ? "justify-center px-2" : "px-3"
-                    } ${
-                      active
-                        ? "bg-[#7D53F6] text-white shadow-sm"
-                        : "text-slate-500 hover:bg-purple-50 hover:text-[#7D53F6]"
-                    }`}
+                    className={`group flex items-center gap-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 relative ${collapsed ? "justify-center px-2" : "px-3"
+                      } ${active
+                        ? "bg-blue-600/20 text-blue-400"
+                        : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                      }`}
                     title={collapsed ? item.label : undefined}
                   >
                     {active && (
