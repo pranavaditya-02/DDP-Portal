@@ -1,19 +1,15 @@
 import getMysqlPool from '../database/mysql';
-import { generateToken } from '../middleware/auth';
 import { logger } from '../utils/logger';
 const ROLE_ALIASES = {
-    ADMIN: { roleName: 'maintenance', roles: ['maintenance', 'admin'] },
+    ADMIN: { roleName: 'admin', roles: ['admin'] },
     FACULTY: { roleName: 'faculty', roles: ['faculty'] },
     HOD: { roleName: 'hod', roles: ['hod'] },
     DEAN: { roleName: 'dean', roles: ['dean'] },
     IQAC: { roleName: 'verification', roles: ['verification'] },
 };
 export class AuthService {
-    isBypassEnabled() {
-        return (process.env.AUTH_BYPASS ?? 'false').toLowerCase() === 'true';
-    }
     prismaDisabledError() {
-        return new Error('Auth data operations are disabled because Prisma is not in use. Enable AUTH_BYPASS=true for development login.');
+        return new Error('Auth data operations are disabled because Prisma is not in use.');
     }
     async register(email, password, name, employeeId) {
         logger.warn(`Register requested for ${email} but Prisma is disabled.`);
@@ -32,27 +28,6 @@ export class AuthService {
     mapRole(roleName) {
         return ROLE_ALIASES[roleName.toUpperCase()] || { roleName: roleName.toLowerCase(), roles: [roleName.toLowerCase()] };
     }
-    getBypassFallbackUser(email, displayName) {
-        const fallbackRoleRaw = (process.env.AUTH_BYPASS_FALLBACK_ROLE || 'faculty').trim().toLowerCase();
-        const mappedRole = this.mapRole(fallbackRoleRaw);
-        return {
-            id: 9999,
-            username: email.split('@')[0] || email,
-            name: displayName || email.split('@')[0] || email,
-            email,
-            roleId: 1,
-            roleName: mappedRole.roleName,
-            roles: mappedRole.roles,
-            facultyId: 'TEST-FACULTY',
-        };
-    }
-    async resolveBypassUser(email, displayName) {
-        const userRow = await this.findUserByEmail(email);
-        if (userRow && userRow.is_active && userRow.role_active) {
-            return this.toSessionUser(userRow, displayName);
-        }
-        return this.getBypassFallbackUser(email, displayName);
-    }
     async fetchGoogleTokenInfo(idToken) {
         const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`);
         if (!response.ok) {
@@ -62,19 +37,35 @@ export class AuthService {
     }
     async findUserByEmail(email) {
         const pool = getMysqlPool();
-        const [rows] = await pool.query(`SELECT u.id, u.username, u.email, u.user_id, u.role_id, u.is_active, r.name AS role_name, r.is_active AS role_active
+        const [rows] = await pool.query(`SELECT
+         u.id,
+         u.username,
+         u.email,
+         u.user_id,
+         u.role_id,
+         u.is_active,
+         r.name AS role_name,
+         r.is_active AS role_active,
+         COALESCE(
+           NULLIF(TRIM(CONCAT_WS(' ', f.salutation, f.name)), ''),
+           NULLIF(TRIM(CONCAT_WS(' ', fe.salutation, fe.name)), ''),
+           u.username
+         ) AS display_name
        FROM users u
        INNER JOIN roles r ON r.id = u.role_id
+      LEFT JOIN faculty f ON f.id = u.user_id
+       LEFT JOIN faculty fe ON LOWER(fe.email) = LOWER(u.email)
        WHERE LOWER(u.email) = LOWER(?)
        LIMIT 1`, [email]);
         return rows[0] ?? null;
     }
     toSessionUser(row, displayName) {
         const mappedRole = this.mapRole(row.role_name);
+        const resolvedName = String(displayName || row.display_name || row.username).trim() || row.username;
         return {
             id: row.id,
             username: row.username,
-            name: displayName || row.username,
+            name: resolvedName,
             email: row.email,
             roleId: row.role_id,
             roleName: mappedRole.roleName,
@@ -83,13 +74,6 @@ export class AuthService {
         };
     }
     async loginWithGoogle(idToken) {
-        if (idToken === 'MOCK_TOKEN' && this.isBypassEnabled()) {
-            const mockEmail = (process.env.AUTH_BYPASS_EMAIL || 'karshan3110@gmail.com').trim().toLowerCase();
-            const bypassUser = await this.resolveBypassUser(mockEmail);
-            const token = generateToken(bypassUser);
-            logger.info(`Google sign-in BYPASSED for ${bypassUser.email} using role ${bypassUser.roleName}`);
-            return { token, user: bypassUser };
-        }
         const googleProfile = await this.fetchGoogleTokenInfo(idToken);
         const expectedClientId = this.getGoogleClientId();
         if (googleProfile.aud !== expectedClientId) {
@@ -101,26 +85,34 @@ export class AuthService {
         if (!googleProfile.email) {
             throw new Error('Google token does not include an email address');
         }
-        if (this.isBypassEnabled()) {
-            const bypassUser = await this.resolveBypassUser(googleProfile.email, googleProfile.name);
-            const token = generateToken(bypassUser);
-            logger.info(`Google sign-in BYPASSED for ${bypassUser.email} using role ${bypassUser.roleName}`);
-            return { token, user: bypassUser };
-        }
         const userRow = await this.findUserByEmail(googleProfile.email);
         if (!userRow || !userRow.is_active || !userRow.role_active) {
             throw new Error('No active portal account is linked to this Google email');
         }
-        const user = this.toSessionUser(userRow, googleProfile.name);
-        const token = generateToken(user);
+        const user = this.toSessionUser(userRow, userRow.display_name || googleProfile.name);
         logger.info(`Google sign-in successful for ${user.email}`);
-        return { token, user };
+        return user;
     }
     async getUserWithRoles(userId) {
         const pool = getMysqlPool();
-        const [rows] = await pool.query(`SELECT u.id, u.username, u.email, u.user_id, u.role_id, u.is_active, r.name AS role_name, r.is_active AS role_active
+        const [rows] = await pool.query(`SELECT
+         u.id,
+         u.username,
+         u.email,
+         u.user_id,
+         u.role_id,
+         u.is_active,
+         r.name AS role_name,
+         r.is_active AS role_active,
+         COALESCE(
+           NULLIF(TRIM(CONCAT_WS(' ', f.salutation, f.name)), ''),
+           NULLIF(TRIM(CONCAT_WS(' ', fe.salutation, fe.name)), ''),
+           u.username
+         ) AS display_name
        FROM users u
        INNER JOIN roles r ON r.id = u.role_id
+      LEFT JOIN faculty f ON f.id = u.user_id
+       LEFT JOIN faculty fe ON LOWER(fe.email) = LOWER(u.email)
        WHERE u.id = ?
        LIMIT 1`, [userId]);
         const userRow = rows[0];

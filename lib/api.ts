@@ -250,9 +250,6 @@ const API_UNREACHABLE_MESSAGE = `Cannot reach API server at ${apiBaseURL}. Start
 
 const client: AxiosInstance = axios.create({
   baseURL: apiBaseURL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
   withCredentials: true,
 });
 
@@ -415,6 +412,16 @@ export const apiClient = {
     return response.data;
   },
 
+  getJournalPublicationsApplied: async () => {
+    const response = await client.get('/journal-publications-applied');
+    return response.data;
+  },
+
+  createJournalPublicationApplied: async (formData: FormData) => {
+    const response = await client.post('/journal-publications-applied', formData);
+    return response.data;
+  },
+
   createIndustry: async (data: {
     industry: string;
     address: string;
@@ -441,29 +448,17 @@ export const apiClient = {
   },
 
   createInternshipTracker: async (formData: FormData) => {
-    const response = await client.post('/internship-tracker', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const response = await client.post('/internship-tracker', formData);
     return response.data;
   },
 
   createPatentTracker: async (formData: FormData) => {
-    const response = await client.post('/patent-tracker', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const response = await client.post('/patent-tracker', formData);
     return response.data;
   },
 
   createPatentReport: async (formData: FormData) => {
-    const response = await client.post('/patent-report', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const response = await client.post('/patent-report', formData);
     return response.data;
   },
 
@@ -512,11 +507,7 @@ export const apiClient = {
   },
 
   createInternshipReport: async (formData: FormData) => {
-    const response = await client.post('/internship-report', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const response = await client.post('/internship-report', formData);
     return response.data;
   },
 
@@ -551,11 +542,7 @@ export const apiClient = {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await client.post('/import/industries/csv', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const response = await client.post('/import/industries/csv', formData);
 
     return response.data;
   },
@@ -564,11 +551,7 @@ export const apiClient = {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await client.post('/import/events-attended/csv', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const response = await client.post('/import/events-attended/csv', formData);
 
     return response.data;
   },

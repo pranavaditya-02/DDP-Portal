@@ -1,6 +1,13 @@
 import { logger } from '../utils/logger';
 export class ActivityService {
+    constructor() {
+        this.warnedPrismaDisabledMethods = new Set();
+    }
     logPrismaDisabled(method) {
+        if (this.warnedPrismaDisabledMethods.has(method)) {
+            return;
+        }
+        this.warnedPrismaDisabledMethods.add(method);
         logger.warn(`ActivityService.${method} called while Prisma is disabled.`);
     }
     // Faculty: Get their own activities only

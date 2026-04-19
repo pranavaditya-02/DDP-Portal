@@ -424,21 +424,37 @@ export default function BookChapterPublicationPage() {
           fetch("http://localhost:5000/departments"),
         ]);
 
-        // Check each response before parsing
-        const checkJson = async (res: Response, label: string) => {
+        const parseJson = async (res: Response, label: string) => {
           const text = await res.text();
           try {
             return JSON.parse(text);
           } catch {
             console.error(`❌ ${label} returned non-JSON:`, text.slice(0, 200));
-            return [];
+            return null;
           }
         };
 
-        setRecords(await checkJson(recordRes, "book-chapter-publications"));
-        setStudents(await checkJson(studentRes, "students"));
-        setLabs(await checkJson(labRes, "speciallabs/active"));
-        setDepartments(await checkJson(deptRes, "departments"));
+        const bookRecords = await parseJson(recordRes, "book-chapter-publications");
+        if (!Array.isArray(bookRecords)) {
+          console.error(
+            "Unexpected book-chapter-publications response shape:",
+            bookRecords,
+            recordRes.status,
+            recordRes.statusText
+          );
+          setRecords([]);
+        } else {
+          setRecords(bookRecords);
+        }
+
+        const studentData = await parseJson(studentRes, "students");
+        setStudents(Array.isArray(studentData) ? studentData : []);
+
+        const labData = await parseJson(labRes, "speciallabs/active");
+        setLabs(Array.isArray(labData) ? labData : []);
+
+        const deptData = await parseJson(deptRes, "departments");
+        setDepartments(Array.isArray(deptData) ? deptData : []);
 
       } catch (err) {
         console.error("Failed to load data", err);

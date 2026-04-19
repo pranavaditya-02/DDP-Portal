@@ -1,6 +1,19 @@
 import jwt from 'jsonwebtoken';
 import { logger } from '../utils/logger';
+import sessionService from '../services/session.service';
 export const AUTH_COOKIE_NAME = 'ddp_auth_token';
+const getJwtSecret = () => {
+    const secret = process.env.JWT_SECRET?.trim();
+    if (!secret) {
+        throw new Error('JWT_SECRET is required and must not be empty');
+    }
+    if (secret.length < 32 || secret === 'your_jwt_secret_key_change_in_production') {
+        throw new Error('JWT_SECRET must be at least 32 characters and not use default placeholder value');
+    }
+    return secret;
+};
+const getJwtIssuer = () => process.env.JWT_ISSUER || 'faculty-tracking-api';
+const getJwtAudience = () => process.env.JWT_AUDIENCE || 'faculty-tracking-client';
 const parseCookies = (cookieHeader) => {
     if (!cookieHeader)
         return {};
@@ -14,7 +27,7 @@ const parseCookies = (cookieHeader) => {
         return accumulator;
     }, {});
 };
-const extractToken = (req) => {
+export const extractToken = (req) => {
     const authorizationHeader = req.headers['authorization'];
     if (authorizationHeader && authorizationHeader.startsWith('Bearer ')) {
         return authorizationHeader.slice(7);
@@ -25,17 +38,29 @@ const extractToken = (req) => {
 export const authenticateToken = (req, res, next) => {
     const token = extractToken(req);
     if (!token) {
-        logger.warn('No token provided');
+        logger.debug('No token provided');
         return res.status(401).json({ error: 'Access token required' });
     }
-    jwt.verify(token, process.env.JWT_SECRET || 'secret', (err, user) => {
-        if (err) {
-            logger.warn('Invalid token:', err.message);
-            return res.status(403).json({ error: 'Invalid or expired token' });
-        }
-        req.user = user;
-        next();
-    });
+    const decoded = verifyToken(token);
+    if (!decoded) {
+        logger.debug('Invalid token received');
+        return res.status(403).json({ error: 'Invalid or expired token' });
+    }
+    if (!sessionService.isSessionActive(decoded.sid, decoded.id)) {
+        logger.debug(`Inactive session rejected for user ${decoded.email}`);
+        return res.status(401).json({ error: 'Session expired or revoked' });
+    }
+    req.user = {
+        id: decoded.id,
+        username: decoded.username,
+        email: decoded.email,
+        name: decoded.name,
+        roleId: decoded.roleId,
+        roleName: decoded.roleName,
+        roles: decoded.roles,
+        facultyId: decoded.facultyId,
+    };
+    next();
 };
 export const requireRole = (...roles) => {
     return (req, res, next) => {
@@ -50,16 +75,26 @@ export const requireRole = (...roles) => {
         next();
     };
 };
-export const generateToken = (payload) => {
-    const secret = process.env.JWT_SECRET || 'secret';
-    const options = {
+export const generateToken = (payload, sessionId) => {
+    return jwt.sign({ ...payload, sid: sessionId }, getJwtSecret(), {
+        algorithm: 'HS256',
+        issuer: getJwtIssuer(),
+        audience: getJwtAudience(),
+        subject: String(payload.id),
         expiresIn: process.env.JWT_EXPIRY || '24h',
-    };
-    return jwt.sign(payload, secret, options);
+    });
 };
 export const verifyToken = (token) => {
     try {
-        return jwt.verify(token, process.env.JWT_SECRET || 'secret');
+        const decoded = jwt.verify(token, getJwtSecret(), {
+            algorithms: ['HS256'],
+            issuer: getJwtIssuer(),
+            audience: getJwtAudience(),
+        });
+        if (!decoded.sid) {
+            return null;
+        }
+        return decoded;
     }
     catch (error) {
         logger.error('Token verification failed:', error);

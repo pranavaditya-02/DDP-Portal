@@ -57,7 +57,7 @@ router.post('/submit', authenticateToken, requireRole('faculty'), async (req, re
     }
 });
 // Verification Team: Get pending activities
-router.get('/pending', authenticateToken, requireRole('verification'), async (req, res) => {
+router.get('/pending', authenticateToken, requireRole('verification', 'admin'), async (req, res) => {
     try {
         const { departmentId } = req.query;
         const activities = await activityService.getPendingActivities(departmentId ? Number(departmentId) : undefined);
@@ -69,7 +69,7 @@ router.get('/pending', authenticateToken, requireRole('verification'), async (re
     }
 });
 // Verification Team: Approve activity
-router.post('/:activityId/approve', authenticateToken, requireRole('verification'), async (req, res) => {
+router.post('/:activityId/approve', authenticateToken, requireRole('verification', 'admin'), async (req, res) => {
     try {
         if (!req.user) {
             return res.status(401).json({ error: 'Authentication required' });
@@ -91,7 +91,7 @@ router.post('/:activityId/approve', authenticateToken, requireRole('verification
     }
 });
 // Verification Team: Reject activity
-router.post('/:activityId/reject', authenticateToken, requireRole('verification'), async (req, res) => {
+router.post('/:activityId/reject', authenticateToken, requireRole('verification', 'admin'), async (req, res) => {
     try {
         if (!req.user) {
             return res.status(401).json({ error: 'Authentication required' });

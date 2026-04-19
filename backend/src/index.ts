@@ -17,7 +17,7 @@ import studentsRoutes from './routes/students.routes';
 import patentReportRoutes from './routes/patentReport.routes';
 import eventsRoutes from './routes/events.routes';
 import registrationRoutes from './routes/registration.routes';
-import journalPublicationRoutes from './routes/journalPublication.routes';
+import journalPublicationsAppliedRoutes from './routes/journalPublicationsApplied.routes';
 import facultyActivitiesRoutes from './facultyActivities/facultyActivities.routes';
 import onlineCourseRoutes from './routes/onlineCourse.routes';
 import { getMysqlPool, verifyMysqlConnection } from './database/mysql';
@@ -129,7 +129,7 @@ app.use('/api/industries', industriesRoutes);
 app.use('/api/faculties', facultiesRoutes);
 app.use('/api/events', eventsRoutes);
 app.use('/api/registrations', registrationRoutes);
-app.use('/api/journal-publications', journalPublicationRoutes);
+app.use('/api/journal-publications-applied', journalPublicationsAppliedRoutes);
 app.use('/api/faculty-activities', facultyActivitiesRoutes);
 app.use('/api/online/course', onlineCourseRoutes);
 
