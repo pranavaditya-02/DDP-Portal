@@ -17,7 +17,8 @@ import studentsRoutes from './routes/students.routes';
 import patentReportRoutes from './routes/patentReport.routes';
 import eventsRoutes from './routes/events.routes';
 import registrationRoutes from './routes/registration.routes';
-import journalPublicationRoutes from './routes/journalPublication.routes';
+import journalPublicationsAppliedRoutes from './routes/journalPublicationsApplied.routes';
+import journalPublicationsPublishedRoutes from './routes/journalPublicationsPublished.routes';
 import facultyActivitiesRoutes from './facultyActivities/facultyActivities.routes';
 import onlineCourseRoutes from './routes/onlineCourse.routes';
 import { getMysqlPool, verifyMysqlConnection } from './database/mysql';
@@ -129,7 +130,8 @@ app.use('/api/industries', industriesRoutes);
 app.use('/api/faculties', facultiesRoutes);
 app.use('/api/events', eventsRoutes);
 app.use('/api/registrations', registrationRoutes);
-app.use('/api/journal-publications', journalPublicationRoutes);
+app.use('/api/journal-publications-applied', journalPublicationsAppliedRoutes);
+app.use('/api/journal-publications-published', journalPublicationsPublishedRoutes);
 app.use('/api/faculty-activities', facultyActivitiesRoutes);
 app.use('/api/online/course', onlineCourseRoutes);
 
@@ -203,12 +205,24 @@ app.use((req, res) => {
 });
 
 // Start server
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT);
+
+server.on('listening', () => {
   logger.info(`Server running on port ${PORT}`);
   logger.info(`Environment: ${process.env.NODE_ENV}`);
   verifyMysqlConnection().catch((error) => {
     logger.warn('MySQL verification failed on startup:', error);
   });
+});
+
+server.on('error', (error: NodeJS.ErrnoException) => {
+  if (error.code === 'EADDRINUSE') {
+    logger.error(`Port ${PORT} is already in use. Please stop the process using port ${PORT} or set a different PORT value.`);
+    process.exit(1);
+  }
+
+  logger.error('Server error during startup:', error);
+  process.exit(1);
 });
 
 // Graceful shutdown

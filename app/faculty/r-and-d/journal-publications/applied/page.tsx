@@ -1,168 +1,226 @@
-'use client';
+"use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Search, PlusCircle, ChevronRight } from "lucide-react";
+import { Search, PlusCircle, Filter } from "lucide-react";
+import { apiClient } from "@/lib/api";
 
-type JournalRecord = {
-  id: number;
-  student_name: string;
-  paper_title: string;
-  journal_name: string;
-  date_of_publication: string;
-  iqac_status: string;
-  doi_number: string;
-  paper_indexed: string;
+interface JournalAppliedRecord {
+  id: string;
+  faculty: string;
+  indexing: string;
+  journalName: string;
+  submittedTitle: string;
+  submittedDate: string;
+  proofUrl?: string | null;
+  status: "Submitted" | "Under Review" | "Accepted for Publication" | "Rejected for Publication";
+}
+
+const sampleRecords: JournalAppliedRecord[] = [];
+
+const statusOrder = ["Submitted", "Under Review", "Accepted for Publication", "Rejected for Publication"] as const;
+
+const renderStatusBadge = (status: JournalAppliedRecord["status"]) => {
+  const config: Record<JournalAppliedRecord["status"], { label: string; className: string }> = {
+    Submitted: { label: "Submitted", className: "bg-slate-100 text-slate-700" },
+    "Under Review": { label: "Under Review", className: "bg-amber-100 text-amber-800" },
+    "Accepted for Publication": { label: "Accepted", className: "bg-emerald-100 text-emerald-800" },
+    "Rejected for Publication": { label: "Rejected", className: "bg-rose-100 text-rose-800" },
+  };
+
+  return (
+    <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${config[status].className}`}>
+      {config[status].label}
+    </span>
+  );
 };
 
-const statusMap: Record<string, { label: string; className: string }> = {
-  Initiated: { label: "Initiated", className: "bg-yellow-50 text-yellow-700" },
-  Verified: { label: "Verified", className: "bg-emerald-50 text-emerald-700" },
-  Rejected: { label: "Rejected", className: "bg-rose-50 text-rose-700" },
-};
-
-const formatDateShort = (value: string) => value?.slice(0, 10) || "";
-
-export default function AppliedPage() {
-  const [records, setRecords] = useState<JournalRecord[]>([]);
+export default function JournalPublicationsAppliedPage() {
   const [query, setQuery] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [filterStatus, setFilterStatus] = useState<JournalAppliedRecord["status"] | "">("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [records, setRecords] = useState<JournalAppliedRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [fetchError, setFetchError] = useState("");
 
   useEffect(() => {
     const loadRecords = async () => {
       try {
-        setLoading(true);
-        const response = await fetch("http://localhost:5000/api/journal-publications");
-        const data = await response.json();
-        setRecords(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error(err);
-        setError("Unable to load applied publications.");
+        const data = await apiClient.getJournalPublicationsApplied();
+        const publications = Array.isArray(data.publications) ? data.publications : [];
+        setRecords(
+          publications.map((item: any) => ({
+            id: String(item.publication_id),
+            faculty: item.faculty_id,
+            indexing: item.indexing_type,
+            journalName: item.journal_name,
+            submittedTitle: item.submitted_journal_title,
+            submittedDate: item.submitted_date,
+            proofUrl: item.proof_document_path,
+            status: item.publication_status as JournalAppliedRecord["status"],
+          })),
+        );
+      } catch (error: any) {
+        setFetchError(error?.message || "Unable to load journal publication records.");
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
-    void loadRecords();
+
+    loadRecords();
   }, []);
 
   const filteredRecords = useMemo(() => {
-    const normalized = query.trim().toLowerCase();
-    return records.filter((record) =>
-      !normalized ||
-      record.student_name.toLowerCase().includes(normalized) ||
-      record.paper_title.toLowerCase().includes(normalized) ||
-      record.journal_name.toLowerCase().includes(normalized) ||
-      record.doi_number.toLowerCase().includes(normalized) ||
-      record.iqac_status.toLowerCase().includes(normalized)
-    );
-  }, [query, records]);
+    return records.filter((record) => {
+      const matchesQuery = query.trim() === "" ||
+        [record.faculty, record.journalName, record.submittedTitle, record.indexing, record.status]
+          .some((value) => value.toLowerCase().includes(query.trim().toLowerCase()));
 
-  const statusCounts = useMemo(
-    () => ({
-      Initiated: records.filter((item) => item.iqac_status === "Initiated").length,
-      Verified: records.filter((item) => item.iqac_status === "Verified").length,
-      Rejected: records.filter((item) => item.iqac_status === "Rejected").length,
-    }),
-    [records],
-  );
+      const matchesStatus = !filterStatus || record.status === filterStatus;
+
+      return matchesQuery && matchesStatus;
+    });
+  }, [filterStatus, query, records]);
+
+  const statusCounts = useMemo(() => ({
+    Submitted: records.filter((record) => record.status === "Submitted").length,
+    "Under Review": records.filter((record) => record.status === "Under Review").length,
+    "Accepted for Publication": records.filter((record) => record.status === "Accepted for Publication").length,
+    "Rejected for Publication": records.filter((record) => record.status === "Rejected for Publication").length,
+  }), [records]);
 
   return (
-    <div className="p-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">Applied Publications</h1>
-          <p className="text-sm text-slate-500 mt-1">Manage all applied journal publication records here.</p>
-          <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
-            <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-slate-700">
-              <span className="text-xs text-slate-500">Initiated</span>
-              <span className="rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-slate-800">{statusCounts.Initiated}</span>
-            </div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-slate-700">
-              <span className="text-xs text-slate-500">Verified</span>
-              <span className="rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-slate-800">{statusCounts.Verified}</span>
-            </div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-slate-700">
-              <span className="text-xs text-slate-500">Rejected</span>
-              <span className="rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-slate-800">{statusCounts.Rejected}</span>
-            </div>
+          <h1 className="text-2xl font-semibold text-slate-900">Journal Publications - Applied</h1>
+          <p className="mt-2 text-sm text-slate-500">
+            Track applied journal publication submissions, indexing, and review status.
+          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
+            {statusOrder.map((status) => (
+              <div key={status} className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1">
+                <span className="text-slate-500">{status}</span>
+                <span className="rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
+                  {statusCounts[status] ?? 0}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
 
-        <Link href="/student/journal-publication/applied/create" className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg shadow-md hover:from-blue-700 hover:to-indigo-700 transition">
+        <Link
+          href="/faculty/r-and-d/journal-publications/applied/create"
+          className="inline-flex items-center gap-2 self-start rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:from-blue-700 hover:to-indigo-700 transition"
+        >
           <PlusCircle className="w-4 h-4" />
-          Create Publication
+          Add Record
         </Link>
       </div>
 
-      <div className="mt-5 bg-white border border-slate-200 rounded-lg shadow-sm">
-        <div className="flex flex-col sm:flex-row items-center gap-3 p-4 border-b border-slate-200">
-          <div className="relative w-full sm:w-80">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+      <div className="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+        <div className="flex flex-col gap-3 border-b border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="relative w-full sm:max-w-[380px]">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search student, paper, journal or DOI..."
-              className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-200 focus:border-blue-500"
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search faculty, journal or status..."
+              className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             />
           </div>
-          <div className="flex items-center gap-2 text-sm text-slate-500">
-            <span>{filteredRecords.length} items</span>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowFilters((prev) => !prev)}
+              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 hover:border-slate-300 transition"
+            >
+              <Filter className="w-4 h-4" />
+              Filters
+            </button>
+            <span className="text-sm text-slate-500">{filteredRecords.length} record{filteredRecords.length === 1 ? "" : "s"}</span>
           </div>
         </div>
 
-        {loading ? (
-          <div className="p-8 text-center text-slate-500">Loading applied publications...</div>
-        ) : error ? (
-          <div className="p-8 text-center text-rose-600">{error}</div>
-        ) : filteredRecords.length === 0 ? (
-          <div className="p-10 text-center text-slate-500">
-            <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-400">
-              <PlusCircle className="w-7 h-7" />
+        {showFilters ? (
+          <div className="border-b border-slate-200 bg-slate-50 p-4">
+            <div className="grid gap-4 md:grid-cols-3">
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
+                  Filter by status
+                </label>
+                <select
+                  value={filterStatus}
+                  onChange={(event) => setFilterStatus(event.target.value as JournalAppliedRecord["status"] | "")}
+                  className="input-base w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                >
+                  <option value="">All statuses</option>
+                  {statusOrder.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
-            <h2 className="text-lg font-medium text-slate-700">No applied publications found</h2>
-            <p className="mt-1 text-sm text-slate-500">Click Create Publication to add a new record.</p>
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-200 text-sm">
-              <thead className="bg-slate-50 text-slate-600">
-                <tr>
-                  <th className="px-4 py-3 text-left">Student / Paper</th>
-                  <th className="px-4 py-3 text-left">Journal</th>
-                  <th className="px-4 py-3 text-left">Published</th>
-                  <th className="px-4 py-3 text-left">Indexed</th>
-                  <th className="px-4 py-3 text-left">Status</th>
-                  <th className="px-4 py-3 text-right">Action</th>
+        ) : null}
+
+        <div className="overflow-x-auto p-4">
+          {isLoading ? (
+            <div className="p-8 text-center text-sm text-slate-500">Loading journal publications...</div>
+          ) : fetchError ? (
+            <div className="p-8 text-center text-sm text-rose-600">{fetchError}</div>
+          ) : (
+            <table className="min-w-full border-separate border-spacing-y-3">
+              <thead>
+                <tr className="text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <th className="pb-2 px-3">Faculty</th>
+                <th className="pb-2 px-3">Indexing</th>
+                <th className="pb-2 px-3">Journal</th>
+                <th className="pb-2 px-3">Submitted Title</th>
+                <th className="pb-2 px-3">Submitted Date</th>
+                <th className="pb-2 px-3">Proof</th>
+                <th className="pb-2 px-3">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredRecords.map((record, index) => (
+                <tr key={record.id} className={index % 2 === 0 ? "bg-white" : "bg-slate-50"}>
+                  <td className="whitespace-nowrap px-3 py-4 text-sm text-slate-700">{record.faculty}</td>
+                  <td className="whitespace-nowrap px-3 py-4 text-sm text-slate-700">{record.indexing}</td>
+                  <td className="px-3 py-4 text-sm text-slate-700 min-w-[220px]">{record.journalName}</td>
+                  <td className="px-3 py-4 text-sm text-slate-700 min-w-[260px]">{record.submittedTitle}</td>
+                  <td className="whitespace-nowrap px-3 py-4 text-sm text-slate-700">{new Date(record.submittedDate).toLocaleDateString()}</td>
+                  <td className="px-3 py-4 text-sm">
+                    {record.proofUrl ? (
+                      <a
+                        href={record.proofUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-indigo-600 hover:text-indigo-800"
+                      >
+                        View proof
+                      </a>
+                    ) : (
+                      <span className="text-slate-500">No proof</span>
+                    )}
+                  </td>
+                  <td className="px-3 py-4 text-sm">{renderStatusBadge(record.status)}</td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200 bg-white">
-                {filteredRecords.map((record) => {
-                  const status = statusMap[record.iqac_status] || { label: record.iqac_status, className: "bg-slate-100 text-slate-700" };
-                  return (
-                    <tr key={record.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-4 py-3 max-w-[300px]">
-                        <div className="font-medium text-slate-900 truncate">{record.paper_title}</div>
-                        <div className="text-xs text-slate-500 truncate">{record.student_name}</div>
-                      </td>
-                      <td className="px-4 py-3 text-slate-700 truncate">{record.journal_name}</td>
-                      <td className="px-4 py-3 text-slate-700 whitespace-nowrap">{formatDateShort(record.date_of_publication)}</td>
-                      <td className="px-4 py-3 text-slate-700 whitespace-nowrap">{record.paper_indexed}</td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold ${status.className}`}>{status.label}</span>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <Link href={`/student/journal-publication/applied/${record.id}`} className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800">
-                          View <ChevronRight className="w-3.5 h-3.5" />
-                        </Link>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
+              ))}
+              {filteredRecords.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-3 py-10 text-center text-sm text-slate-500">
+                    No records found. Use the "Add Record" button to create a new entry.
+                  </td>
+                </tr>
+              ) : null}
+            </tbody>
+          </table>
+          )}
+        </div>
       </div>
     </div>
   );

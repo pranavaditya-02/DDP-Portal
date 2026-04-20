@@ -1,8 +1,10 @@
 import express from 'express';
 import { z } from 'zod';
 import authService from '../services/auth.service';
-import { AUTH_COOKIE_NAME, authenticateToken } from '../middleware/auth';
+import rolesService from '../services/roles.service';
+import { AUTH_COOKIE_NAME, authenticateToken, extractToken, generateToken, verifyToken } from '../middleware/auth';
 import { logger } from '../utils/logger';
+import sessionService from '../services/session.service';
 const router = express.Router();
 // Validation schemas
 const registerSchema = z.object({
@@ -40,6 +42,37 @@ const setAuthCookie = (res, token) => {
 const clearAuthCookie = (res) => {
     res.clearCookie(AUTH_COOKIE_NAME, { path: '/' });
 };
+const groupOrder = ['Overview', 'Student', 'Faculty', 'Department', 'College', 'Management', 'Other'];
+const pickDefaultRoute = (access) => {
+    const filtered = (access.resources || [])
+        .map((resource) => ({
+        href: (resource.href || '').replace(/\/+$/, '') || '/',
+        label: resource.label || '',
+        group: resource.group || 'Other',
+    }))
+        .filter((resource) => resource.href !== '/' && resource.href !== '/login' && resource.href !== '/register')
+        .filter((resource) => !/\[[^\]]+\]/.test(resource.href));
+    if (filtered.length > 0) {
+        filtered.sort((a, b) => {
+            const ai = groupOrder.indexOf(a.group);
+            const bi = groupOrder.indexOf(b.group);
+            if (ai !== bi) {
+                if (ai === -1)
+                    return 1;
+                if (bi === -1)
+                    return -1;
+                return ai - bi;
+            }
+            return a.label.localeCompare(b.label);
+        });
+        return filtered[0].href;
+    }
+    const routePaths = (access.routePaths || [])
+        .map((route) => (route || '').replace(/\/+$/, '') || '/')
+        .filter((route) => route !== '/' && route !== '/login' && route !== '/register')
+        .filter((route) => !/\[[^\]]+\]/.test(route));
+    return routePaths[0] || '/dashboard';
+};
 // Register
 router.post('/register', async (req, res) => {
     try {
@@ -62,11 +95,17 @@ router.post('/register', async (req, res) => {
 router.post('/google', async (req, res) => {
     try {
         const { credential } = loginSchema.parse(req.body);
-        const result = await authService.loginWithGoogle(credential);
-        setAuthCookie(res, result.token);
+        const user = await authService.loginWithGoogle(credential);
+        const access = await rolesService.getRoleAccessByRoleId(user.roleId);
+        const defaultRoute = pickDefaultRoute(access);
+        const session = sessionService.createSession(user.id);
+        const token = generateToken(user, session.id);
+        setAuthCookie(res, token);
         res.json({
             message: 'Login successful',
-            user: result.user,
+            user,
+            access,
+            defaultRoute,
         });
     }
     catch (error) {
@@ -77,7 +116,14 @@ router.post('/google', async (req, res) => {
         res.status(401).json({ error: error instanceof Error ? error.message : 'Google login failed' });
     }
 });
-router.post('/logout', async (_req, res) => {
+router.post('/logout', async (req, res) => {
+    const token = extractToken(req);
+    if (token) {
+        const decoded = verifyToken(token);
+        if (decoded?.sid) {
+            sessionService.revokeSession(decoded.sid);
+        }
+    }
     clearAuthCookie(res);
     res.json({ message: 'Logged out successfully' });
 });

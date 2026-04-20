@@ -1,13 +1,14 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import fs from 'fs';
 import path from 'path';
 import 'express-async-errors';
-import dotenv from 'dotenv';
 import { logger } from './utils/logger';
 import authRoutes from './routes/auth.routes';
 import activityRoutes from './routes/activity.routes';
 import importRoutes from './routes/import.routes';
+import alertsRoutes from './routes/alerts.routes';
 import internshipTrackerRoutes from './routes/internshipTracker.routes';
 import internshipReportRoutes from './routes/internshipReport.routes';
 import patentTrackerRoutes from './routes/patentTracker.routes';
@@ -15,11 +16,13 @@ import studentsRoutes from './routes/students.routes';
 import patentReportRoutes from './routes/patentReport.routes';
 import eventsRoutes from './routes/events.routes';
 import registrationRoutes from './routes/registration.routes';
-import journalPublicationRoutes from './routes/journalPublication.routes';
+import journalPublicationsAppliedRoutes from './routes/journalPublicationsApplied.routes';
 import facultyActivitiesRoutes from './facultyActivities/facultyActivities.routes';
 import onlineCourseRoutes from './routes/onlineCourse.routes';
 import { getMysqlPool, verifyMysqlConnection } from './database/mysql';
-dotenv.config();
+import usersRoutes from './routes/users.routes';
+import rolesRoutes from './routes/roles.routes';
+import workflowTargetsRoutes from './routes/workflowTargets.routes';
 const app = express();
 const PORT = process.env.PORT || 5000;
 const normalizeOrigin = (value) => {
@@ -91,6 +94,7 @@ import facultiesRoutes from './routes/faculties.routes';
 app.use('/api/auth', authRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/import', importRoutes);
+app.use('/api/alerts', alertsRoutes);
 app.use('/api/internship-tracker', internshipTrackerRoutes);
 app.use('/api/internship-report', internshipReportRoutes);
 app.use('/api/patent-tracker', patentTrackerRoutes);
@@ -100,7 +104,7 @@ app.use('/api/industries', industriesRoutes);
 app.use('/api/faculties', facultiesRoutes);
 app.use('/api/events', eventsRoutes);
 app.use('/api/registrations', registrationRoutes);
-app.use('/api/journal-publications', journalPublicationRoutes);
+app.use('/api/journal-publications-applied', journalPublicationsAppliedRoutes);
 app.use('/api/faculty-activities', facultyActivitiesRoutes);
 app.use('/api/online/course', onlineCourseRoutes);
 const fetchStudents = async (_req, res) => {
@@ -154,6 +158,9 @@ app.get('/api/speciallabs/active', fetchActiveSpecialLabs);
 app.get('/departments', fetchDepartments);
 app.get('/api/departments', fetchDepartments);
 app.get('/api/courses/active', fetchActiveCourses);
+app.use('/api/users', usersRoutes);
+app.use('/api/roles', rolesRoutes);
+app.use('/api/workflow-targets', workflowTargetsRoutes);
 // Error handling middleware
 app.use((err, req, res, next) => {
     logger.error('Unhandled error:', err);

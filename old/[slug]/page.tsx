@@ -39,7 +39,7 @@ export default async function RandDOptionPage({
           <div className="mt-4 flex flex-wrap gap-3">
             {slug === "journal-publications-applied" ? (
               <Link
-                href="/faculty/r-and-d/journal-publications-applied/submit"
+                href="/faculty/r-and-d/journal-publications/applied/create"
                 className="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-[#2572ed] hover:bg-blue-700 transition-colors"
               >
                 Add Record

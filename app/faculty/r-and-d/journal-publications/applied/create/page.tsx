@@ -1,738 +1,387 @@
-'use client';
+"use client";
 
-import React, { ChangeEvent, useEffect, useState } from "react";
-import { ChevronRight, Check, X, GraduationCap, BookOpen, Link, UploadCloud, Users } from "lucide-react";
-import { SearchableSelect } from "@/components/SearchableSelect";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { apiClient } from "@/lib/api";
 
-type Student = { id: number; student_name?: string; name?: string };
-type Department = { id: number; dept_name: string };
+const indexingOptions = [
+  "SCOPUS",
+  "SCI/SCIE/WOS",
+  "UGC CARE",
+  "OTHERS",
+] as const;
 
-type FormState = {
-  student: string;
-  yearOfStudy: string;
-  specialLab: string;
-  paperTitle: string;
-  authorsNames: string;
-  totalAuthors: string;
-  studentAuthorCount: string;
-  facultyAuthorCount: string;
-  studentAuthorNames: string[];
-  facultyAuthorNames: string[];
-  dateOfPublication: string;
-  volumeNumber: string;
-  issueNumber: string;
-  issnNumber: string;
-  doiNumber: string;
-  pageFrom: string;
-  pageTo: string;
-  journalName: string;
-  publisherName: string;
-  webUrl: string;
-  paperIndexed: string;
-  indexedDetails: string;
-  indexedOtherDetails: string;
-  impactFactor: string;
-  impactFactorValue: string;
-  studentAuthorPosition: string;
-  labsInvolved: string;
-  projectOutcome: string;
-  sponsorshipType: string;
-  sponsorshipAmount: string;
-  sponsorshipOtherSpecify: string;
-  interdisciplinary: string;
-  interdisciplinaryDepartment: string;
-  otherDeptStudentCount: string;
-  sdgGoals: string;
-  sdgTitle: string;
-  abstractProof: File | null;
-  fullDocumentProof: File | null;
-  originalCertProof: File | null;
-  attestedCertProof: File | null;
-  iqacVerification: string;
-};
+const statusOptions = [
+  "Submitted",
+  "Under Review",
+  "Accepted for Publication",
+  "Rejected for Publication",
+] as const;
 
-const INITIAL_FORM: FormState = {
-  student: "",
-  yearOfStudy: "",
-  specialLab: "",
-  paperTitle: "",
-  authorsNames: "",
-  totalAuthors: "",
-  studentAuthorCount: "",
-  facultyAuthorCount: "",
-  studentAuthorNames: [],
-  facultyAuthorNames: [],
-  dateOfPublication: "",
-  volumeNumber: "",
-  issueNumber: "",
-  issnNumber: "",
-  doiNumber: "",
-  pageFrom: "",
-  pageTo: "",
-  journalName: "",
-  publisherName: "",
-  webUrl: "",
-  paperIndexed: "",
-  indexedDetails: "",
-  indexedOtherDetails: "",
-  impactFactor: "",
-  impactFactorValue: "",
-  studentAuthorPosition: "",
-  labsInvolved: "",
-  projectOutcome: "",
-  sponsorshipType: "",
-  sponsorshipAmount: "",
-  sponsorshipOtherSpecify: "",
-  interdisciplinary: "",
-  interdisciplinaryDepartment: "",
-  otherDeptStudentCount: "",
-  sdgGoals: "",
-  sdgTitle: "",
-  abstractProof: null,
-  fullDocumentProof: null,
-  originalCertProof: null,
-  attestedCertProof: null,
-  iqacVerification: "Initiated",
-};
+const RequiredAst = () => <span className="text-red-500 ml-0.5">*</span>;
 
-const STEPS = [
-  { id: 1, label: "Student info" },
-  { id: 2, label: "Paper details" },
-  { id: 3, label: "Publication" },
-  { id: 4, label: "Documents" },
-];
+const inputClass = (error?: string) =>
+  `w-full rounded-xl border px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 ${
+    error ? "border-red-400 bg-red-50" : "border-slate-200 bg-white"
+  }`;
 
-const INDEXED_OPTIONS = ["Scopus", "SCI/SCI(E)", "WoS", "Others"];
-
-const SDG_MAPPING: Record<string, string> = {
-  "1": "SDG 1: No Poverty",
-  "2": "SDG 2: Zero Hunger",
-  "3": "SDG 3: Good Health and Well-being",
-  "4": "SDG 4: Quality Education",
-  "5": "SDG 5: Gender Equality",
-  "6": "SDG 6: Clean Water and Sanitation",
-  "7": "SDG 7: Affordable and Clean Energy",
-  "8": "SDG 8: Decent Work and Economic Growth",
-  "9": "SDG 9: Industry, Innovation and Infrastructure",
-  "10": "SDG 10: Reduced Inequalities",
-  "11": "SDG 11: Sustainable Cities and Communities",
-  "12": "SDG 12: Responsible Consumption and Production",
-  "13": "SDG 13: Climate Action",
-  "14": "SDG 14: Life Below Water",
-  "15": "SDG 15: Life on Land",
-  "16": "SDG 16: Peace, Justice and Strong Institutions",
-  "17": "SDG 17: Partnerships for the Goals",
-};
+const selectClass = (error?: string) =>
+  `w-full rounded-xl border bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 ${
+    error ? "border-red-400" : "border-slate-200"
+  }`;
 
 export default function JournalPublicationAppliedCreatePage() {
-  const [form, setForm] = useState<FormState>(INITIAL_FORM);
-  const [files, setFiles] = useState<{
-    abstractProof: File | null;
-    fullDocumentProof: File | null;
-    originalCertProof: File | null;
-    attestedCertProof: File | null;
-  }>({
-    abstractProof: null,
-    fullDocumentProof: null,
-    originalCertProof: null,
-    attestedCertProof: null,
+  const router = useRouter();
+  const [formData, setFormData] = useState({
+    faculty: "",
+    indexing: "",
+    otherIndexing: "",
+    journalName: "",
+    submittedTitle: "",
+    submittedDate: "",
+    status: "Submitted",
+    proofFile: null as File | null,
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-  const [activeStep, setActiveStep] = useState(1);
-  const [students, setStudents] = useState<Student[]>([]);
-  const [labs, setLabs] = useState<{ id: number; specialLabName: string }[]>([]);
-  const [departments, setDepartments] = useState<Department[]>([]);
 
-  const handleSearchableChange = (name: string, value: string) => {
-    setForm((prev) => ({ ...prev, [name]: value }));
-    setError(null);
-  };
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitError, setSubmitError] = useState("");
+  const [fileName, setFileName] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [facultyQuery, setFacultyQuery] = useState("");
+  const [selectedFaculty, setSelectedFaculty] = useState<{ id: string; name: string | null } | null>(null);
+  const [facultySuggestions, setFacultySuggestions] = useState<Array<{ id: string; name: string | null }>>([]);
+  const [showFacultySuggestions, setShowFacultySuggestions] = useState(false);
+  const [facultyLoading, setFacultyLoading] = useState(false);
+  const [facultiesError, setFacultiesError] = useState("");
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
+  const validate = () => {
+    const nextErrors: Record<string, string> = {};
 
-    setForm((prev) => {
-      const next = { ...prev, [name]: value };
-
-      if (name === "paperIndexed") {
-        next.indexedDetails = "";
-        next.indexedOtherDetails = "";
-      }
-
-      if (name === "indexedDetails" && value !== "Others") {
-        next.indexedOtherDetails = "";
-      }
-
-      if (name === "impactFactor" && value !== "Yes") {
-        next.impactFactorValue = "";
-      }
-
-      if (name === "sponsorshipType") {
-        next.sponsorshipAmount = "";
-        next.sponsorshipOtherSpecify = "";
-      }
-
-      if (name === "interdisciplinary") {
-        next.interdisciplinaryDepartment = "";
-        next.otherDeptStudentCount = "";
-      }
-
-      return next;
-    });
-
-    setError(null);
-  };
-
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, files: fileList } = e.target;
-    if (fileList && fileList[0]) {
-      setFiles((prev) => ({ ...prev, [name]: fileList[0] }));
-      setError(null);
+    if (!selectedFaculty) nextErrors.faculty = "Please select a faculty from the suggestions.";
+    if (!formData.indexing) nextErrors.indexing = "Indexing is required.";
+    if (formData.indexing === "OTHERS" && !formData.otherIndexing.trim()) {
+      nextErrors.otherIndexing = "Please specify the other indexing.";
     }
-  };
-
-  const handleTotalAuthorsChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    const val = e.target.value;
-    setForm((prev) => ({
-      ...prev,
-      totalAuthors: val,
-      studentAuthorCount: "",
-      facultyAuthorCount: "",
-      studentAuthorNames: [],
-      facultyAuthorNames: [],
-    }));
-    setError(null);
-  };
-
-  const handleStudentAuthorCountChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    const studentCount = e.target.value;
-    const total = parseInt(form.totalAuthors) || 0;
-    const students = parseInt(studentCount) || 0;
-    const faculty = total - students;
-    setForm((prev) => ({
-      ...prev,
-      studentAuthorCount: studentCount,
-      facultyAuthorCount: String(faculty),
-      studentAuthorNames: Array(students).fill(""),
-      facultyAuthorNames: Array(faculty).fill(""),
-    }));
-    setError(null);
-  };
-
-  const handleStudentAuthorNameChange = (index: number, value: string) => {
-    setForm((prev) => {
-      const updated = [...prev.studentAuthorNames];
-      updated[index] = value;
-      return { ...prev, studentAuthorNames: updated };
-    });
-  };
-
-  const handleFacultyAuthorNameChange = (index: number, value: string) => {
-    setForm((prev) => {
-      const updated = [...prev.facultyAuthorNames];
-      updated[index] = value;
-      return { ...prev, facultyAuthorNames: updated };
-    });
-  };
-
-  const handleCancel = () => {
-    setForm(INITIAL_FORM);
-    setFiles({
-      abstractProof: null,
-      fullDocumentProof: null,
-      originalCertProof: null,
-      attestedCertProof: null,
-    });
-    setError(null);
-    setSuccess(false);
-    setActiveStep(1);
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    try {
-      if (!files.abstractProof || !files.fullDocumentProof) {
-        setError("Abstract and Full Document proofs are required");
-        setLoading(false);
-        return;
-      }
-
-      const formData = new FormData();
-
-      Object.entries(form).forEach(([key, value]) => {
-        if (value && typeof value === "string") {
-          formData.append(key, value);
-        }
-      });
-
-      formData.append("studentAuthorNames", JSON.stringify(form.studentAuthorNames));
-      formData.append("facultyAuthorNames", JSON.stringify(form.facultyAuthorNames));
-
-      if (files.abstractProof) formData.append("abstractProof", files.abstractProof);
-      if (files.fullDocumentProof) formData.append("fullDocumentProof", files.fullDocumentProof);
-      if (files.originalCertProof) formData.append("originalCertProof", files.originalCertProof);
-      if (files.attestedCertProof) formData.append("attestedCertProof", files.attestedCertProof);
-
-      const response = await fetch("http://localhost:5000/api/journal-publications", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Failed to create journal publication");
-
-      setSuccess(true);
-      handleCancel();
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-    } finally {
-      setLoading(false);
+    if (!formData.journalName.trim()) nextErrors.journalName = "Journal name is required.";
+    if (!formData.submittedTitle.trim()) nextErrors.submittedTitle = "Submitted journal title is required.";
+    if (!formData.submittedDate) nextErrors.submittedDate = "Submitted date is required.";
+    if (!formData.proofFile) nextErrors.proofFile = "Proof document is required.";
+    if (formData.proofFile && formData.proofFile.type !== "application/pdf") {
+      nextErrors.proofFile = "Proof document must be a PDF file.";
     }
+    if (!formData.status) nextErrors.status = "Status is required.";
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  const handleChange = (field: keyof typeof formData, value: string | File | null) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+    setErrors((prev) => ({ ...prev, [field]: "" }));
+  };
+
+  const handleFacultyInputChange = (value: string) => {
+    setFacultyQuery(value);
+    setSelectedFaculty(null);
+    setErrors((prev) => ({ ...prev, faculty: "" }));
+    setShowFacultySuggestions(true);
+  };
+
+  const handleFacultySelect = (faculty: { id: string; name: string | null }) => {
+    setSelectedFaculty(faculty);
+    setFacultyQuery(faculty.name || faculty.id);
+    setShowFacultySuggestions(false);
+    setErrors((prev) => ({ ...prev, faculty: "" }));
+  };
+
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] ?? null;
+    handleChange("proofFile", file);
+    setFileName(file?.name ?? "");
   };
 
   useEffect(() => {
-    const fetchData = async () => {
+    let cancelled = false;
+    if (!facultyQuery.trim()) {
+      setFacultySuggestions([]);
+      setFacultyLoading(false);
+      return;
+    }
+
+    setFacultyLoading(true);
+    const timer = window.setTimeout(async () => {
       try {
-        const fetchJson = async <T,>(url: string): Promise<T> => {
-          const response = await fetch(url);
-          const raw = await response.text();
-          if (!response.ok) throw new Error(`Request failed (${response.status}) for ${url}`);
-          try {
-            return JSON.parse(raw) as T;
-          } catch {
-            throw new Error(`Invalid JSON response from ${url}`);
-          }
-        };
-
-        const [studentsData, labsData, departmentsData] = await Promise.all([
-          fetchJson<Student[]>("http://localhost:5000/students"),
-          fetchJson<{ id: number; specialLabName: string }[]>("http://localhost:5000/speciallabs/active"),
-          fetchJson<Department[]>("http://localhost:5000/departments"),
-        ]);
-
-        setStudents(studentsData.map((s) => ({ ...s, student_name: s.student_name ?? s.name ?? "" })));
-        setLabs(labsData);
-        setDepartments(departmentsData);
+        const response = await apiClient.getFaculties(facultyQuery.trim());
+        if (!cancelled) {
+          setFacultySuggestions(Array.isArray(response.faculties) ? response.faculties : []);
+          setFacultiesError("");
+        }
       } catch (err) {
-        console.error("Failed to load data", err);
-        setError(err instanceof Error ? err.message : "Failed to load data");
+        if (!cancelled) {
+          setFacultySuggestions([]);
+          setFacultiesError("Unable to fetch faculty suggestions.");
+        }
+      } finally {
+        if (!cancelled) setFacultyLoading(false);
       }
+    }, 200);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
     };
+  }, [facultyQuery]);
 
-    fetchData();
-  }, []);
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!validate()) return;
 
-  const totalAuthorsNum = parseInt(form.totalAuthors) || 0;
-  const studentCountNum = parseInt(form.studentAuthorCount) || 0;
-  const facultyCountNum = parseInt(form.facultyAuthorCount) || 0;
-  const showStudentCountField = totalAuthorsNum > 0;
-  const showFacultyCountField = showStudentCountField && form.studentAuthorCount !== "";
-  const showAuthorNameFields = showFacultyCountField && (studentCountNum > 0 || facultyCountNum > 0);
+    setSubmitError("");
+    setIsSubmitting(true);
 
-  const showIndexedDetails = form.paperIndexed === "Yes";
-  const showIndexedOtherInput = showIndexedDetails && form.indexedDetails === "Others";
-  const showImpactValue = form.impactFactor === "Yes";
-  const showSponsorshipAmount = form.sponsorshipType === "Institute" || form.sponsorshipType === "Others";
-  const showSponsorshipOther = form.sponsorshipType === "Others";
-  const showInterdisciplinary = form.interdisciplinary === "Yes";
+    const payload = new FormData();
+    payload.append("faculty_id", selectedFaculty?.id ?? "");
+    payload.append("indexing_type", formData.indexing);
+    if (formData.indexing === "OTHERS") {
+      payload.append("indexing_others_specify", formData.otherIndexing);
+    }
+    payload.append("journal_name", formData.journalName);
+    payload.append("submitted_journal_title", formData.submittedTitle);
+    payload.append("submitted_date", formData.submittedDate);
+    payload.append("publication_status", formData.status);
+    if (formData.proofFile) payload.append("proofFile", formData.proofFile);
+
+    try {
+      const data = await apiClient.createJournalPublicationApplied(payload);
+      if (!data) {
+        setSubmitError("Failed to save journal publication.");
+        return;
+      }
+      router.push("/faculty/r-and-d/journal-publications/applied");
+    } catch (error: any) {
+      setSubmitError(error?.response?.data?.error || error?.message || "Unable to save the record. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50/70 p-4 sm:p-6 lg:p-8">
-      <div className="mx-auto max-w-7xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div className="border-b border-gray-100 px-6 py-5 sm:px-8">
-          <nav className="flex flex-wrap items-center gap-1.5 text-xs text-gray-400 mb-4">
-            <span className="font-medium">Student</span>
-            <ChevronRight size={12} className="text-gray-300" />
-            <span className="font-semibold text-indigo-600">Journal Publication</span>
-            <ChevronRight size={12} className="text-gray-300" />
-            <span className="font-semibold text-gray-700">Create Applied Publication</span>
-          </nav>
+    <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto">
+      <div className="mb-8">
+        <h1 className="text-2xl font-semibold text-slate-900">Journal Publication - Applied</h1>
+        <p className="mt-2 text-sm text-slate-500">
+          Submit applied journal publication details including indexing, title, proof document and status.
+        </p>
+      </div>
 
-          <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
+      <div className="rounded-3xl border border-slate-200 bg-white shadow-sm">
+        <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-6">
+          <div className="grid gap-6 lg:grid-cols-2">
             <div>
-              <h1 className="text-2xl font-semibold text-slate-900">Create Applied Publication</h1>
-              <p className="mt-1 text-sm text-slate-500">Complete all required fields and upload proof documents.</p>
-            </div>
-            <button onClick={handleCancel} type="button" className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
-              <X size={16} /> Reset
-            </button>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {STEPS.map((step) => {
-              const isDone = step.id < activeStep;
-              const isActive = step.id === activeStep;
-              return (
-                <div key={step.id} className="flex items-center gap-2">
-                  <div className={`flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-semibold ${isDone ? "bg-emerald-500 text-white" : isActive ? "bg-indigo-600 text-white" : "border border-slate-200 bg-white text-slate-500"}`}>
-                    {isDone ? <Check size={10} strokeWidth={3} /> : step.id}
-                  </div>
-                  <span className={`text-xs uppercase ${isActive ? "text-slate-900" : "text-slate-400"}`}>{step.label}</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {error && (
-          <div className="mx-6 mt-5 flex items-start gap-2.5 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-            <X size={14} className="mt-0.5 text-rose-500" />
-            <span>{error}</span>
-          </div>
-        )}
-
-        {success && (
-          <div className="mx-6 mt-5 flex items-start gap-2.5 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-            <Check size={14} className="mt-0.5 text-emerald-600" />
-            <span>Journal publication record created successfully.</span>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="px-6 py-6 sm:px-8 sm:py-7 space-y-7">
-          <FormSection icon={<GraduationCap size={14} />} title="Student information" onActivate={() => setActiveStep(1)}>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              <SearchableSelect
-                label="Student"
-                required
-                name="student"
-                value={form.student}
-                placeholder="Choose student"
-                options={students.map((s) => ({ value: String(s.id), label: s.student_name ?? "" }))}
-                onChange={handleSearchableChange}
-              />
-              <SelectField
-                label="Year of Study"
-                required
-                name="yearOfStudy"
-                value={form.yearOfStudy}
-                options={["Choose year", "First", "Second", "Third", "Fourth"]}
-                onChange={handleChange}
-              />
-              <SearchableSelect
-                label="Special Lab"
-                required
-                name="specialLab"
-                value={form.specialLab}
-                placeholder="Choose lab"
-                options={labs.map((l) => ({ value: String(l.id), label: l.specialLabName }))}
-                onChange={handleSearchableChange}
-              />
-            </div>
-          </FormSection>
-
-          <FormSection icon={<BookOpen size={14} />} title="Paper details" onActivate={() => setActiveStep(2)}>
-            <div className="space-y-4">
-              <InputField label="Paper Title" required name="paperTitle" value={form.paperTitle} placeholder="Enter paper title" onChange={handleChange} />
-              <InputField label="Author(s) Names (as appear in the paper)" required name="authorsNames" value={form.authorsNames} placeholder="Enter authors as they appear in the paper" onChange={handleChange} />
-
-              <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4 space-y-4">
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center justify-center w-5 h-5 rounded-md bg-slate-100 text-slate-400">
-                    <Users size={11} />
-                  </div>
-                  <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Author breakdown</span>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                  <div>
-                    <label className="mb-1.5 block text-xs font-medium text-slate-700">Total number of authors<span className="ml-0.5 text-rose-500">*</span></label>
-                    <select value={form.totalAuthors} onChange={handleTotalAuthorsChange} className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100">
-                      <option value="">Choose</option>
-                      {[1, 2, 3, 4, 5].map((n) => (
-                        <option key={n} value={String(n)}>{n}</option>
-                      ))}
-                    </select>
-                    <p className="mt-1 text-[10px] text-slate-400">Maximum 5 authors</p>
-                  </div>
-
-                  {showStudentCountField && (
-                    <div>
-                      <label className="mb-1.5 block text-xs font-medium text-slate-700">Number of student authors<span className="ml-0.5 text-rose-500">*</span></label>
-                      <select value={form.studentAuthorCount} onChange={handleStudentAuthorCountChange} className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100">
-                        <option value="">Choose</option>
-                        {Array.from({ length: totalAuthorsNum + 1 }, (_, i) => (
-                          <option key={i} value={String(i)}>{i}</option>
-                        ))}
-                      </select>
-                      <p className="mt-1 text-[10px] text-slate-400">Out of {totalAuthorsNum} total</p>
-                    </div>
-                  )}
-
-                  {showFacultyCountField && (
-                    <div>
-                      <label className="mb-1.5 block text-xs font-medium text-slate-700">Number of faculty authors</label>
-                      <input readOnly value={form.facultyAuthorCount} className="w-full rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-slate-500 cursor-not-allowed" />
-                      <p className="mt-1 text-[10px] text-slate-400">Auto-calculated</p>
-                    </div>
-                  )}
-                </div>
-
-                {showFacultyCountField && (
-                  <div className="flex flex-wrap items-center gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3">
-                    <div className="flex items-center gap-2 text-sm text-slate-600">
-                      <span className="font-semibold text-slate-900">{totalAuthorsNum}</span>
-                      total authors
-                    </div>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-1 text-xs font-semibold text-indigo-600">{studentCountNum} student{studentCountNum !== 1 ? "s" : ""}</span>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-600">{facultyCountNum} faculty</span>
-                  </div>
-                )}
-
-                {showAuthorNameFields && (
-                  <div className="space-y-4">
-                    {studentCountNum > 0 && (
-                      <div className="rounded-xl border border-indigo-100 bg-indigo-50/60 p-4 space-y-3">
-                        <p className="text-[10px] font-semibold uppercase tracking-widest text-indigo-500">Student author names</p>
-                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                          {form.studentAuthorNames.map((name, index) => (
-                            <div key={index}>
-                              <label className="mb-1.5 block text-xs font-medium text-slate-700">Student author {index + 1}<span className="ml-0.5 text-rose-500">*</span></label>
-                              <input value={name} placeholder="Full name as in paper" onChange={(e) => handleStudentAuthorNameChange(index, e.target.value)} className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {facultyCountNum > 0 && (
-                      <div className="rounded-xl border border-emerald-100 bg-emerald-50/60 p-4 space-y-3">
-                        <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-600">Faculty author names</p>
-                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                          {form.facultyAuthorNames.map((name, index) => (
-                            <div key={index}>
-                              <label className="mb-1.5 block text-xs font-medium text-slate-700">Faculty author {index + 1}<span className="ml-0.5 text-rose-500">*</span></label>
-                              <input value={name} placeholder="Full name as in paper" onChange={(e) => handleFacultyAuthorNameChange(index, e.target.value)} className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <InputField label="Date of Publication" required type="date" name="dateOfPublication" value={form.dateOfPublication} onChange={handleChange} />
-                <InputField label="Volume Number" required name="volumeNumber" value={form.volumeNumber} placeholder="e.g., 12" onChange={handleChange} />
-                <InputField label="Issue Number" required name="issueNumber" value={form.issueNumber} placeholder="e.g., 3" onChange={handleChange} />
-                <InputField label="ISSN Number" required name="issnNumber" value={form.issnNumber} placeholder="Enter ISSN" onChange={handleChange} />
-              </div>
-            </div>
-          </FormSection>
-
-          <FormSection icon={<Link size={14} />} title="Publication information" onActivate={() => setActiveStep(3)}>
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <InputField label="Journal Name" required name="journalName" value={form.journalName} placeholder="Enter journal name" onChange={handleChange} />
-                <InputField label="Publisher Name" required name="publisherName" value={form.publisherName} placeholder="Enter publisher name" onChange={handleChange} />
-              </div>
-
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-                <InputField label="DOI Number" required name="doiNumber" value={form.doiNumber} placeholder="e.g., 10.1234/..." onChange={handleChange} />
-                <InputField label="Page From" required type="number" name="pageFrom" value={form.pageFrom} placeholder="e.g., 100" onChange={handleChange} />
-                <InputField label="Page To" required type="number" name="pageTo" value={form.pageTo} placeholder="e.g., 115" onChange={handleChange} />
-                <InputField label="Paper Web URL" required name="webUrl" value={form.webUrl} placeholder="https://..." onChange={handleChange} />
-              </div>
-
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <InputField label="Position of Student as Author in Paper" required name="studentAuthorPosition" value={form.studentAuthorPosition} placeholder="e.g., 1" onChange={handleChange} />
-                <InputField label="Labs Involved" required name="labsInvolved" value={form.labsInvolved} placeholder="e.g., Lab 1" onChange={handleChange} />
-              </div>
-
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-                <SelectField label="Paper Indexed" required name="paperIndexed" value={form.paperIndexed} options={["Choose", "Yes", "No"]} onChange={handleChange} />
-
-                {showIndexedDetails && (
-                  <SelectField label="Indexed Details" required name="indexedDetails" value={form.indexedDetails} options={["Choose", ...INDEXED_OPTIONS]} onChange={handleChange} />
-                )}
-
-                {showIndexedOtherInput && (
-                  <InputField label="Specify Index" required name="indexedOtherDetails" value={form.indexedOtherDetails} placeholder="Enter index name" onChange={handleChange} />
-                )}
-
-                <SelectField label="Impact Factor" required name="impactFactor" value={form.impactFactor} options={["Choose", "Yes", "No"]} onChange={handleChange} />
-              </div>
-
-              {showImpactValue && (
-                <InputField label="Impact Factor Value" required name="impactFactorValue" value={form.impactFactorValue} placeholder="e.g., 4.52" onChange={handleChange} />
-              )}
-
-              <InputField label="Project Outcome" required name="projectOutcome" value={form.projectOutcome} placeholder="Enter outcome" onChange={handleChange} />
-
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-                <SearchableSelect
-                  label="SDG Goals"
-                  required
-                  name="sdgGoals"
-                  value={form.sdgGoals}
-                  placeholder="Choose SDG"
-                  options={Object.entries(SDG_MAPPING).map(([value, label]) => ({ value, label }))}
-                  onChange={handleSearchableChange}
+              <label htmlFor="faculty" className="block text-sm font-medium text-slate-700 mb-2">
+                Faculty <RequiredAst />
+              </label>
+              <div className="relative">
+                <input
+                  id="faculty"
+                  name="faculty"
+                  value={facultyQuery}
+                  onChange={(event) => handleFacultyInputChange(event.target.value)}
+                  type="text"
+                  className={inputClass(errors.faculty)}
+                  placeholder="Type faculty name..."
+                  autoComplete="off"
                 />
-              </div>
-
-              <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4 space-y-4">
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center justify-center w-5 h-5 rounded-md bg-slate-100 text-slate-400">
-                    <Users size={11} />
+                {showFacultySuggestions && facultyQuery.trim() && (
+                  <div className="absolute z-20 mt-1 max-h-60 w-full overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-lg">
+                    {facultyLoading ? (
+                      <div className="px-3 py-3 text-sm text-slate-500">Searching faculties...</div>
+                    ) : facultySuggestions.length === 0 ? (
+                      <div className="px-3 py-3 text-sm text-slate-500">No matching faculties found.</div>
+                    ) : (
+                      facultySuggestions.map((faculty) => (
+                        <button
+                          key={faculty.id}
+                          type="button"
+                          onClick={() => handleFacultySelect(faculty)}
+                          className="w-full px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-100"
+                        >
+                          {faculty.name || faculty.id}
+                        </button>
+                      ))
+                    )}
                   </div>
-                  <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Sponsorship details</span>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                  <SelectField label="Sponsorship Type" required name="sponsorshipType" value={form.sponsorshipType} options={["Choose", "Self", "Institute", "Others"]} onChange={handleChange} />
-
-                  {showSponsorshipAmount && (
-                    <InputField label={form.sponsorshipType === "Institute" ? "Sponsorship Amount (₹)" : "Amount (₹)"} required type="number" name="sponsorshipAmount" value={form.sponsorshipAmount} placeholder="Enter amount" onChange={handleChange} />
-                  )}
-
-                  {showSponsorshipOther && (
-                    <InputField label="If Others, please specify" required name="sponsorshipOtherSpecify" value={form.sponsorshipOtherSpecify} placeholder="Specify sponsorship source" onChange={handleChange} />
-                  )}
-                </div>
+                )}
               </div>
-
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-                <SelectField label="Interdisciplinary" required name="interdisciplinary" value={form.interdisciplinary} options={["Choose", "Yes", "No"]} onChange={handleChange} />
-              </div>
-
-              {showInterdisciplinary && (
-                <div className="rounded-xl border border-violet-100 bg-violet-50/80 p-4 space-y-3">
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center justify-center w-5 h-5 rounded-md bg-violet-100 text-violet-400">
-                      <Users size={11} />
-                    </div>
-                    <span className="text-[10px] font-semibold uppercase tracking-widest text-violet-500">Interdisciplinary details</span>
-                  </div>
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div>
-                      <label className="mb-1.5 block text-xs font-medium text-slate-700">Other Department<span className="ml-0.5 text-rose-500">*</span></label>
-                      <select name="interdisciplinaryDepartment" value={form.interdisciplinaryDepartment} onChange={handleChange} className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100">
-                        <option value="">Choose department</option>
-                        {departments.map((department) => (
-                          <option key={department.id} value={String(department.id)}>{department.dept_name}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <InputField label="Number of Other Department Students" required type="number" name="otherDeptStudentCount" value={form.otherDeptStudentCount} placeholder="e.g., 3" onChange={handleChange} />
-                  </div>
-                </div>
-              )}
+              {facultiesError ? (
+                <p className="mt-2 text-sm text-rose-600">{facultiesError}</p>
+              ) : null}
+              {errors.faculty ? (
+                <p className="mt-2 text-sm text-red-600">{errors.faculty}</p>
+              ) : null}
             </div>
-          </FormSection>
 
-          <FormSection icon={<UploadCloud size={14} />} title="Document uploads" onActivate={() => setActiveStep(4)}>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="space-y-1.5">
-                <FileField label="Abstract Document Proof" required name="abstractProof" onChange={handleFileChange} fileName={files.abstractProof?.name} />
-                <p className="text-xs text-slate-400">Format: Reg.No – JPA – Date</p>
-              </div>
-              <div className="space-y-1.5">
-                <FileField label="Full Document Proof" required name="fullDocumentProof" onChange={handleFileChange} fileName={files.fullDocumentProof?.name} />
-                <p className="text-xs text-slate-400">Format: Reg.No – JPF – Date</p>
-              </div>
-              <div className="space-y-1.5">
-                <FileField label="Original Certificate" name="originalCertProof" onChange={handleFileChange} fileName={files.originalCertProof?.name} />
-                <p className="text-xs text-slate-400">Format: Reg.No – JPO – Date</p>
-              </div>
-              <div className="space-y-1.5">
-                <FileField label="Attested Certificate" name="attestedCertProof" onChange={handleFileChange} fileName={files.attestedCertProof?.name} />
-                <p className="text-xs text-slate-400">Format: Reg.No – JPX – Date</p>
-              </div>
+            <div>
+              <label htmlFor="indexing" className="block text-sm font-medium text-slate-700 mb-2">
+                Indexing <RequiredAst />
+              </label>
+              <select
+                id="indexing"
+                name="indexing"
+                value={formData.indexing}
+                onChange={(event) => handleChange("indexing", event.target.value)}
+                className={selectClass(errors.indexing)}
+              >
+                <option value="">Select indexing</option>
+                {indexingOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+              {errors.indexing ? (
+                <p className="mt-2 text-sm text-red-600">{errors.indexing}</p>
+              ) : null}
             </div>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 mt-4">
-              <SelectField label="IQAC Verification" required name="iqacVerification" value={form.iqacVerification} options={["Initiated", "Verified", "Rejected"]} onChange={handleChange} />
-            </div>
-          </FormSection>
 
-          <div className="flex flex-wrap items-center justify-end gap-2 border-t border-slate-100 pt-5">
-            <button type="button" onClick={handleCancel} disabled={loading} className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50">
-              Cancel
-            </button>
-            <button type="submit" disabled={loading} className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition-colors disabled:opacity-50">
-              {loading ? (
-                <span className="inline-flex items-center gap-2"><span className="h-3.5 w-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" />Creating…</span>
-              ) : (
-                <><Check size={14} />Create Publication</>
-              )}
+            {formData.indexing === "OTHERS" ? (
+              <div className="lg:col-span-2">
+                <label htmlFor="otherIndexing" className="block text-sm font-medium text-slate-700 mb-2">
+                  If Others, Please Specify <RequiredAst />
+                </label>
+                <input
+                  id="otherIndexing"
+                  name="otherIndexing"
+                  value={formData.otherIndexing}
+                  onChange={(event) => handleChange("otherIndexing", event.target.value)}
+                  type="text"
+                  className={inputClass(errors.otherIndexing)}
+                  placeholder="Specify other indexing"
+                />
+                {errors.otherIndexing ? (
+                  <p className="mt-2 text-sm text-red-600">{errors.otherIndexing}</p>
+                ) : null}
+              </div>
+            ) : null}
+
+            <div>
+              <label htmlFor="journalName" className="block text-sm font-medium text-slate-700 mb-2">
+                Name of the Journal <RequiredAst />
+              </label>
+              <input
+                id="journalName"
+                name="journalName"
+                value={formData.journalName}
+                onChange={(event) => handleChange("journalName", event.target.value)}
+                type="text"
+                className={inputClass(errors.journalName)}
+                placeholder="Enter journal name"
+              />
+              {errors.journalName ? (
+                <p className="mt-2 text-sm text-red-600">{errors.journalName}</p>
+              ) : null}
+            </div>
+
+            <div>
+              <label htmlFor="submittedTitle" className="block text-sm font-medium text-slate-700 mb-2">
+                Submitted Journal Title <RequiredAst />
+              </label>
+              <input
+                id="submittedTitle"
+                name="submittedTitle"
+                value={formData.submittedTitle}
+                onChange={(event) => handleChange("submittedTitle", event.target.value)}
+                type="text"
+                className={inputClass(errors.submittedTitle)}
+                placeholder="Enter submitted title"
+              />
+              {errors.submittedTitle ? (
+                <p className="mt-2 text-sm text-red-600">{errors.submittedTitle}</p>
+              ) : null}
+            </div>
+
+            <div>
+              <label htmlFor="submittedDate" className="block text-sm font-medium text-slate-700 mb-2">
+                Submitted Date <RequiredAst />
+              </label>
+              <input
+                id="submittedDate"
+                name="submittedDate"
+                value={formData.submittedDate}
+                onChange={(event) => handleChange("submittedDate", event.target.value)}
+                type="date"
+                className={inputClass(errors.submittedDate)}
+              />
+              {errors.submittedDate ? (
+                <p className="mt-2 text-sm text-red-600">{errors.submittedDate}</p>
+              ) : null}
+            </div>
+
+            <div>
+              <label htmlFor="proofFile" className="block text-sm font-medium text-slate-700 mb-2">
+                Submitted Document Proof (.pdf) <RequiredAst />
+              </label>
+              <input
+                id="proofFile"
+                name="proofFile"
+                type="file"
+                accept="application/pdf"
+                onChange={handleFileChange}
+                className={inputClass(errors.proofFile)}
+              />
+              {fileName ? (
+                <p className="mt-2 text-sm text-slate-500">Selected file: {fileName}</p>
+              ) : null}
+              {errors.proofFile ? (
+                <p className="mt-2 text-sm text-red-600">{errors.proofFile}</p>
+              ) : null}
+            </div>
+
+            <div>
+              <label htmlFor="status" className="block text-sm font-medium text-slate-700 mb-2">
+                Status <RequiredAst />
+              </label>
+              <select
+                id="status"
+                name="status"
+                value={formData.status}
+                onChange={(event) => handleChange("status", event.target.value)}
+                className={selectClass(errors.status)}
+              >
+                {statusOptions.map((status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
+              </select>
+              {errors.status ? (
+                <p className="mt-2 text-sm text-red-600">{errors.status}</p>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm text-slate-500">
+                All fields marked with <span className="text-red-500">*</span> are required.
+              </p>
+              {submitError ? (
+                <p className="mt-2 text-sm text-red-600">{submitError}</p>
+              ) : null}
+            </div>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+            >
+              {isSubmitting ? "Saving..." : "Save Record"}
             </button>
           </div>
         </form>
       </div>
-    </div>
-  );
-}
-
-function FormSection({ icon, title, children, onActivate }: { icon: React.ReactNode; title: string; children: React.ReactNode; onActivate?: () => void }) {
-  return (
-    <div className="space-y-4" onClick={onActivate}>
-      <div className="flex items-center gap-2">
-        <div className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-200 bg-slate-50 text-slate-500">{icon}</div>
-        <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">{title}</span>
-        <div className="flex-1 h-px bg-slate-100" />
-      </div>
-      {children}
-    </div>
-  );
-}
-
-type BaseFieldProps = { label: string; name: string; required?: boolean };
-
-type InputFieldProps = BaseFieldProps & { type?: string; value: string; placeholder?: string; onChange: (e: ChangeEvent<HTMLInputElement>) => void };
-
-function InputField({ label, name, required, type = "text", value, placeholder, onChange }: InputFieldProps) {
-  return (
-    <div>
-      <label className="mb-1.5 block text-xs font-medium text-slate-700">
-        {label}{required && <span className="ml-0.5 text-rose-500">*</span>}
-      </label>
-      <input type={type} name={name} value={value} onChange={onChange} placeholder={placeholder} className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100" />
-    </div>
-  );
-}
-
-type SelectFieldProps = BaseFieldProps & { value: string; options: string[]; onChange: (e: ChangeEvent<HTMLSelectElement>) => void };
-
-function SelectField({ label, name, required, value, options, onChange }: SelectFieldProps) {
-  return (
-    <div>
-      <label className="mb-1.5 block text-sm font-semibold text-slate-700">
-        {label}{required && <span className="ml-1 text-rose-500">*</span>}
-      </label>
-      <select name={name} value={value} onChange={onChange} className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 pr-8 text-sm text-slate-800 outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100">
-        {options.map((option) => (
-          <option key={option} value={option.startsWith("Choose") ? "" : option}>{option}</option>
-        ))}
-      </select>
-    </div>
-  );
-}
-
-type FileFieldProps = BaseFieldProps & { onChange: (e: ChangeEvent<HTMLInputElement>) => void; fileName?: string };
-
-function FileField({ label, required, name, onChange, fileName }: FileFieldProps) {
-  return (
-    <div>
-      <label className="mb-1.5 block text-xs font-medium text-slate-700">
-        {label}{required && <span className="ml-0.5 text-rose-500">*</span>}
-      </label>
-      <label className={`group flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed px-4 py-5 text-center transition-colors ${fileName ? "border-emerald-300 bg-emerald-50" : "border-slate-300 bg-slate-50 hover:border-indigo-300 hover:bg-indigo-50"}`}>
-        <div className={`flex items-center justify-center rounded-lg p-2 transition-colors ${fileName ? "bg-emerald-100 text-emerald-600" : "bg-slate-100 text-slate-400 group-hover:bg-indigo-100 group-hover:text-indigo-500"}`}>
-          {fileName ? <Check size={16} /> : <UploadCloud size={16} />}
-        </div>
-        <div>
-          <p className={`text-xs font-medium ${fileName ? "text-emerald-700" : "text-slate-600 group-hover:text-indigo-600"}`}>{fileName ? fileName : "Click to upload or drag & drop"}</p>
-          {!fileName && <p className="mt-0.5 text-xs text-slate-400">PDF, JPG, PNG</p>}
-        </div>
-        <input name={name} type="file" className="hidden" onChange={onChange} accept=".pdf,.jpg,.jpeg,.png" />
-      </label>
     </div>
   );
 }

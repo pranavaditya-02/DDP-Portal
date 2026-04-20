@@ -425,10 +425,23 @@ export default function BookChapterPublicationPage() {
         ]);
 
         // Check each response before parsing
+        const normalizeArrayResponse = (value: unknown, label: string) => {
+          if (Array.isArray(value)) return value;
+          if (value && typeof value === "object") {
+            const obj = value as Record<string, unknown>;
+            if (Array.isArray(obj.data)) return obj.data;
+            if (Array.isArray(obj.rows)) return obj.rows;
+            if (Array.isArray(obj.items)) return obj.items;
+          }
+          console.error(`❌ ${label} returned non-array JSON:`, value);
+          return [];
+        };
+
         const checkJson = async (res: Response, label: string) => {
           const text = await res.text();
           try {
-            return JSON.parse(text);
+            const parsed = JSON.parse(text);
+            return normalizeArrayResponse(parsed, label);
           } catch {
             console.error(`❌ ${label} returned non-JSON:`, text.slice(0, 200));
             return [];
@@ -448,6 +461,8 @@ export default function BookChapterPublicationPage() {
     };
     fetchData();
   }, []);
+
+  const recordsList = Array.isArray(records) ? records : [];
 
   // ── List view ──────────────────────────────────────────────────────────────
 
@@ -513,7 +528,7 @@ export default function BookChapterPublicationPage() {
                 <p className="text-xs text-gray-400">Loading records…</p>
               </div>
 
-            ) : records.length === 0 ? (
+            ) : recordsList.length === 0 ? (
               <div className="flex min-h-[340px] flex-col items-center justify-center gap-3 px-4 py-12 text-center">
                 <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gray-50 border border-gray-100">
                   <Database size={22} className="text-gray-300" />
@@ -561,7 +576,7 @@ export default function BookChapterPublicationPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                      {records.map((record) => {
+                      {recordsList.map((record) => {
                         const s = STATUS_MAP[record.iqac_status] ?? STATUS_MAP.Initiated;
                         return (
                           <tr
