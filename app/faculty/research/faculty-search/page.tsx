@@ -369,7 +369,7 @@ export default function FacultySearchPage() {
       ) : null}
 
       {selectedPublication ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/60 backdrop-blur-[1px] p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-4">
           <div className="max-h-[90vh] w-full max-w-3xl overflow-auto rounded-2xl bg-white p-5 shadow-2xl sm:p-6">
             <div className="mb-4 flex items-start justify-between gap-4">
               <h2 className="text-lg font-semibold text-slate-900">Publication Details</h2>
