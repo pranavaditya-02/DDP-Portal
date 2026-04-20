@@ -453,6 +453,23 @@ export default function CreateCompetitionReport() {
     <div className="min-h-screen bg-gray-50/70 p-4 sm:p-6 lg:p-8">
       <div className="mx-auto max-w-7xl space-y-6">
 
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 className="text-xl font-semibold text-gray-900 tracking-tight">Competitionx Report</h1>
+            <p className="mt-0.5 text-xs text-gray-500">Submit competition report details and upload proof documents.</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleReset}
+              disabled={submitting}
+              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+            >
+              Reset Form
+            </button>
+          </div>
+        </div>
+
         {/* server-side error banner */}
         {submitError && (
           <div className="flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
@@ -462,7 +479,7 @@ export default function CreateCompetitionReport() {
           </div>
         )}
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8 space-y-8">
+        <section className="rounded-xl border border-gray-200 bg-white shadow-sm p-6 sm:p-8 space-y-8">
 
           {/* Student */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

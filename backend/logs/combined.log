@@ -15408,3 +15408,200 @@
 {"level":"info","message":"GET /api/roles","service":"faculty-tracking-api","timestamp":"2026-04-20 15:22:58"}
 {"level":"info","message":"GET /api/roles/resources","service":"faculty-tracking-api","timestamp":"2026-04-20 15:22:58"}
 {"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:23:34"}
+{"level":"info","message":"GET /api/registrations/my","service":"faculty-tracking-api","timestamp":"2026-04-20 15:32:07"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:32:07"}
+{"level":"info","message":"GET /api/internship-report/sdg-goals","service":"faculty-tracking-api","timestamp":"2026-04-20 15:32:14"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:32:14"}
+{"level":"info","message":"GET /students","service":"faculty-tracking-api","timestamp":"2026-04-20 15:32:14"}
+{"code":"ER_DUP_FIELDNAME","errno":1060,"level":"warn","message":"Could not add internship_reports.tracker_id column, it may already exist or require manual migration. Duplicate column name 'tracker_id'","service":"faculty-tracking-api","sql":"ALTER TABLE internship_reports ADD COLUMN tracker_id INT NOT NULL AFTER id","sqlMessage":"Duplicate column name 'tracker_id'","sqlState":"42S21","stack":"Error: Duplicate column name 'tracker_id'\n    at PromisePool.query (/home/karshan/Documents/Documents/BIP/DDP-Portal/backend/node_modules/mysql2/lib/promise/pool.js:36:22)\n    at ensureTablesExist (/home/karshan/Documents/Documents/BIP/DDP-Portal/backend/src/services/internshipReport.service.ts:87:16)\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async InternshipReportService.listSdgGoals (/home/karshan/Documents/Documents/BIP/DDP-Portal/backend/src/services/internshipReport.service.ts:497:5)\n    at async <anonymous> (/home/karshan/Documents/Documents/BIP/DDP-Portal/backend/src/routes/internshipReport.routes.ts:246:19)","timestamp":"2026-04-20 15:32:15"}
+{"code":"ER_CANT_DROP_FIELD_OR_KEY","errno":1091,"level":"warn","message":"Could not drop internship_reports.tracker_id unique index, it may not exist yet. index tracker_id doesn't exist","service":"faculty-tracking-api","sql":"ALTER TABLE internship_reports DROP INDEX tracker_id","sqlMessage":"index tracker_id doesn't exist","sqlState":"42000","stack":"Error: index tracker_id doesn't exist\n    at PromisePool.query (/home/karshan/Documents/Documents/BIP/DDP-Portal/backend/node_modules/mysql2/lib/promise/pool.js:36:22)\n    at ensureTablesExist (/home/karshan/Documents/Documents/BIP/DDP-Portal/backend/src/services/internshipReport.service.ts:93:16)\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async InternshipReportService.listSdgGoals (/home/karshan/Documents/Documents/BIP/DDP-Portal/backend/src/services/internshipReport.service.ts:497:5)\n    at async <anonymous> (/home/karshan/Documents/Documents/BIP/DDP-Portal/backend/src/routes/internshipReport.routes.ts:246:19)","timestamp":"2026-04-20 15:32:15"}
+{"code":"ER_CANT_DROP_FIELD_OR_KEY","errno":1091,"level":"warn","message":"Could not drop internship_reports.uk_tracker_id unique index, it may not exist yet. index uk_tracker_id doesn't exist","service":"faculty-tracking-api","sql":"ALTER TABLE internship_reports DROP INDEX uk_tracker_id","sqlMessage":"index uk_tracker_id doesn't exist","sqlState":"42000","stack":"Error: index uk_tracker_id doesn't exist\n    at PromisePool.query (/home/karshan/Documents/Documents/BIP/DDP-Portal/backend/node_modules/mysql2/lib/promise/pool.js:36:22)\n    at ensureTablesExist (/home/karshan/Documents/Documents/BIP/DDP-Portal/backend/src/services/internshipReport.service.ts:98:16)\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async InternshipReportService.listSdgGoals (/home/karshan/Documents/Documents/BIP/DDP-Portal/backend/src/services/internshipReport.service.ts:497:5)\n    at async <anonymous> (/home/karshan/Documents/Documents/BIP/DDP-Portal/backend/src/routes/internshipReport.routes.ts:246:19)","timestamp":"2026-04-20 15:32:15"}
+{"code":"ER_DUP_FIELDNAME","errno":1060,"level":"warn","message":"Could not add internship_reports.report_number column, it may already exist or require manual migration. Duplicate column name 'report_number'","service":"faculty-tracking-api","sql":"ALTER TABLE internship_reports ADD COLUMN report_number BIGINT UNSIGNED NULL AFTER id","sqlMessage":"Duplicate column name 'report_number'","sqlState":"42S21","stack":"Error: Duplicate column name 'report_number'\n    at PromisePool.query (/home/karshan/Documents/Documents/BIP/DDP-Portal/backend/node_modules/mysql2/lib/promise/pool.js:36:22)\n    at ensureTablesExist (/home/karshan/Documents/Documents/BIP/DDP-Portal/backend/src/services/internshipReport.service.ts:116:16)\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async InternshipReportService.listSdgGoals (/home/karshan/Documents/Documents/BIP/DDP-Portal/backend/src/services/internshipReport.service.ts:497:5)\n    at async <anonymous> (/home/karshan/Documents/Documents/BIP/DDP-Portal/backend/src/routes/internshipReport.routes.ts:246:19)","timestamp":"2026-04-20 15:32:15"}
+{"code":"ER_DUP_FIELDNAME","errno":1060,"level":"warn","message":"Could not add internship_reports.reject_reason column, it may already exist or require manual migration. Duplicate column name 'reject_reason'","service":"faculty-tracking-api","sql":"ALTER TABLE internship_reports ADD COLUMN reject_reason VARCHAR(255) DEFAULT NULL AFTER iqac_verification","sqlMessage":"Duplicate column name 'reject_reason'","sqlState":"42S21","stack":"Error: Duplicate column name 'reject_reason'\n    at PromisePool.query (/home/karshan/Documents/Documents/BIP/DDP-Portal/backend/node_modules/mysql2/lib/promise/pool.js:36:22)\n    at ensureTablesExist (/home/karshan/Documents/Documents/BIP/DDP-Portal/backend/src/services/internshipReport.service.ts:122:16)\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async InternshipReportService.listSdgGoals (/home/karshan/Documents/Documents/BIP/DDP-Portal/backend/src/services/internshipReport.service.ts:497:5)\n    at async <anonymous> (/home/karshan/Documents/Documents/BIP/DDP-Portal/backend/src/routes/internshipReport.routes.ts:246:19)","timestamp":"2026-04-20 15:32:16"}
+{"code":"ER_FK_DUP_NAME","errno":1826,"level":"warn","message":"Could not add internship_reports.fk_tracker constraint, it may already exist or require manual migration. Duplicate foreign key constraint name 'fk_tracker'","service":"faculty-tracking-api","sql":"ALTER TABLE internship_reports ADD CONSTRAINT fk_tracker FOREIGN KEY (tracker_id) REFERENCES internship_tracker(id)","sqlMessage":"Duplicate foreign key constraint name 'fk_tracker'","sqlState":"HY000","stack":"Error: Duplicate foreign key constraint name 'fk_tracker'\n    at PromisePool.query (/home/karshan/Documents/Documents/BIP/DDP-Portal/backend/node_modules/mysql2/lib/promise/pool.js:36:22)\n    at ensureTablesExist (/home/karshan/Documents/Documents/BIP/DDP-Portal/backend/src/services/internshipReport.service.ts:128:16)\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async InternshipReportService.listSdgGoals (/home/karshan/Documents/Documents/BIP/DDP-Portal/backend/src/services/internshipReport.service.ts:497:5)\n    at async <anonymous> (/home/karshan/Documents/Documents/BIP/DDP-Portal/backend/src/routes/internshipReport.routes.ts:246:19)","timestamp":"2026-04-20 15:32:16"}
+{"level":"info","message":"internship_reports tables are ready","service":"faculty-tracking-api","timestamp":"2026-04-20 15:32:16"}
+{"level":"info","message":"GET /api/courses/active","service":"faculty-tracking-api","timestamp":"2026-04-20 15:33:16"}
+{"level":"info","message":"GET /api/speciallabs/active","service":"faculty-tracking-api","timestamp":"2026-04-20 15:33:16"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-20 15:33:16"}
+{"level":"info","message":"GET /api/online/course/student-online-courses","service":"faculty-tracking-api","timestamp":"2026-04-20 15:33:16"}
+{"level":"info","message":"GET /api/students","service":"faculty-tracking-api","timestamp":"2026-04-20 15:33:16"}
+{"level":"info","message":"GET /api/roles/me/access","service":"faculty-tracking-api","timestamp":"2026-04-20 15:33:43"}
+{"level":"info","message":"GET /api/roles/me/access","service":"faculty-tracking-api","timestamp":"2026-04-20 15:33:44"}
+{"level":"info","message":"GET /api/roles/me/access","service":"faculty-tracking-api","timestamp":"2026-04-20 15:33:45"}
+{"level":"info","message":"GET /api/roles/me/access","service":"faculty-tracking-api","timestamp":"2026-04-20 15:33:47"}
+{"level":"info","message":"GET /api/roles/me/access","service":"faculty-tracking-api","timestamp":"2026-04-20 15:33:48"}
+{"level":"info","message":"GET /api/roles/me/access","service":"faculty-tracking-api","timestamp":"2026-04-20 15:33:50"}
+{"level":"info","message":"GET /api/roles/me/access","service":"faculty-tracking-api","timestamp":"2026-04-20 15:33:51"}
+{"level":"info","message":"GET /api/roles/me/access","service":"faculty-tracking-api","timestamp":"2026-04-20 15:33:52"}
+{"level":"info","message":"GET /api/roles/me/access","service":"faculty-tracking-api","timestamp":"2026-04-20 15:33:52"}
+{"level":"info","message":"GET /api/roles/me/access","service":"faculty-tracking-api","timestamp":"2026-04-20 15:33:53"}
+{"level":"info","message":"GET /api/roles/me/access","service":"faculty-tracking-api","timestamp":"2026-04-20 15:33:54"}
+{"level":"info","message":"GET /api/roles/pages","service":"faculty-tracking-api","timestamp":"2026-04-20 15:34:30"}
+{"level":"warn","message":"User selvakarshanck.cs25@bitsathy.ac.in lacks required role. Required: maintenance, admin, Has: create event","service":"faculty-tracking-api","timestamp":"2026-04-20 15:34:30"}
+{"level":"info","message":"POST /api/auth/logout","service":"faculty-tracking-api","timestamp":"2026-04-20 15:34:36"}
+{"level":"info","message":"GET /api/roles/pages","service":"faculty-tracking-api","timestamp":"2026-04-20 15:34:36"}
+{"level":"debug","message":"No token provided","service":"faculty-tracking-api","timestamp":"2026-04-20 15:34:36"}
+{"level":"info","message":"POST /api/auth/logout","service":"faculty-tracking-api","timestamp":"2026-04-20 15:34:36"}
+{"level":"info","message":"POST /api/auth/google","service":"faculty-tracking-api","timestamp":"2026-04-20 15:35:26"}
+{"level":"info","message":"Google sign-in successful for selvakarshanck.cs25@bitsathy.ac.in","service":"faculty-tracking-api","timestamp":"2026-04-20 15:35:27"}
+{"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-20 15:35:28"}
+{"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-20 15:35:28"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-20 15:35:28"}
+{"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-20 15:35:47"}
+{"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-20 15:35:47"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-20 15:35:47"}
+{"level":"info","message":"GET /api/internship-report/sdg-goals","service":"faculty-tracking-api","timestamp":"2026-04-20 15:35:53"}
+{"level":"info","message":"GET /students","service":"faculty-tracking-api","timestamp":"2026-04-20 15:35:53"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:36:04"}
+{"level":"info","message":"POST /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:36:34"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:36:38"}
+{"level":"info","message":"GET /api/registrations/by-event/273456","service":"faculty-tracking-api","timestamp":"2026-04-20 15:36:40"}
+{"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-20 15:37:14"}
+{"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-20 15:37:14"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-20 15:37:14"}
+{"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-20 15:37:28"}
+{"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-20 15:37:28"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-20 15:37:28"}
+{"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-20 15:37:44"}
+{"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-20 15:37:44"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-20 15:37:44"}
+{"level":"info","message":"GET /api/registrations/my","service":"faculty-tracking-api","timestamp":"2026-04-20 15:37:50"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:37:50"}
+{"level":"info","message":"POST /api/registrations","service":"faculty-tracking-api","timestamp":"2026-04-20 15:37:52"}
+{"level":"info","message":"GET /api/internship-report/sdg-goals","service":"faculty-tracking-api","timestamp":"2026-04-20 15:37:57"}
+{"level":"info","message":"GET /students","service":"faculty-tracking-api","timestamp":"2026-04-20 15:37:57"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:37:57"}
+{"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-20 15:38:22"}
+{"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-20 15:38:22"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-20 15:38:22"}
+{"level":"info","message":"GET /api/internship-report/sdg-goals","service":"faculty-tracking-api","timestamp":"2026-04-20 15:38:22"}
+{"level":"info","message":"GET /students","service":"faculty-tracking-api","timestamp":"2026-04-20 15:38:22"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:38:22"}
+{"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-20 15:38:30"}
+{"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-20 15:38:30"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-20 15:38:30"}
+{"level":"info","message":"GET /api/internship-report/sdg-goals","service":"faculty-tracking-api","timestamp":"2026-04-20 15:38:30"}
+{"level":"info","message":"GET /students","service":"faculty-tracking-api","timestamp":"2026-04-20 15:38:30"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:38:30"}
+{"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-20 15:38:37"}
+{"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-20 15:38:37"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-20 15:38:37"}
+{"level":"info","message":"GET /api/internship-report/sdg-goals","service":"faculty-tracking-api","timestamp":"2026-04-20 15:38:38"}
+{"level":"info","message":"GET /students","service":"faculty-tracking-api","timestamp":"2026-04-20 15:38:38"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:38:38"}
+{"level":"info","message":"GET /api/internship-report/sdg-goals","service":"faculty-tracking-api","timestamp":"2026-04-20 15:38:48"}
+{"level":"info","message":"GET /students","service":"faculty-tracking-api","timestamp":"2026-04-20 15:38:48"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:38:48"}
+{"level":"info","message":"GET /api/internship-report/sdg-goals","service":"faculty-tracking-api","timestamp":"2026-04-20 15:38:49"}
+{"level":"info","message":"GET /students","service":"faculty-tracking-api","timestamp":"2026-04-20 15:38:49"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:38:49"}
+{"level":"info","message":"GET /api/internship-report/sdg-goals","service":"faculty-tracking-api","timestamp":"2026-04-20 15:38:56"}
+{"level":"info","message":"GET /students","service":"faculty-tracking-api","timestamp":"2026-04-20 15:38:56"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:38:56"}
+{"level":"info","message":"GET /api/internship-report/sdg-goals","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:00"}
+{"level":"info","message":"GET /students","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:00"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:00"}
+{"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:02"}
+{"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:02"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:02"}
+{"level":"info","message":"GET /api/internship-report/sdg-goals","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:44"}
+{"level":"info","message":"GET /students","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:44"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:44"}
+{"level":"info","message":"GET /api/roles/me/access","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:47"}
+{"level":"info","message":"GET /api/courses/active","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:47"}
+{"level":"info","message":"GET /api/speciallabs/active","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:47"}
+{"level":"info","message":"GET /api/departments","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:47"}
+{"level":"info","message":"GET /api/online/course/student-online-courses","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:47"}
+{"level":"info","message":"GET /api/students","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:47"}
+{"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:48"}
+{"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:48"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:48"}
+{"level":"info","message":"GET /api/roles/me/access","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:48"}
+{"level":"info","message":"GET /api/internship-report/sdg-goals","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:48"}
+{"level":"info","message":"GET /students","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:48"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:48"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:48"}
+{"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:48"}
+{"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:48"}
+{"level":"info","message":"GET /api/roles/me/access","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:49"}
+{"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:49"}
+{"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:49"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:49"}
+{"level":"info","message":"GET /api/roles/me/access","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:50"}
+{"level":"info","message":"GET /api/internship-report/sdg-goals","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:50"}
+{"level":"info","message":"GET /students","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:50"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:50"}
+{"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:51"}
+{"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:51"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:51"}
+{"level":"info","message":"GET /api/roles/me/access","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:53"}
+{"level":"info","message":"GET /api/internship-report/sdg-goals","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:53"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:53"}
+{"level":"info","message":"GET /students","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:53"}
+{"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:53"}
+{"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:53"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:53"}
+{"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:55"}
+{"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:55"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-20 15:39:55"}
+{"level":"info","message":"GET /api/roles","service":"faculty-tracking-api","timestamp":"2026-04-20 15:40:00"}
+{"level":"info","message":"GET /api/roles/resources","service":"faculty-tracking-api","timestamp":"2026-04-20 15:40:00"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-20 15:40:11"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:40:11"}
+{"level":"info","message":"GET /api/registrations/by-event/273456","service":"faculty-tracking-api","timestamp":"2026-04-20 15:40:20"}
+{"level":"info","message":"POST /api/registrations/150001/approve","service":"faculty-tracking-api","timestamp":"2026-04-20 15:40:25"}
+{"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-20 15:40:27"}
+{"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-20 15:40:27"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-20 15:40:27"}
+{"level":"info","message":"GET /api/registrations/by-event/3470","service":"faculty-tracking-api","timestamp":"2026-04-20 15:40:39"}
+{"level":"info","message":"GET /api/users","service":"faculty-tracking-api","timestamp":"2026-04-20 15:41:25"}
+{"level":"info","message":"GET /api/users/metadata","service":"faculty-tracking-api","timestamp":"2026-04-20 15:41:25"}
+{"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-20 15:44:06"}
+{"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-20 15:44:06"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-20 15:44:06"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:44:14"}
+{"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-20 15:44:24"}
+{"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-20 15:44:24"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-20 15:44:24"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:45:39"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:45:47"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:45:53"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:46:10"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:46:10"}
+{"level":"info","message":"GET /api/roles/me/access","service":"faculty-tracking-api","timestamp":"2026-04-20 15:47:23"}
+{"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-20 15:47:24"}
+{"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-20 15:47:24"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-20 15:47:24"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:47:25"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:47:40"}
+{"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-20 15:47:46"}
+{"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-20 15:47:46"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-20 15:47:46"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:47:50"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:47:52"}
+{"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-20 15:47:53"}
+{"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-20 15:47:53"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-20 15:47:53"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:47:53"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:47:57"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:48:05"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:48:05"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:48:05"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:48:07"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:48:10"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:48:16"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:48:24"}
+{"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-20 15:49:32"}
+{"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-20 15:49:32"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-20 15:49:32"}
+{"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-20 15:49:53"}
+{"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-20 15:49:53"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-20 15:49:53"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-20 15:50:03"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:50:03"}
+{"level":"info","message":"GET /api/roles/pages","service":"faculty-tracking-api","timestamp":"2026-04-20 15:50:22"}
+{"level":"info","message":"GET /api/activities/pending","service":"faculty-tracking-api","timestamp":"2026-04-20 15:50:31"}
+{"level":"info","message":"Returning empty pending activities","service":"faculty-tracking-api","timestamp":"2026-04-20 15:50:31"}
+{"level":"info","message":"GET /api/registrations/verification","service":"faculty-tracking-api","timestamp":"2026-04-20 15:50:31"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:50:35"}
+{"level":"info","message":"GET /api/events","service":"faculty-tracking-api","timestamp":"2026-04-20 15:50:45"}

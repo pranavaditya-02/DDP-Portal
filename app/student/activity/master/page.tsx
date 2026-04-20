@@ -587,31 +587,31 @@ export default function Page() {
               <p className="text-sm text-slate-600">View all events and their registrations</p>
             </div>
           </div>
-          <div>
-            {canCreate ? (
-            <Link href="/student/activity/create-event" className="btn-primary whitespace-nowrap">
-              Create Event
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          ) : null}
-
-          </div>
+          
 
           <div className="mb-4">
-            <div className="flex flex-wrap gap-2">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => setActiveTab(tab.key)}
-                  className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
-                    activeTab === tab.key ? 'bg-[#7D53F6] text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-600 hover:border-[#7D53F6]/40 hover:bg-[#7D53F6]/5'
-                  }`}
-                >
-                  {tab.label}
-                  <span className="ml-2 text-xs opacity-70">({counts[tab.key]})</span>
-                </button>
-              ))}
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex flex-wrap gap-2">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    onClick={() => setActiveTab(tab.key)}
+                    className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
+                      activeTab === tab.key ? 'bg-[#7D53F6] text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-600 hover:border-[#7D53F6]/40 hover:bg-[#7D53F6]/5'
+                    }`}
+                  >
+                    {tab.label}
+                    <span className="ml-2 text-xs opacity-70">({counts[tab.key]})</span>
+                  </button>
+                ))}
+              </div>
+              {canCreate ? (
+                <Link href="/student/activity/create-event" className="btn-primary whitespace-nowrap">
+                  Create Event
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              ) : null}
             </div>
           </div>
 
