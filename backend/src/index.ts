@@ -19,6 +19,7 @@ import registrationRoutes from './routes/registration.routes';
 import usersRoutes from './routes/users.routes';
 import rolesRoutes from './routes/roles.routes';
 import workflowTargetsRoutes from './routes/workflowTargets.routes';
+import onlineCourseRoutes from './routes/onlineCourse.routes';
 import { verifyMysqlConnection } from './database/mysql';
 
 const app = express();
@@ -120,6 +121,7 @@ app.use('/api/registrations', registrationRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/roles', rolesRoutes);
 app.use('/api/workflow-targets', workflowTargetsRoutes);
+app.use('/api/online-course', onlineCourseRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
